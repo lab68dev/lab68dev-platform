@@ -117,7 +117,7 @@ export default function HomePage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
                 { name: "lab68dev-platform", desc: "Next.js web application with AI integration", status: "Active", github: "https://github.com/lab68dev/lab68dev-platform" },
-                { name: "Project Beta", desc: "Python data processing pipeline", status: "Active" },
+                { name: "lab68dev-AutoPR", desc: "Automate pull request reviews with an AI that understands context, best practices, and your org’s style guide", status: "Soon" },
                 { name: "Project Gamma", desc: "React component library", status: "In Progress" },
               ].map((project) => (
                 <div key={project.name} className="border border-border p-6 hover:border-primary transition-colors">
