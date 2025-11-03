@@ -15,13 +15,13 @@ export function Footer() {
               GitHub
             </Link>
             <Link
-              href="https://linkedin.com"
+              href="https://www.linkedin.com/company/lab68dev/"
               target="_blank"
               className="text-sm hover:text-primary transition-colors underline"
             >
               LinkedIn
             </Link>
-            <Link href="mailto:contact@lab68dev.com" className="text-sm hover:text-primary transition-colors underline">
+            <Link href="mailto:dongduong840@gmail.com" className="text-sm hover:text-primary transition-colors underline">
               Email
             </Link>
           </div>
