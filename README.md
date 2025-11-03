@@ -1,7 +1,7 @@
 # Lab68dev Platform
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/F4P1E/lab68dev-platform/ci.yml?branch=main&style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-APACHE-blue.svg?style=for-the-badge)](./LICENSE)
 [![Version](https://img.shields.io/github/package-json/v/F4P1E/lab68dev-platform?style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform/issues)
 
