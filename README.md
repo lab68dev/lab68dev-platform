@@ -162,13 +162,13 @@ See the [LICENSE](./LICENSE) file for details.
 ## Contact
 
 For issues, suggestions, or feature requests, open an issue on GitHub:
-👉 [https://github.com/F4P1E/lab68dev-platform/issues](https://github.com/F4P1E/lab68dev-platform/issues)
+👉 [https://github.com/lab68dev/lab68dev-platform/issues](https://github.com/lab68dev/lab68dev-platform/issues)
 
 Or contact the maintainer directly:
 **@F4P1E** on GitHub
 
 ---
 
-### 🏁 Made with ❤️ by the Lab68 Dev Team
+### Made with ❤️ by the Lab68 Dev Team
 
 > Empowering developers to build better, faster, and smarter.
