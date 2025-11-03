@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="w-full border-t border-border bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col items-center justify-center gap-4 text-center">
-          <p className="text-sm font-mono">© 2025 Lab68dev — Built with passion and code.</p>
+          <p className="text-sm font-mono">©2025 lab68dev — Built with passion and code.</p>
           <div className="flex gap-6">
             <Link
               href="https://github.com/lab68dev"
