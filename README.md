@@ -3,6 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-APACHE-blue.svg?style=for-the-badge)](./LICENSE)
 [![Version](https://img.shields.io/github/package-json/v/F4P1E/lab68dev-platform?style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform/issues)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-yellow.svg?style=for-the-badge&logo=buymeacoffee)](https://www.buymeacoffee.com/lab68dev)
+
 
 > The official monorepo for the **Lab68 Development Platform** — a modern, scalable, and developer-friendly web foundation built with **Next.js**, **TypeScript**, and **Vercel**.
 
