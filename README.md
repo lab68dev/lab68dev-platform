@@ -68,7 +68,7 @@ Make sure you have the following installed:
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/F4P1E/lab68dev-platform.git
+git clone https://github.com/lab68dev/lab68dev-platform.git
 
 # Navigate into the directory
 cd lab68dev-platform
