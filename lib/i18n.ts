@@ -526,6 +526,7 @@ const translations: Record<Language, Translations> = {
       exportJSON: "Export as JSON",
       clear: "Clear Canvas",
       zoom: "Zoom",
+      editLabel: ""
     },
   },
   es: {
@@ -781,6 +782,7 @@ const translations: Record<Language, Translations> = {
       exportJSON: "Exportar como JSON",
       clear: "Limpiar Lienzo",
       zoom: "Zoom",
+      editLabel: ""
     },
   },
   fr: {
@@ -1037,6 +1039,7 @@ const translations: Record<Language, Translations> = {
       exportJSON: "Exporter en JSON",
       clear: "Effacer le Canevas",
       zoom: "Zoom",
+      editLabel: ""
     },
   },
   de: {
@@ -1292,6 +1295,7 @@ const translations: Record<Language, Translations> = {
       exportJSON: "Als JSON Exportieren",
       clear: "Leinwand Löschen",
       zoom: "Zoom",
+      editLabel: ""
     },
   },
   zh: {
@@ -1547,6 +1551,7 @@ const translations: Record<Language, Translations> = {
       exportJSON: "导出为JSON",
       clear: "清空画布",
       zoom: "缩放",
+      editLabel: ""
     },
   },
   ja: {
@@ -1802,6 +1807,7 @@ const translations: Record<Language, Translations> = {
       exportJSON: "JSONとしてエクスポート",
       clear: "キャンバスをクリア",
       zoom: "ズーム",
+      editLabel: ""
     },
   },
   pt: {
@@ -2057,6 +2063,7 @@ const translations: Record<Language, Translations> = {
       exportJSON: "Exportar como JSON",
       clear: "Limpar Tela",
       zoom: "Zoom",
+      editLabel: ""
     },
   },
   ru: {
@@ -2312,6 +2319,7 @@ const translations: Record<Language, Translations> = {
       exportJSON: "Экспорт в JSON",
       clear: "Очистить Холст",
       zoom: "Масштаб",
+      editLabel: ""
     },
   },
   vi: {
@@ -2567,6 +2575,7 @@ const translations: Record<Language, Translations> = {
       exportJSON: "Xuất JSON",
       clear: "Xóa Canvas",
       zoom: "Thu Phóng",
+      editLabel: ""
     },
   },
 }
