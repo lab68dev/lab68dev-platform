@@ -4,12 +4,21 @@ export async function POST(request: Request) {
   try {
     const { message, history } = await request.json()
 
-    // Get API key from environment
-    const apiKey = process.env.GEMINI_API_KEY
+    // Get API key from environment (strip accidental quotes/whitespace)
+    const rawKey =
+      process.env.GEMINI_API_KEY ||
+      // Fallback for local setups where the key was added with NEXT_PUBLIC_ by mistake.
+      process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+      ""
+
+    const apiKey = rawKey.replace(/^['"`]+|['"`]+$/g, "").trim()
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY is not configured. Please add it to your environment variables." },
+        {
+          error:
+            "GEMINI_API_KEY is not configured. Add GEMINI_API_KEY to .env.local (at the project root) and restart the dev server.",
+        },
         { status: 500 },
       )
     }
