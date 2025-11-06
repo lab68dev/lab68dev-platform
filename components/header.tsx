@@ -33,7 +33,7 @@ export function Header() {
             {t.nav.community}
           </Link>
           <Link
-            href="https://github.com/lab68dev"
+            href="https://lab68dev.mintlify.app/"
             target="_blank"
             className="text-sm font-medium hover:text-primary transition-colors"
           >
