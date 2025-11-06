@@ -1,3 +1,5 @@
+"use client"
+
 // Multi-language support for Lab68 Platform
 
 export type Language = "en" | "es" | "fr" | "de" | "zh" | "ja" | "pt" | "ru" | "vi"
@@ -17,6 +19,7 @@ export interface Translations {
     todo: string
     meeting: string
     planning: string
+    diagrams: string
   }
   // Auth
   auth: {
@@ -233,6 +236,40 @@ export interface Translations {
     noCards: string
     dragCard: string
   }
+  diagrams: {
+    editLabel: string
+    title: string
+    createNew: string
+    noDiagrams: string
+    noDiagramsDesc: string
+    diagramName: string
+    description: string
+    create: string
+    edit: string
+    delete: string
+    confirmDelete: string
+    cancel: string
+    save: string
+    addNode: string
+    addConnection: string
+    nodeTypes: {
+      start: string
+      process: string
+      decision: string
+      end: string
+      data: string
+    }
+    tools: {
+      select: string
+      move: string
+      delete: string
+      connect: string
+    }
+    exportImage: string
+    exportJSON: string
+    clear: string
+    zoom: string
+  }
 }
 
 const translations: Record<Language, Translations> = {
@@ -250,6 +287,7 @@ const translations: Record<Language, Translations> = {
       todo: "To Do",
       meeting: "Meeting",
       planning: "Planning",
+      diagrams: "Flow & Diagrams",
     },
     auth: {
       signIn: "Sign In",
@@ -456,6 +494,39 @@ const translations: Record<Language, Translations> = {
       noCards: "No cards yet",
       dragCard: "Drag cards between columns",
     },
+    diagrams: {
+      title: "Flow & Diagrams",
+      createNew: "Create New Diagram",
+      noDiagrams: "No diagrams yet",
+      noDiagramsDesc: "Create your first flowchart or diagram to visualize your processes",
+      diagramName: "Diagram Name",
+      description: "Description",
+      create: "Create",
+      edit: "Edit",
+      delete: "Delete",
+      confirmDelete: "Are you sure you want to delete this diagram?",
+      cancel: "Cancel",
+      save: "Save",
+      addNode: "Add Node",
+      addConnection: "Add Connection",
+      nodeTypes: {
+        start: "Start",
+        process: "Process",
+        decision: "Decision",
+        end: "End",
+        data: "Data",
+      },
+      tools: {
+        select: "Select",
+        move: "Move",
+        delete: "Delete",
+        connect: "Connect",
+      },
+      exportImage: "Export as Image",
+      exportJSON: "Export as JSON",
+      clear: "Clear Canvas",
+      zoom: "Zoom",
+    },
   },
   es: {
     nav: {
@@ -471,6 +542,7 @@ const translations: Record<Language, Translations> = {
       todo: "Tareas",
       meeting: "Reuniones",
       planning: "Planificación",
+      diagrams: "Flujo y Diagramas",
     },
     auth: {
       signIn: "Iniciar Sesión",
@@ -677,6 +749,39 @@ const translations: Record<Language, Translations> = {
       noCards: "Aún no hay tarjetas",
       dragCard: "Arrastra tarjetas entre columnas",
     },
+    diagrams: {
+      title: "Flujo y Diagramas",
+      createNew: "Crear Nuevo Diagrama",
+      noDiagrams: "Aún no hay diagramas",
+      noDiagramsDesc: "Crea tu primer diagrama de flujo para visualizar tus procesos",
+      diagramName: "Nombre del Diagrama",
+      description: "Descripción",
+      create: "Crear",
+      edit: "Editar",
+      delete: "Eliminar",
+      confirmDelete: "¿Estás seguro de que quieres eliminar este diagrama?",
+      cancel: "Cancelar",
+      save: "Guardar",
+      addNode: "Agregar Nodo",
+      addConnection: "Agregar Conexión",
+      nodeTypes: {
+        start: "Inicio",
+        process: "Proceso",
+        decision: "Decisión",
+        end: "Fin",
+        data: "Datos",
+      },
+      tools: {
+        select: "Seleccionar",
+        move: "Mover",
+        delete: "Eliminar",
+        connect: "Conectar",
+      },
+      exportImage: "Exportar como Imagen",
+      exportJSON: "Exportar como JSON",
+      clear: "Limpiar Lienzo",
+      zoom: "Zoom",
+    },
   },
   fr: {
     nav: {
@@ -692,6 +797,7 @@ const translations: Record<Language, Translations> = {
       todo: "Tâches",
       meeting: "Réunions",
       planning: "Planification",
+      diagrams: "Flux et Diagrammes",
     },
     auth: {
       signIn: "Se Connecter",
@@ -899,6 +1005,39 @@ const translations: Record<Language, Translations> = {
       noCards: "Pas encore de cartes",
       dragCard: "Faites glisser les cartes entre les colonnes",
     },
+    diagrams: {
+      title: "Flux et Diagrammes",
+      createNew: "Créer un Nouveau Diagramme",
+      noDiagrams: "Aucun diagramme pour le moment",
+      noDiagramsDesc: "Créez votre premier organigramme pour visualiser vos processus",
+      diagramName: "Nom du Diagramme",
+      description: "Description",
+      create: "Créer",
+      edit: "Modifier",
+      delete: "Supprimer",
+      confirmDelete: "Êtes-vous sûr de vouloir supprimer ce diagramme?",
+      cancel: "Annuler",
+      save: "Enregistrer",
+      addNode: "Ajouter un Nœud",
+      addConnection: "Ajouter une Connexion",
+      nodeTypes: {
+        start: "Début",
+        process: "Processus",
+        decision: "Décision",
+        end: "Fin",
+        data: "Données",
+      },
+      tools: {
+        select: "Sélectionner",
+        move: "Déplacer",
+        delete: "Supprimer",
+        connect: "Connecter",
+      },
+      exportImage: "Exporter en Image",
+      exportJSON: "Exporter en JSON",
+      clear: "Effacer le Canevas",
+      zoom: "Zoom",
+    },
   },
   de: {
     nav: {
@@ -914,6 +1053,7 @@ const translations: Record<Language, Translations> = {
       todo: "Aufgaben",
       meeting: "Besprechungen",
       planning: "Planung",
+      diagrams: "Fluss & Diagramme",
     },
     auth: {
       signIn: "Anmelden",
@@ -1120,6 +1260,39 @@ const translations: Record<Language, Translations> = {
       noCards: "Noch keine Karten",
       dragCard: "Ziehen Sie Karten zwischen Spalten",
     },
+    diagrams: {
+      title: "Fluss & Diagramme",
+      createNew: "Neues Diagramm Erstellen",
+      noDiagrams: "Noch keine Diagramme",
+      noDiagramsDesc: "Erstellen Sie Ihr erstes Flussdiagramm zur Visualisierung Ihrer Prozesse",
+      diagramName: "Diagrammname",
+      description: "Beschreibung",
+      create: "Erstellen",
+      edit: "Bearbeiten",
+      delete: "Löschen",
+      confirmDelete: "Möchten Sie dieses Diagramm wirklich löschen?",
+      cancel: "Abbrechen",
+      save: "Speichern",
+      addNode: "Knoten Hinzufügen",
+      addConnection: "Verbindung Hinzufügen",
+      nodeTypes: {
+        start: "Start",
+        process: "Prozess",
+        decision: "Entscheidung",
+        end: "Ende",
+        data: "Daten",
+      },
+      tools: {
+        select: "Auswählen",
+        move: "Bewegen",
+        delete: "Löschen",
+        connect: "Verbinden",
+      },
+      exportImage: "Als Bild Exportieren",
+      exportJSON: "Als JSON Exportieren",
+      clear: "Leinwand Löschen",
+      zoom: "Zoom",
+    },
   },
   zh: {
     nav: {
@@ -1135,6 +1308,7 @@ const translations: Record<Language, Translations> = {
       todo: "待办事项",
       meeting: "会议",
       planning: "规划",
+      diagrams: "流程图",
     },
     auth: {
       signIn: "登录",
@@ -1341,6 +1515,39 @@ const translations: Record<Language, Translations> = {
       noCards: "还没有卡片",
       dragCard: "在列之间拖动卡片",
     },
+    diagrams: {
+      title: "流程图",
+      createNew: "创建新图表",
+      noDiagrams: "还没有图表",
+      noDiagramsDesc: "创建您的第一个流程图来可视化您的流程",
+      diagramName: "图表名称",
+      description: "描述",
+      create: "创建",
+      edit: "编辑",
+      delete: "删除",
+      confirmDelete: "您确定要删除此图表吗？",
+      cancel: "取消",
+      save: "保存",
+      addNode: "添加节点",
+      addConnection: "添加连接",
+      nodeTypes: {
+        start: "开始",
+        process: "过程",
+        decision: "决策",
+        end: "结束",
+        data: "数据",
+      },
+      tools: {
+        select: "选择",
+        move: "移动",
+        delete: "删除",
+        connect: "连接",
+      },
+      exportImage: "导出为图片",
+      exportJSON: "导出为JSON",
+      clear: "清空画布",
+      zoom: "缩放",
+    },
   },
   ja: {
     nav: {
@@ -1356,6 +1563,7 @@ const translations: Record<Language, Translations> = {
       todo: "タスク",
       meeting: "ミーティング",
       planning: "計画",
+      diagrams: "フロー図",
     },
     auth: {
       signIn: "ログイン",
@@ -1562,6 +1770,39 @@ const translations: Record<Language, Translations> = {
       noCards: "まだカードがありません",
       dragCard: "列間でカードをドラッグ",
     },
+    diagrams: {
+      title: "フロー図",
+      createNew: "新しい図を作成",
+      noDiagrams: "まだ図がありません",
+      noDiagramsDesc: "最初のフローチャートを作成してプロセスを視覚化しましょう",
+      diagramName: "図の名前",
+      description: "説明",
+      create: "作成",
+      edit: "編集",
+      delete: "削除",
+      confirmDelete: "この図を削除してもよろしいですか？",
+      cancel: "キャンセル",
+      save: "保存",
+      addNode: "ノードを追加",
+      addConnection: "接続を追加",
+      nodeTypes: {
+        start: "開始",
+        process: "プロセス",
+        decision: "判断",
+        end: "終了",
+        data: "データ",
+      },
+      tools: {
+        select: "選択",
+        move: "移動",
+        delete: "削除",
+        connect: "接続",
+      },
+      exportImage: "画像としてエクスポート",
+      exportJSON: "JSONとしてエクスポート",
+      clear: "キャンバスをクリア",
+      zoom: "ズーム",
+    },
   },
   pt: {
     nav: {
@@ -1577,6 +1818,7 @@ const translations: Record<Language, Translations> = {
       todo: "Tarefas",
       meeting: "Reuniões",
       planning: "Planejamento",
+      diagrams: "Fluxo e Diagramas",
     },
     auth: {
       signIn: "Entrar",
@@ -1783,6 +2025,39 @@ const translations: Record<Language, Translations> = {
       noCards: "Ainda não há cartões",
       dragCard: "Arraste cartões entre colunas",
     },
+    diagrams: {
+      title: "Fluxo e Diagramas",
+      createNew: "Criar Novo Diagrama",
+      noDiagrams: "Ainda não há diagramas",
+      noDiagramsDesc: "Crie seu primeiro fluxograma para visualizar seus processos",
+      diagramName: "Nome do Diagrama",
+      description: "Descrição",
+      create: "Criar",
+      edit: "Editar",
+      delete: "Excluir",
+      confirmDelete: "Tem certeza de que deseja excluir este diagrama?",
+      cancel: "Cancelar",
+      save: "Salvar",
+      addNode: "Adicionar Nó",
+      addConnection: "Adicionar Conexão",
+      nodeTypes: {
+        start: "Início",
+        process: "Processo",
+        decision: "Decisão",
+        end: "Fim",
+        data: "Dados",
+      },
+      tools: {
+        select: "Selecionar",
+        move: "Mover",
+        delete: "Excluir",
+        connect: "Conectar",
+      },
+      exportImage: "Exportar como Imagem",
+      exportJSON: "Exportar como JSON",
+      clear: "Limpar Tela",
+      zoom: "Zoom",
+    },
   },
   ru: {
     nav: {
@@ -1798,6 +2073,7 @@ const translations: Record<Language, Translations> = {
       todo: "Задачи",
       meeting: "Встречи",
       planning: "Планирование",
+      diagrams: "Блок-схемы",
     },
     auth: {
       signIn: "Войти",
@@ -2004,6 +2280,39 @@ const translations: Record<Language, Translations> = {
       noCards: "Пока нет карточек",
       dragCard: "Перетаскивайте карточки между колонками",
     },
+    diagrams: {
+      title: "Блок-схемы",
+      createNew: "Создать Новую Диаграмму",
+      noDiagrams: "Пока нет диаграмм",
+      noDiagramsDesc: "Создайте свою первую блок-схему для визуализации процессов",
+      diagramName: "Название Диаграммы",
+      description: "Описание",
+      create: "Создать",
+      edit: "Редактировать",
+      delete: "Удалить",
+      confirmDelete: "Вы уверены, что хотите удалить эту диаграмму?",
+      cancel: "Отмена",
+      save: "Сохранить",
+      addNode: "Добавить Узел",
+      addConnection: "Добавить Связь",
+      nodeTypes: {
+        start: "Начало",
+        process: "Процесс",
+        decision: "Решение",
+        end: "Конец",
+        data: "Данные",
+      },
+      tools: {
+        select: "Выбрать",
+        move: "Переместить",
+        delete: "Удалить",
+        connect: "Соединить",
+      },
+      exportImage: "Экспорт в Изображение",
+      exportJSON: "Экспорт в JSON",
+      clear: "Очистить Холст",
+      zoom: "Масштаб",
+    },
   },
   vi: {
     nav: {
@@ -2019,6 +2328,7 @@ const translations: Record<Language, Translations> = {
       todo: "Công Việc",
       meeting: "Cuộc Họp",
       planning: "Kế Hoạch",
+      diagrams: "Sơ Đồ",
     },
     auth: {
       signIn: "Đăng Nhập",
@@ -2225,6 +2535,39 @@ const translations: Record<Language, Translations> = {
       noCards: "Chưa có thẻ nào",
       dragCard: "Kéo thẻ giữa các cột",
     },
+    diagrams: {
+      title: "Sơ Đồ",
+      createNew: "Tạo Sơ Đồ Mới",
+      noDiagrams: "Chưa có sơ đồ nào",
+      noDiagramsDesc: "Tạo sơ đồ đầu tiên để trực quan hóa quy trình của bạn",
+      diagramName: "Tên Sơ Đồ",
+      description: "Mô Tả",
+      create: "Tạo",
+      edit: "Chỉnh Sửa",
+      delete: "Xóa",
+      confirmDelete: "Bạn có chắc chắn muốn xóa sơ đồ này?",
+      cancel: "Hủy",
+      save: "Lưu",
+      addNode: "Thêm Nút",
+      addConnection: "Thêm Kết Nối",
+      nodeTypes: {
+        start: "Bắt Đầu",
+        process: "Quy Trình",
+        decision: "Quyết Định",
+        end: "Kết Thúc",
+        data: "Dữ Liệu",
+      },
+      tools: {
+        select: "Chọn",
+        move: "Di Chuyển",
+        delete: "Xóa",
+        connect: "Kết Nối",
+      },
+      exportImage: "Xuất Hình Ảnh",
+      exportJSON: "Xuất JSON",
+      clear: "Xóa Canvas",
+      zoom: "Thu Phóng",
+    },
   },
 }
 
@@ -2257,4 +2600,39 @@ export function getUserLanguage(): Language {
 // Set user's language preference
 export function setUserLanguage(lang: Language): void {
   localStorage.setItem("lab68_language", lang)
+}
+
+import { useState, useEffect } from "react"
+
+export function useLanguage() {
+  const [language, setLanguage] = useState<Language>("en")
+  const [translations, setTranslations] = useState<Translations>(getTranslations("en"))
+
+  useEffect(() => {
+    const lang = getUserLanguage()
+    setLanguage(lang)
+    setTranslations(getTranslations(lang))
+
+    // Listen for language changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "lab68_language") {
+        const newLang = (e.newValue as Language) || "en"
+        setLanguage(newLang)
+        setTranslations(getTranslations(newLang))
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    return () => window.removeEventListener("storage", handleStorageChange)
+  }, [])
+
+  return {
+    language,
+    t: translations,
+    setLanguage: (lang: Language) => {
+      setUserLanguage(lang)
+      setLanguage(lang)
+      setTranslations(getTranslations(lang))
+    },
+  }
 }

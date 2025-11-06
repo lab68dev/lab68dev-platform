@@ -12,6 +12,7 @@ import {
   CheckSquare,
   Calendar,
   ClipboardList,
+  Workflow,
 } from "lucide-react"
 import { getCurrentUser, signOut } from "@/lib/auth"
 import { useEffect, useState } from "react"
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/dashboard/todo", label: "To Do", icon: CheckSquare },
   { href: "/dashboard/meeting", label: "Meeting", icon: Calendar },
   { href: "/dashboard/planning", label: "Planning", icon: ClipboardList },
+  { href: "/dashboard/diagrams", label: "Flow & Diagrams", icon: Workflow },
   { href: "/dashboard/community", label: "Community", icon: Users },
   { href: "/dashboard/ai-tools", label: "AI Tools", icon: Sparkles },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
