@@ -35,7 +35,7 @@ Whether you're creating internal tools, marketing sites, or production-grade web
 ## Live Deployment
 
 **Production URL:**  
-Demo Link: lab68dev-platform-1ds5.vercel.app/
+[Demo Link](lab68dev-platform-1ds5.vercel.app/)
 
 Every push to the `main` branch triggers an automatic deployment to Vercel — ensuring the live site always reflects your latest code.
 
