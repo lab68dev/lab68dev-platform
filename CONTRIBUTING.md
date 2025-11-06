@@ -1,6 +1,6 @@
 # Contributing to Lab68 Development Platform
 
-Thank you for your interest in contributing to **Lab68 Development Platform**.  
+Thank you for your interest in contributing to **lab68dev Platform**.  
 This document outlines how to report issues, propose features, and submit contributions effectively.
 
 ---
@@ -23,7 +23,7 @@ This document outlines how to report issues, propose features, and submit contri
 ### 1. Fork and Clone
 Fork the repository and clone your fork locally:
 ```bash
-git clone https://github.com/<your-username>/lab68dev-platform.git
+git clone https://github.com/lab68dev/lab68dev-platform.git
 cd lab68dev-platform
 ````
 

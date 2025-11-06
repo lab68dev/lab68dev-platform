@@ -1,9 +1,10 @@
 # Lab68dev Platform
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/F4P1E/lab68dev-platform/ci.yml?branch=main&style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform/actions)
 [![License: MIT](https://img.shields.io/badge/License-APACHE-blue.svg?style=for-the-badge)](./LICENSE)
 [![Version](https://img.shields.io/github/package-json/v/F4P1E/lab68dev-platform?style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform/issues)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-yellow.svg?style=for-the-badge&logo=buymeacoffee)](https://www.buymeacoffee.com/lab68dev)
+
 
 > The official monorepo for the **Lab68 Development Platform** — a modern, scalable, and developer-friendly web foundation built with **Next.js**, **TypeScript**, and **Vercel**.
 
@@ -34,7 +35,7 @@ Whether you're creating internal tools, marketing sites, or production-grade web
 ## Live Deployment
 
 **Production URL:**  
-(Coming Soon)
+Demo Link: lab68dev-platform-1ds5.vercel.app/
 
 Every push to the `main` branch triggers an automatic deployment to Vercel — ensuring the live site always reflects your latest code.
 
@@ -69,7 +70,7 @@ Make sure you have the following installed:
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/F4P1E/lab68dev-platform.git
+git clone https://github.com/lab68dev/lab68dev-platform.git
 
 # Navigate into the directory
 cd lab68dev-platform
@@ -97,13 +98,13 @@ pnpm start
 
 ## Features
 
-✅ Modern architecture with Next.js App Router
-✅ TypeScript-first design for reliability and scalability
-✅ Tailwind CSS integration for rapid UI development
-✅ Built-in API routes and modular structure
-✅ Continuous deployment to Vercel
-✅ Easy environment configuration via `.env` files
-✅ Automatic build & lint checks with GitHub Actions
+- ✅ Modern architecture with Next.js App Router
+- ✅ TypeScript-first design for reliability and scalability
+- ✅ Tailwind CSS integration for rapid UI development
+- ✅ Built-in API routes and modular structure
+- ✅ Continuous deployment to Vercel
+- ✅ Easy environment configuration via `.env` files
+- ✅ Automatic build & lint checks with GitHub Actions
 
 ---
 
@@ -154,7 +155,7 @@ To get started:
 
 ## License
 
-This project is licensed under the **MIT License**.
+This project is licensed under the **Apache License**.
 See the [LICENSE](./LICENSE) file for details.
 
 ---
