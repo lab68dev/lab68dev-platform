@@ -15,6 +15,7 @@ import {
   Workflow,
   FileText,
   BookOpen,
+  MessageSquare,
 } from "lucide-react"
 import { getCurrentUser, signOut } from "@/lib/auth"
 import { useEffect, useState } from "react"
@@ -24,13 +25,14 @@ import { NotificationsPanel } from "./notifications-panel"
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
+  { href: "/dashboard/collaborators", label: "Collaborators", icon: Users },
   { href: "/dashboard/todo", label: "To Do", icon: CheckSquare },
   { href: "/dashboard/meeting", label: "Meeting", icon: Calendar },
   { href: "/dashboard/planning", label: "Planning", icon: ClipboardList },
   { href: "/dashboard/diagrams", label: "Flow & Diagrams", icon: Workflow },
   { href: "/dashboard/files", label: "Files", icon: FileText },
   { href: "/dashboard/wiki", label: "Knowledge Base", icon: BookOpen },
-  { href: "/dashboard/community", label: "Community", icon: Users },
+  { href: "/dashboard/community", label: "Community", icon: MessageSquare },
   { href: "/dashboard/ai-tools", label: "AI Tools", icon: Sparkles },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ]
