@@ -23,7 +23,7 @@ Whether you're creating internal tools, marketing sites, or production-grade web
 
 | Stack | Description |
 |--------|-------------|
-| **Framework** | [Next.js 14+](https://nextjs.org/) with App Router |
+| **Framework** | [Next.js 16](https://nextjs.org/) with App Router & Turbopack |
 | **Language** | TypeScript (primary), CSS Modules |
 | **Package Manager** | pnpm |
 | **Deployment** | Vercel — CI/CD integrated with GitHub |
@@ -35,7 +35,7 @@ Whether you're creating internal tools, marketing sites, or production-grade web
 ## Live Deployment
 
 **Production URL:**  
-Demo Link: lab68dev-platform-1ds5.vercel.app/
+[lab68dev platform](lab68dev-platform-1ds5.vercel.app/)
 
 Every push to the `main` branch triggers an automatic deployment to Vercel — ensuring the live site always reflects your latest code.
 
@@ -98,13 +98,13 @@ pnpm start
 
 ## Features
 
-- ✅ Modern architecture with Next.js App Router
-- ✅ TypeScript-first design for reliability and scalability
-- ✅ Tailwind CSS integration for rapid UI development
-- ✅ Built-in API routes and modular structure
-- ✅ Continuous deployment to Vercel
-- ✅ Easy environment configuration via `.env` files
-- ✅ Automatic build & lint checks with GitHub Actions
+- Modern architecture with Next.js App Router
+- TypeScript-first design for reliability and scalability
+- Tailwind CSS integration for rapid UI development
+- Built-in API routes and modular structure
+- Continuous deployment to Vercel
+- Easy environment configuration via `.env` files
+- Automatic build & lint checks with GitHub Actions
 
 ---
 
