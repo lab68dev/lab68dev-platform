@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { getCurrentUser } from "@/lib/auth"
 import { getTranslations, getUserLanguage } from "@/lib/i18n"
 import { Plus, Trash2, CalendarIcon, Clock, X, Search, Filter } from "lucide-react"
+import { getMeetings, createMeeting, deleteMeeting as deleteMeetingDB, type Meeting as DBMeeting } from "@/lib/database"
 
 interface Meeting {
   id: string
@@ -36,21 +37,52 @@ export default function MeetingPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [filterTime, setFilterTime] = useState<"all" | "upcoming" | "past">("all")
   const [language, setLanguage] = useState(getUserLanguage())
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const t = getTranslations(language).meeting
 
-  useEffect(() => {
+  const loadMeetings = useCallback(async () => {
     const user = getCurrentUser()
     if (!user) {
       router.push("/login")
       return
     }
 
-    // Load meetings from localStorage
-    const storedMeetings = localStorage.getItem("lab68_meetings")
-    if (storedMeetings) {
-      const allMeetings: Meeting[] = JSON.parse(storedMeetings)
-      setMeetings(allMeetings.filter((meeting) => meeting.userId === user.id))
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await getMeetings(user.id)
+      
+      // Transform Supabase data to match component interface
+      const transformedMeetings: Meeting[] = data.map((m) => {
+        // Split datetime into date and time
+        const datetime = new Date(m.date)
+        const date = datetime.toISOString().split('T')[0]
+        const time = datetime.toTimeString().substring(0, 5)
+        
+        return {
+          id: m.id,
+          userId: m.user_id,
+          title: m.title,
+          description: m.description || "",
+          date: date,
+          time: time,
+          duration: m.duration || 30,
+          createdAt: m.created_at,
+        }
+      })
+      
+      setMeetings(transformedMeetings)
+    } catch (err) {
+      console.error('Failed to load meetings:', err)
+      setError('Failed to load meetings')
+    } finally {
+      setLoading(false)
     }
+  }, [router])
+
+  useEffect(() => {
+    loadMeetings()
 
     // Listen for language changes
     const handleStorageChange = () => {
@@ -58,43 +90,52 @@ export default function MeetingPage() {
     }
     window.addEventListener("storage", handleStorageChange)
     return () => window.removeEventListener("storage", handleStorageChange)
-  }, [router])
+  }, [loadMeetings])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     const user = getCurrentUser()
     if (!user) return
 
-    const newMeeting: Meeting = {
-      id: crypto.randomUUID(),
-      userId: user.id,
-      title: formData.title,
-      description: formData.description,
-      date: formData.date,
-      time: formData.time,
-      duration: formData.duration,
-      createdAt: new Date().toISOString(),
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Combine date and time into a single datetime string
+      const meetingDate = `${formData.date}T${formData.time}`
+
+      await createMeeting({
+        user_id: user.id,
+        title: formData.title,
+        description: formData.description,
+        date: meetingDate,
+        duration: formData.duration,
+      })
+
+      await loadMeetings()
+      setFormData({ title: "", description: "", date: "", time: "", duration: 30 })
+      setShowForm(false)
+    } catch (err) {
+      console.error("Error creating meeting:", err)
+      setError("Failed to create meeting")
+    } finally {
+      setLoading(false)
     }
+  }, [formData, loadMeetings])
 
-    const storedMeetings = localStorage.getItem("lab68_meetings")
-    const allMeetings: Meeting[] = storedMeetings ? JSON.parse(storedMeetings) : []
-    allMeetings.push(newMeeting)
-    localStorage.setItem("lab68_meetings", JSON.stringify(allMeetings))
-
-    setMeetings([...meetings, newMeeting])
-    setFormData({ title: "", description: "", date: "", time: "", duration: 30 })
-    setShowForm(false)
-  }
-
-  const deleteMeeting = (meetingId: string) => {
-    const storedMeetings = localStorage.getItem("lab68_meetings")
-    if (!storedMeetings) return
-
-    const allMeetings: Meeting[] = JSON.parse(storedMeetings)
-    const filteredMeetings = allMeetings.filter((m) => m.id !== meetingId)
-    localStorage.setItem("lab68_meetings", JSON.stringify(filteredMeetings))
-    setMeetings(meetings.filter((m) => m.id !== meetingId))
-  }
+  const deleteMeeting = useCallback(async (meetingId: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+      await deleteMeetingDB(meetingId)
+      await loadMeetings()
+    } catch (err) {
+      console.error("Error deleting meeting:", err)
+      setError("Failed to delete meeting")
+    } finally {
+      setLoading(false)
+    }
+  }, [loadMeetings])
 
   const isPastMeeting = (date: string, time: string) => {
     const meetingDateTime = new Date(`${date}T${time}`)

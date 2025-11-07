@@ -22,13 +22,17 @@ export default function LoginPage() {
   useEffect(() => {
     setT(getTranslations(getUserLanguage()))
 
-    const rememberedUser = checkRememberMe()
-    if (rememberedUser) {
-      router.push("/dashboard")
+    const checkAuth = async () => {
+      const rememberedUser = await checkRememberMe()
+      if (rememberedUser) {
+        router.push("/dashboard")
+      }
     }
+    
+    checkAuth()
   }, [router])
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
@@ -37,7 +41,7 @@ export default function LoginPage() {
       return
     }
 
-    const result = signIn(email, password, rememberMe)
+    const result = await signIn(email, password, rememberMe)
 
     if (result.success) {
       router.push("/dashboard")

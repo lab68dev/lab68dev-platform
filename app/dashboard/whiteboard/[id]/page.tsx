@@ -45,6 +45,32 @@ export default function WhiteboardEditorPage() {
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false)
   const [collaboratorEmail, setCollaboratorEmail] = useState("")
 
+  // Add dynamic styles for color buttons and stroke widths
+  useEffect(() => {
+    const styleId = 'whiteboard-dynamic-styles'
+    let styleEl = document.getElementById(styleId) as HTMLStyleElement
+    
+    if (!styleEl) {
+      styleEl = document.createElement('style')
+      styleEl.id = styleId
+      document.head.appendChild(styleEl)
+    }
+
+    const colorStyles = DEFAULT_COLORS.map(color => 
+      `button[data-color="${color}"] { background-color: ${color}; }`
+    ).join('\n')
+
+    const widthStyles = STROKE_WIDTHS.map(width => 
+      `div[data-width="${width}"] { width: ${Math.min(width * 3, 48)}px; height: ${width}px; }`
+    ).join('\n')
+
+    styleEl.textContent = colorStyles + '\n' + widthStyles
+
+    return () => {
+      styleEl?.remove()
+    }
+  }, [])
+
   useEffect(() => {
     const wb = getWhiteboard(whiteboardId)
     if (!wb) {
@@ -406,10 +432,12 @@ export default function WhiteboardEditorPage() {
                   className={`w-full h-10 border-2 transition-all ${
                     state.currentColor === color ? "border-primary scale-110" : "border-border"
                   }`}
-                  style={{ backgroundColor: color }}
+                  data-color={color}
                   title={color}
                   aria-label={`Select color ${color}`}
-                />
+                >
+                  <span className="sr-only">{color}</span>
+                </button>
               ))}
             </div>
             <label htmlFor="custom-color" className="sr-only">
@@ -440,10 +468,12 @@ export default function WhiteboardEditorPage() {
                       ? "border-primary bg-primary/10"
                       : "border-border hover:bg-muted"
                   }`}
+                  title={`Stroke width ${width}px`}
+                  aria-label={`Set stroke width to ${width} pixels`}
                 >
                   <div
                     className="bg-foreground rounded-full"
-                    style={{ width: `${Math.min(width * 3, 48)}px`, height: `${width}px` }}
+                    data-width={width}
                   />
                 </button>
               ))}
@@ -521,8 +551,7 @@ export default function WhiteboardEditorPage() {
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
-              className="bg-white cursor-crosshair"
-              style={{ maxWidth: "100%", height: "auto" }}
+              className="bg-white cursor-crosshair max-w-full h-auto"
             />
           </div>
         </div>

@@ -55,8 +55,8 @@ export function DashboardSidebar() {
     }
   }, [router])
 
-  const handleLogout = () => {
-    signOut()
+  const handleLogout = async () => {
+    await signOut()
     router.push("/")
   }
 

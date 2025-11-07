@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,6 +17,8 @@ import {
 } from "lucide-react"
 import { getCurrentUser } from "@/lib/auth"
 import { getTranslations, getUserLanguage, type Language } from "@/lib/i18n"
+import { getFiles, createFile, deleteFile, type FileRecord } from "@/lib/database"
+import { createClient } from "@/lib/supabase"
 
 interface File {
   id: string
@@ -49,44 +51,49 @@ export default function FilesPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [filterType, setFilterType] = useState<"all" | "uploaded" | "link">("all")
   const [filterRelated, setFilterRelated] = useState<"all" | typeof FILE_CATEGORIES[number]>("all")
-  const [language, setLanguage] = useState<Language>("en")
+  const [language, setLanguage] = useState<Language>(getUserLanguage())
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const t = getTranslations(language)
 
-  useEffect(() => {
-    setLanguage(getUserLanguage())
-    loadFiles()
+  const loadFiles = useCallback(async () => {
+    const user = getCurrentUser()
+    if (!user) {
+      setLoading(false)
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await getFiles(user.id)
+      
+      // Transform Supabase data to match component interface
+      const transformedFiles: File[] = data.map((f) => ({
+        id: f.id,
+        name: f.name,
+        description: f.category || "",
+        type: f.type === "link" ? "link" : "uploaded",
+        url: f.url,
+        userId: f.user_id,
+        userEmail: user.email,
+        createdAt: f.created_at,
+        relatedTo: (f.category as typeof FILE_CATEGORIES[number]) || "general",
+        relatedId: f.project_id || f.task_id,
+      }))
+      
+      setFiles(transformedFiles)
+    } catch (err) {
+      console.error('Failed to load files:', err)
+      setError('Failed to load files')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  const loadFiles = () => {
-    const user = getCurrentUser()
-    if (!user) return
-
-    const saved = localStorage.getItem("lab68_files")
-    if (saved) {
-      const allFiles = JSON.parse(saved)
-      setFiles(allFiles.filter((f: File) => f.userId === user.id))
-    }
-  }
-
-  const saveFiles = (userFiles: File[]) => {
-    const user = getCurrentUser()
-    if (!user) return
-
-    const saved = localStorage.getItem("lab68_files")
-    const allFiles = saved ? JSON.parse(saved) : []
-
-    userFiles.forEach((updatedFile) => {
-      const index = allFiles.findIndex((f: File) => f.id === updatedFile.id)
-      if (index !== -1) {
-        allFiles[index] = updatedFile
-      } else {
-        allFiles.push(updatedFile)
-      }
-    })
-
-    localStorage.setItem("lab68_files", JSON.stringify(allFiles))
+  useEffect(() => {
     loadFiles()
-  }
+  }, [loadFiles])
 
   const handleOpenModal = (type: "upload" | "link") => {
     setModalType(type)
@@ -130,7 +137,7 @@ export default function FilesPage() {
     }
   }
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     const user = getCurrentUser()
     if (!user) return
 
@@ -143,37 +150,41 @@ export default function FilesPage() {
       setUploading(true)
 
       try {
-        // Convert file to base64 for localStorage storage
-        // In a real app, you would upload to a server/cloud storage
-        const reader = new FileReader()
-        reader.onload = () => {
-          const base64 = reader.result as string
+        const supabase = createClient()
+        
+        // Upload file to Supabase Storage
+        const fileExt = selectedFile.name.split('.').pop()
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('files')
+          .upload(fileName, selectedFile)
 
-          const newFile: File = {
-            id: Date.now().toString(),
-            name: formData.name || selectedFile.name,
-            description: formData.description,
-            type: "uploaded",
-            url: base64, // In real app, this would be the server URL
-            userId: user.id,
-            userEmail: user.email,
-            createdAt: new Date().toISOString(),
-            relatedTo: formData.relatedTo,
-            relatedId: formData.relatedId || undefined,
-          }
+        if (uploadError) throw uploadError
 
-          saveFiles([...files, newFile])
-          setUploading(false)
-          handleCloseModal()
-        }
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('files')
+          .getPublicUrl(fileName)
 
-        reader.onerror = () => {
-          alert("Error reading file")
-          setUploading(false)
-        }
+        // Create file record in database
+        await createFile({
+          user_id: user.id,
+          name: formData.name || selectedFile.name,
+          type: selectedFile.type || "application/octet-stream",
+          size: selectedFile.size,
+          url: publicUrl,
+          storage_path: fileName,
+          category: formData.relatedTo,
+          project_id: formData.relatedTo === "project" ? formData.relatedId : undefined,
+          task_id: formData.relatedTo === "task" ? formData.relatedId : undefined,
+        })
 
-        reader.readAsDataURL(selectedFile)
+        await loadFiles()
+        setUploading(false)
+        handleCloseModal()
       } catch (error) {
+        console.error("Error uploading file:", error)
         alert("Error uploading file")
         setUploading(false)
       }
@@ -184,34 +195,67 @@ export default function FilesPage() {
         return
       }
 
-      const newFile: File = {
-        id: Date.now().toString(),
-        name: formData.name,
-        description: formData.description,
-        type: "link",
-        url: formData.url,
-        userId: user.id,
-        userEmail: user.email,
-        createdAt: new Date().toISOString(),
-        relatedTo: formData.relatedTo,
-        relatedId: formData.relatedId || undefined,
+      try {
+        setLoading(true)
+        setError(null)
+
+        await createFile({
+          user_id: user.id,
+          name: formData.name,
+          type: "link",
+          url: formData.url,
+          category: formData.relatedTo,
+          project_id: formData.relatedTo === "project" ? formData.relatedId : undefined,
+          task_id: formData.relatedTo === "task" ? formData.relatedId : undefined,
+        })
+
+        await loadFiles()
+        handleCloseModal()
+      } catch (error) {
+        console.error("Error creating link:", error)
+        alert("Error creating link")
+      } finally {
+        setLoading(false)
       }
-
-      saveFiles([...files, newFile])
-      handleCloseModal()
     }
-  }
+  }, [modalType, selectedFile, formData, loadFiles])
 
-  const handleDelete = (fileId: string) => {
-    if (confirm("Are you sure you want to delete this file?")) {
-      const saved = localStorage.getItem("lab68_files")
-      const allFiles = saved ? JSON.parse(saved) : []
-      const updatedFiles = allFiles.filter((f: File) => f.id !== fileId)
+  const handleDelete = useCallback(async (fileId: string) => {
+    if (!confirm("Are you sure you want to delete this file?")) return
 
-      localStorage.setItem("lab68_files", JSON.stringify(updatedFiles))
-      loadFiles()
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Find the file to get storage path
+      const file = files.find(f => f.id === fileId)
+      
+      // If it's an uploaded file, delete from storage
+      if (file && file.type === "uploaded") {
+        const supabase = createClient()
+        const fileRecord = await supabase
+          .from('files')
+          .select('storage_path')
+          .eq('id', fileId)
+          .single()
+        
+        if (fileRecord.data?.storage_path) {
+          await supabase.storage
+            .from('files')
+            .remove([fileRecord.data.storage_path])
+        }
+      }
+      
+      // Delete from database
+      await deleteFile(fileId)
+      await loadFiles()
+    } catch (err) {
+      console.error("Error deleting file:", err)
+      setError("Failed to delete file")
+    } finally {
+      setLoading(false)
     }
-  }
+  }, [files, loadFiles])
 
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString)

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { getCurrentUser } from "@/lib/auth"
 import { getTranslations, getUserLanguage, type Language } from "@/lib/i18n"
+import { getWikiArticles, createWikiArticle, updateWikiArticle, deleteWikiArticle, type WikiArticle } from "@/lib/database"
 
 interface Article {
   id: string
@@ -44,25 +45,48 @@ export default function WikiPage() {
   })
   const [searchQuery, setSearchQuery] = useState("")
   const [filterCategory, setFilterCategory] = useState<"all" | typeof CATEGORIES[number]>("all")
-  const [language, setLanguage] = useState<Language>("en")
+  const [language, setLanguage] = useState<Language>(getUserLanguage())
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const t = getTranslations(language)
 
-  useEffect(() => {
-    setLanguage(getUserLanguage())
-    loadArticles()
+  const loadArticles = useCallback(async () => {
+    const user = getCurrentUser()
+    if (!user) {
+      setLoading(false)
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await getWikiArticles(user.id)
+      
+      // Transform Supabase data to match component interface
+      const transformedArticles: Article[] = data.map((a) => ({
+        id: a.id,
+        title: a.title,
+        content: a.content,
+        category: a.category as typeof CATEGORIES[number],
+        tags: a.tags || [],
+        userId: a.user_id,
+        authorName: user.name,
+        createdAt: a.created_at,
+        updatedAt: a.updated_at,
+      }))
+      
+      setArticles(transformedArticles)
+    } catch (err) {
+      console.error('Failed to load articles:', err)
+      setError('Failed to load articles')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  const loadArticles = () => {
-    const saved = localStorage.getItem("lab68_wiki")
-    if (saved) {
-      setArticles(JSON.parse(saved))
-    }
-  }
-
-  const saveArticles = (updatedArticles: Article[]) => {
-    localStorage.setItem("lab68_wiki", JSON.stringify(updatedArticles))
-    setArticles(updatedArticles)
-  }
+  useEffect(() => {
+    loadArticles()
+  }, [loadArticles])
 
   const handleOpenModal = (article?: Article) => {
     if (article) {
@@ -96,7 +120,7 @@ export default function WikiPage() {
     })
   }
 
-  const handleSave = () => {
+  const handleSave = useCallback(async () => {
     const user = getCurrentUser()
     if (!user || !formData.title || !formData.content) return
 
@@ -105,47 +129,57 @@ export default function WikiPage() {
       .map((t) => t.trim())
       .filter((t) => t)
 
-    if (editingArticle) {
-      const updatedArticles = articles.map((a) =>
-        a.id === editingArticle.id
-          ? {
-              ...a,
-              title: formData.title,
-              content: formData.content,
-              category: formData.category,
-              tags,
-              updatedAt: new Date().toISOString(),
-            }
-          : a
-      )
-      saveArticles(updatedArticles)
-    } else {
-      const newArticle: Article = {
-        id: Date.now().toString(),
-        title: formData.title,
-        content: formData.content,
-        category: formData.category,
-        tags,
-        userId: user.id,
-        authorName: user.name,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+    try {
+      setLoading(true)
+      setError(null)
+
+      if (editingArticle) {
+        await updateWikiArticle(editingArticle.id, {
+          title: formData.title,
+          content: formData.content,
+          category: formData.category,
+          tags,
+        })
+      } else {
+        await createWikiArticle({
+          user_id: user.id,
+          title: formData.title,
+          content: formData.content,
+          category: formData.category,
+          tags,
+        })
       }
-      saveArticles([newArticle, ...articles])
+
+      await loadArticles()
+      handleCloseModal()
+    } catch (err) {
+      console.error("Error saving article:", err)
+      setError("Failed to save article")
+    } finally {
+      setLoading(false)
     }
+  }, [formData, editingArticle, loadArticles])
 
-    handleCloseModal()
-  }
+  const handleDelete = useCallback(async (articleId: string) => {
+    if (!confirm(t.wiki.confirmDelete)) return
 
-  const handleDelete = (articleId: string) => {
-    if (confirm(t.wiki.confirmDelete)) {
-      const updatedArticles = articles.filter((a) => a.id !== articleId)
-      saveArticles(updatedArticles)
+    try {
+      setLoading(true)
+      setError(null)
+      await deleteWikiArticle(articleId)
+      
       if (selectedArticle?.id === articleId) {
         setSelectedArticle(null)
       }
+      
+      await loadArticles()
+    } catch (err) {
+      console.error("Error deleting article:", err)
+      setError("Failed to delete article")
+    } finally {
+      setLoading(false)
     }
-  }
+  }, [t.wiki.confirmDelete, selectedArticle, loadArticles])
 
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString)

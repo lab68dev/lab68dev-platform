@@ -80,6 +80,24 @@ pnpm dev
 
 Visit [http://localhost:3000](http://localhost:3000) while the dev server is running.
 
+### Authentication Setup
+
+This project uses **Supabase** for authentication. Follow these steps to set up:
+
+1. **Create a Supabase project** at [https://supabase.com/dashboard](https://supabase.com/dashboard)
+2. **Get your API credentials** from Project Settings → API
+3. **Add them to `.env.local`**:
+
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your-project-url.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   ```
+
+4. **Run the database schema** by executing `supabase-schema.sql` in the SQL Editor
+5. **Restart your dev server**
+
+For detailed setup instructions, see **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**.
+
 ### Production Build
 
 ```bash
@@ -98,6 +116,7 @@ The build step runs Next.js static analysis, type-checking, and route bundling.
 | **Dashboard Overview** | Snapshot of active projects, AI assistant, system metrics, and notifications. |
 | **Projects & Kanban** | Create projects, assign collaborators, manage roles, and move cards across kanban columns. |
 | **Team Management** | `lib/team.ts` exposes helpers for permissions, activity logging, and "time ago" formatting. |
+| **Authentication** | Secure user authentication powered by [Supabase Auth](https://supabase.com) with email/password, session management, and protected routes. |
 | **Chat & Messaging** | Real-time team communication with chat rooms, direct messages, typing indicators, reactions, and @mentions. |
 | **Comments System** | Contextual collaboration on tasks, diagrams, and projects with threaded comments, mentions, and resolution tracking. |
 | **Whiteboard** | Collaborative drawing canvas with freehand pen, shapes (rectangle, circle, line), text, color picker, stroke width, fill options, undo/redo, export to PNG/SVG, and collaborator invitations. |

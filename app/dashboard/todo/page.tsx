@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { getCurrentUser } from "@/lib/auth"
 import { getTranslations, getUserLanguage } from "@/lib/i18n"
 import { Plus, Trash2, Check, X, CheckCircle2, Circle, Search, Filter } from "lucide-react"
+import { getTodos, createTodo, updateTodo, deleteTodo, type Todo as DBTodo } from "@/lib/database"
 
 interface Task {
   id: string
@@ -34,21 +35,44 @@ export default function TodoPage() {
   const [filterPriority, setFilterPriority] = useState<"all" | "low" | "medium" | "high">("all")
   const [filterStatus, setFilterStatus] = useState<"all" | "completed" | "pending">("all")
   const [language, setLanguage] = useState(getUserLanguage())
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const t = getTranslations(language).todo
 
-  useEffect(() => {
+  const loadTasks = useCallback(async () => {
     const user = getCurrentUser()
     if (!user) {
       router.push("/login")
       return
     }
 
-    // Load tasks from localStorage
-    const storedTasks = localStorage.getItem("lab68_tasks")
-    if (storedTasks) {
-      const allTasks: Task[] = JSON.parse(storedTasks)
-      setTasks(allTasks.filter((task) => task.userId === user.id))
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await getTodos(user.id)
+      
+      // Transform Supabase data to match component interface
+      const transformedTasks: Task[] = data.map((t) => ({
+        id: t.id,
+        userId: t.user_id,
+        name: t.title,
+        description: t.description || "",
+        priority: t.priority as "low" | "medium" | "high",
+        completed: t.completed,
+        createdAt: t.created_at,
+      }))
+      
+      setTasks(transformedTasks)
+    } catch (err) {
+      console.error('Failed to load tasks:', err)
+      setError('Failed to load tasks')
+    } finally {
+      setLoading(false)
     }
+  }, [router])
+
+  useEffect(() => {
+    loadTasks()
 
     // Listen for language changes
     const handleStorageChange = () => {
@@ -56,55 +80,65 @@ export default function TodoPage() {
     }
     window.addEventListener("storage", handleStorageChange)
     return () => window.removeEventListener("storage", handleStorageChange)
-  }, [router])
+  }, [loadTasks])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     const user = getCurrentUser()
     if (!user) return
 
-    const newTask: Task = {
-      id: crypto.randomUUID(),
-      userId: user.id,
-      name: formData.name,
-      description: formData.description,
-      priority: formData.priority,
-      completed: false,
-      createdAt: new Date().toISOString(),
+    try {
+      setLoading(true)
+      setError(null)
+
+      await createTodo({
+        user_id: user.id,
+        title: formData.name,
+        priority: formData.priority,
+        completed: false,
+      })
+
+      await loadTasks()
+      setFormData({ name: "", description: "", priority: "medium" })
+      setShowForm(false)
+    } catch (err) {
+      console.error("Error creating task:", err)
+      setError("Failed to create task")
+    } finally {
+      setLoading(false)
     }
+  }, [formData, loadTasks])
 
-    const storedTasks = localStorage.getItem("lab68_tasks")
-    const allTasks: Task[] = storedTasks ? JSON.parse(storedTasks) : []
-    allTasks.push(newTask)
-    localStorage.setItem("lab68_tasks", JSON.stringify(allTasks))
+  const toggleComplete = useCallback(async (taskId: string) => {
+    const task = tasks.find((t) => t.id === taskId)
+    if (!task) return
 
-    setTasks([...tasks, newTask])
-    setFormData({ name: "", description: "", priority: "medium" })
-    setShowForm(false)
-  }
-
-  const toggleComplete = (taskId: string) => {
-    const storedTasks = localStorage.getItem("lab68_tasks")
-    if (!storedTasks) return
-
-    const allTasks: Task[] = JSON.parse(storedTasks)
-    const taskIndex = allTasks.findIndex((t) => t.id === taskId)
-    if (taskIndex !== -1) {
-      allTasks[taskIndex].completed = !allTasks[taskIndex].completed
-      localStorage.setItem("lab68_tasks", JSON.stringify(allTasks))
-      setTasks(tasks.map((t) => (t.id === taskId ? allTasks[taskIndex] : t)))
+    try {
+      setLoading(true)
+      setError(null)
+      await updateTodo(taskId, { completed: !task.completed })
+      await loadTasks()
+    } catch (err) {
+      console.error("Error updating task:", err)
+      setError("Failed to update task")
+    } finally {
+      setLoading(false)
     }
-  }
+  }, [tasks, loadTasks])
 
-  const deleteTask = (taskId: string) => {
-    const storedTasks = localStorage.getItem("lab68_tasks")
-    if (!storedTasks) return
-
-    const allTasks: Task[] = JSON.parse(storedTasks)
-    const filteredTasks = allTasks.filter((t) => t.id !== taskId)
-    localStorage.setItem("lab68_tasks", JSON.stringify(filteredTasks))
-    setTasks(tasks.filter((t) => t.id !== taskId))
-  }
+  const deleteTask = useCallback(async (taskId: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+      await deleteTodo(taskId)
+      await loadTasks()
+    } catch (err) {
+      console.error("Error deleting task:", err)
+      setError("Failed to delete task")
+    } finally {
+      setLoading(false)
+    }
+  }, [loadTasks])
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {

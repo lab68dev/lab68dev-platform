@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, CheckCircle2, Clock, X, Pencil, Trash2, Users, LayoutGrid, Search, Filter } from "lucide-react"
-import { getCurrentUser, getAllUsers } from "@/lib/auth"
+import { getCurrentUser } from "@/lib/auth"
 import { getTranslations, getUserLanguage, type Language } from "@/lib/i18n"
+import { getProjects, createProject, updateProject, deleteProject, type Project as DBProject, addProjectCollaborator, getProjectCollaborators, removeProjectCollaborator, getProfileByEmail } from "@/lib/database"
 import Link from "next/link"
 
 interface Project {
@@ -22,6 +23,8 @@ interface Project {
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [showCollabModal, setShowCollabModal] = useState(false)
@@ -35,48 +38,54 @@ export default function ProjectsPage() {
   })
   const [searchQuery, setSearchQuery] = useState("")
   const [filterStatus, setFilterStatus] = useState<string>("all")
-  const [language, setLanguage] = useState<Language>("en")
+  const [language, setLanguage] = useState<Language>(getUserLanguage())
   const t = getTranslations(language)
 
-  useEffect(() => {
-    setLanguage(getUserLanguage())
-    loadProjects()
+  const loadProjects = useCallback(async () => {
+    const user = getCurrentUser()
+    if (!user) {
+      setLoading(false)
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await getProjects(user.id)
+      
+      // Transform Supabase data to match component interface and fetch collaborators
+      const transformedProjects: Project[] = await Promise.all(
+        data.map(async (p) => {
+          const collaborators = await getProjectCollaborators(p.id)
+          const collaboratorEmails = collaborators
+            .map((c: any) => c.profiles?.email)
+            .filter((email: string | undefined): email is string => Boolean(email))
+          
+          return {
+            id: p.id,
+            name: p.title,
+            description: p.description || "",
+            status: p.status === 'active' ? 'Active' : p.status === 'completed' ? 'Completed' : 'On Hold',
+            tech: p.tags || [],
+            lastUpdated: p.updated_at,
+            userId: p.user_id,
+            collaborators: collaboratorEmails
+          }
+        })
+      )
+      
+      setProjects(transformedProjects)
+    } catch (err) {
+      console.error('Failed to load projects:', err)
+      setError('Failed to load projects')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  const loadProjects = () => {
-    const user = getCurrentUser()
-    if (!user) return
-
-    const saved = localStorage.getItem("lab68_projects")
-    if (saved) {
-      const allProjects = JSON.parse(saved)
-      setProjects(
-        allProjects.filter(
-          (p: Project) => p.userId === user.email || (p.collaborators && p.collaborators.includes(user.email)),
-        ),
-      )
-    }
-  }
-
-  const saveProjects = (userProjects: Project[]) => {
-    const user = getCurrentUser()
-    if (!user) return
-
-    const saved = localStorage.getItem("lab68_projects")
-    const allProjects = saved ? JSON.parse(saved) : []
-
-    userProjects.forEach((updatedProject) => {
-      const index = allProjects.findIndex((p: Project) => p.id === updatedProject.id)
-      if (index !== -1) {
-        allProjects[index] = updatedProject
-      } else {
-        allProjects.push(updatedProject)
-      }
-    })
-
-    localStorage.setItem("lab68_projects", JSON.stringify(allProjects))
+  useEffect(() => {
     loadProjects()
-  }
+  }, [loadProjects])
 
   const handleOpenModal = (project?: Project) => {
     if (project) {
@@ -100,7 +109,7 @@ export default function ProjectsPage() {
     setFormData({ name: "", description: "", status: "Active", tech: "" })
   }
 
-  const handleSaveProject = () => {
+  const handleSaveProject = useCallback(async () => {
     const user = getCurrentUser()
     if (!user || !formData.name || !formData.description) return
 
@@ -109,104 +118,186 @@ export default function ProjectsPage() {
       .map((t) => t.trim())
       .filter((t) => t)
 
-    if (editingProject) {
-      const saved = localStorage.getItem("lab68_projects")
-      const allProjects = saved ? JSON.parse(saved) : []
-      const updatedProjects = allProjects.map((p: Project) =>
-        p.id === editingProject.id
-          ? {
-              ...p,
-              name: formData.name,
-              description: formData.description,
-              status: formData.status,
-              tech: techArray,
-              lastUpdated: new Date().toISOString(),
-            }
-          : p,
-      )
+    try {
+      setLoading(true)
+      setError(null)
 
-      localStorage.setItem("lab68_projects", JSON.stringify(updatedProjects))
-      loadProjects()
-    } else {
-      const newProject: Project = {
-        id: Date.now().toString(),
-        name: formData.name,
-        description: formData.description,
-        status: formData.status,
-        tech: techArray,
-        lastUpdated: new Date().toISOString(),
-        userId: user.email,
-        collaborators: [],
+      if (editingProject) {
+        // Update existing project
+        const statusMap: { [key: string]: "active" | "on-hold" | "completed" | "archived" } = {
+          "Active": "active",
+          "Planning": "active",
+          "In Progress": "active",
+          "Building": "active",
+          "Completed": "completed",
+          "On Hold": "on-hold"
+        }
+
+        await updateProject(editingProject.id, {
+          title: formData.name,
+          description: formData.description,
+          status: statusMap[formData.status] || "active",
+          tags: techArray,
+        })
+      } else {
+        // Create new project
+        const statusMap: { [key: string]: "active" | "on-hold" | "completed" | "archived" } = {
+          "Active": "active",
+          "Planning": "active",
+          "In Progress": "active",
+          "Building": "active",
+          "Completed": "completed",
+          "On Hold": "on-hold"
+        }
+
+        await createProject({
+          title: formData.name,
+          description: formData.description,
+          status: statusMap[formData.status] || "active",
+          tags: techArray,
+          user_id: user.id,
+          priority: "medium",
+          progress: 0,
+        })
       }
-      saveProjects([...projects, newProject])
+
+      await loadProjects()
+      handleCloseModal()
+    } catch (err) {
+      console.error("Error saving project:", err)
+      setError("Failed to save project. Please try again.")
+    } finally {
+      setLoading(false)
     }
+  }, [formData, editingProject, loadProjects])
 
-    handleCloseModal()
-  }
+  const handleDeleteProject = useCallback(async (projectId: string) => {
+    if (!confirm("Are you sure you want to delete this project?")) return
 
-  const handleDeleteProject = (projectId: string) => {
-    if (confirm("Are you sure you want to delete this project?")) {
-      const saved = localStorage.getItem("lab68_projects")
-      const allProjects = saved ? JSON.parse(saved) : []
-      const updatedProjects = allProjects.filter((p: Project) => p.id !== projectId)
-
-      localStorage.setItem("lab68_projects", JSON.stringify(updatedProjects))
-      loadProjects()
+    try {
+      setLoading(true)
+      setError(null)
+      await deleteProject(projectId)
+      await loadProjects()
+    } catch (err) {
+      console.error("Error deleting project:", err)
+      setError("Failed to delete project. Please try again.")
+    } finally {
+      setLoading(false)
     }
-  }
+  }, [loadProjects])
 
   const handleOpenCollabModal = (project: Project) => {
     setSelectedProject(project)
     setShowCollabModal(true)
   }
 
-  const handleAddCollaborator = () => {
+  const handleAddCollaborator = useCallback(async () => {
     if (!selectedProject || !collaboratorEmail) return
 
-    const users = getAllUsers()
-    const userExists = users.find((u) => u.email === collaboratorEmail)
+    try {
+      setLoading(true)
+      setError(null)
 
-    if (!userExists) {
-      alert("User not found. Please enter a valid email address.")
-      return
+      // Find user by email
+      const userProfile = await getProfileByEmail(collaboratorEmail)
+      
+      if (!userProfile) {
+        alert("User not found. Please enter a valid email address.")
+        return
+      }
+
+      const currentUser = getCurrentUser()
+      if (collaboratorEmail === currentUser?.email) {
+        alert("You cannot add yourself as a collaborator.")
+        return
+      }
+
+      // Check if already a collaborator
+      const collaborators = await getProjectCollaborators(selectedProject.id)
+      if (collaborators.some(c => c.user_id === userProfile.id)) {
+        alert("This user is already a collaborator.")
+        return
+      }
+
+      // Add collaborator
+      await addProjectCollaborator(
+        selectedProject.id, 
+        userProfile.id, 
+        'viewer',
+        currentUser?.id
+      )
+
+      setCollaboratorEmail("")
+      await loadProjects()
+      
+      // Reload selected project to show new collaborator
+      const updatedProjects = await getProjects(currentUser!.id)
+      const updated = updatedProjects.find(p => p.id === selectedProject.id)
+      if (updated) {
+        const collaborators = await getProjectCollaborators(updated.id)
+        const collaboratorEmails = await Promise.all(
+          collaborators.map(async (c) => {
+            const profile = await getProfileByEmail(c.user_id)
+            return profile?.email || ''
+          })
+        )
+        setSelectedProject({
+          ...selectedProject,
+          collaborators: collaboratorEmails.filter(e => e)
+        })
+      }
+    } catch (err) {
+      console.error("Error adding collaborator:", err)
+      setError("Failed to add collaborator. Please try again.")
+    } finally {
+      setLoading(false)
     }
+  }, [selectedProject, collaboratorEmail, loadProjects])
 
-    const currentUser = getCurrentUser()
-    if (collaboratorEmail === currentUser?.email) {
-      alert("You cannot add yourself as a collaborator.")
-      return
-    }
-
-    if (selectedProject.collaborators?.includes(collaboratorEmail)) {
-      alert("This user is already a collaborator.")
-      return
-    }
-
-    const saved = localStorage.getItem("lab68_projects")
-    const allProjects = saved ? JSON.parse(saved) : []
-    const updatedProjects = allProjects.map((p: Project) =>
-      p.id === selectedProject.id ? { ...p, collaborators: [...(p.collaborators || []), collaboratorEmail] } : p,
-    )
-
-    localStorage.setItem("lab68_projects", JSON.stringify(updatedProjects))
-    setCollaboratorEmail("")
-    loadProjects()
-    setSelectedProject(updatedProjects.find((p: Project) => p.id === selectedProject.id))
-  }
-
-  const handleRemoveCollaborator = (email: string) => {
+  const handleRemoveCollaborator = useCallback(async (email: string) => {
     if (!selectedProject) return
 
-    const saved = localStorage.getItem("lab68_projects")
-    const allProjects = saved ? JSON.parse(saved) : []
-    const updatedProjects = allProjects.map((p: Project) =>
-      p.id === selectedProject.id ? { ...p, collaborators: p.collaborators?.filter((c: string) => c !== email) } : p,
-    )
+    try {
+      setLoading(true)
+      setError(null)
 
-    localStorage.setItem("lab68_projects", JSON.stringify(updatedProjects))
-    loadProjects()
-    setSelectedProject(updatedProjects.find((p: Project) => p.id === selectedProject.id))
-  }
+      // Find user by email
+      const userProfile = await getProfileByEmail(email)
+      if (!userProfile) {
+        alert("User not found.")
+        return
+      }
+
+      // Remove collaborator
+      await removeProjectCollaborator(selectedProject.id, userProfile.id)
+      
+      await loadProjects()
+      
+      // Update selected project
+      const currentUser = getCurrentUser()
+      const updatedProjects = await getProjects(currentUser!.id)
+      const updated = updatedProjects.find(p => p.id === selectedProject.id)
+      if (updated) {
+        const collaborators = await getProjectCollaborators(updated.id)
+        const collaboratorEmails = await Promise.all(
+          collaborators.map(async (c) => {
+            const profile = await getProfileByEmail(c.user_id)
+            return profile?.email || ''
+          })
+        )
+        setSelectedProject({
+          ...selectedProject,
+          collaborators: collaboratorEmails.filter(e => e)
+        })
+      }
+    } catch (err) {
+      console.error("Error removing collaborator:", err)
+      setError("Failed to remove collaborator. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }, [selectedProject, loadProjects])
 
   const getStatusIcon = (status: string) => {
     switch (status) {

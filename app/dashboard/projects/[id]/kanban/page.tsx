@@ -2,12 +2,14 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ArrowLeft, Plus, X, Trash2, Pencil } from "lucide-react"
 import { getTranslations, getUserLanguage, type Language } from "@/lib/i18n"
+import { getProjects, getTasks, createTask, updateTask, deleteTask, type Task as DBTask } from "@/lib/database"
+import { getCurrentUser } from "@/lib/auth"
 
 interface KanbanCard {
   id: string
@@ -16,12 +18,14 @@ interface KanbanCard {
   assignee?: string
   dueDate?: string
   columnId: string
+  status: 'todo' | 'in-progress' | 'review' | 'done'
 }
 
 interface KanbanColumn {
   id: string
   name: string
   cards: KanbanCard[]
+  status: 'todo' | 'in-progress' | 'review' | 'done'
 }
 
 interface Project {
@@ -39,7 +43,6 @@ export default function KanbanPage() {
   const [project, setProject] = useState<Project | null>(null)
   const [columns, setColumns] = useState<KanbanColumn[]>([])
   const [showCardModal, setShowCardModal] = useState(false)
-  const [showColumnModal, setShowColumnModal] = useState(false)
   const [editingCard, setEditingCard] = useState<KanbanCard | null>(null)
   const [selectedColumnId, setSelectedColumnId] = useState<string>("")
   const [draggedCard, setDraggedCard] = useState<KanbanCard | null>(null)
@@ -49,49 +52,82 @@ export default function KanbanPage() {
     assignee: "",
     dueDate: "",
   })
-  const [columnName, setColumnName] = useState("")
-  const [language, setLanguage] = useState<Language>("en")
+  const [language, setLanguage] = useState<Language>(getUserLanguage())
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const t = getTranslations(language)
 
-  useEffect(() => {
-    setLanguage(getUserLanguage())
-    loadProject()
-    loadKanban()
-  }, [projectId])
+  const loadProject = useCallback(async () => {
+    const user = getCurrentUser()
+    if (!user) {
+      router.push("/dashboard/projects")
+      return
+    }
 
-  const loadProject = () => {
-    const saved = localStorage.getItem("lab68_projects")
-    if (saved) {
-      const allProjects = JSON.parse(saved)
-      const foundProject = allProjects.find((p: Project) => p.id === projectId)
+    try {
+      const allProjects = await getProjects(user.id)
+      const foundProject = allProjects.find((p) => p.id === projectId)
       if (foundProject) {
-        setProject(foundProject)
+        setProject({
+          id: foundProject.id,
+          name: foundProject.title,
+          userId: foundProject.user_id,
+          collaborators: []
+        })
       } else {
         router.push("/dashboard/projects")
       }
+    } catch (err) {
+      console.error("Failed to load project:", err)
+      setError("Failed to load project")
+      router.push("/dashboard/projects")
     }
-  }
+  }, [projectId, router])
 
-  const loadKanban = () => {
-    const saved = localStorage.getItem(`lab68_kanban_${projectId}`)
-    if (saved) {
-      setColumns(JSON.parse(saved))
-    } else {
-      // Initialize with default columns
+  const loadKanban = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const tasks = await getTasks(projectId)
+      
+      // Initialize default columns with status mapping
       const defaultColumns: KanbanColumn[] = [
-        { id: "todo", name: "To Do", cards: [] },
-        { id: "inprogress", name: "In Progress", cards: [] },
-        { id: "done", name: "Done", cards: [] },
+        { id: "todo", name: "To Do", cards: [], status: "todo" },
+        { id: "in-progress", name: "In Progress", cards: [], status: "in-progress" },
+        { id: "review", name: "Review", cards: [], status: "review" },
+        { id: "done", name: "Done", cards: [], status: "done" },
       ]
-      setColumns(defaultColumns)
-      saveKanban(defaultColumns)
+      
+      // Organize tasks into columns
+      const columnsWithCards = defaultColumns.map((col) => ({
+        ...col,
+        cards: tasks
+          .filter((t) => t.status === col.status)
+          .map((t) => ({
+            id: t.id,
+            title: t.title,
+            description: t.description || "",
+            assignee: t.assignee_id || "",
+            dueDate: t.due_date || "",
+            columnId: col.id,
+            status: t.status
+          }))
+      }))
+      
+      setColumns(columnsWithCards)
+    } catch (err) {
+      console.error("Failed to load kanban:", err)
+      setError("Failed to load kanban board")
+    } finally {
+      setLoading(false)
     }
-  }
+  }, [projectId])
 
-  const saveKanban = (updatedColumns: KanbanColumn[]) => {
-    localStorage.setItem(`lab68_kanban_${projectId}`, JSON.stringify(updatedColumns))
-    setColumns(updatedColumns)
-  }
+  useEffect(() => {
+    loadProject()
+    loadKanban()
+  }, [loadProject, loadKanban])
 
   const handleOpenCardModal = (columnId: string, card?: KanbanCard) => {
     setSelectedColumnId(columnId)
@@ -110,62 +146,69 @@ export default function KanbanPage() {
     setShowCardModal(true)
   }
 
-  const handleSaveCard = () => {
+  const handleSaveCard = useCallback(async () => {
     if (!cardForm.title) return
 
-    const updatedColumns = columns.map((col) => {
-      if (col.id === selectedColumnId) {
-        if (editingCard) {
-          // Edit existing card
-          return {
-            ...col,
-            cards: col.cards.map((card) => (card.id === editingCard.id ? { ...card, ...cardForm } : card)),
-          }
-        } else {
-          // Add new card
-          const newCard: KanbanCard = {
-            id: Date.now().toString(),
-            ...cardForm,
-            columnId: col.id,
-          }
-          return { ...col, cards: [...col.cards, newCard] }
-        }
+    try {
+      setLoading(true)
+      setError(null)
+
+      const selectedColumn = columns.find(col => col.id === selectedColumnId)
+      if (!selectedColumn) return
+
+      const user = getCurrentUser()
+      if (!user) return
+
+      if (editingCard) {
+        // Update existing card
+        await updateTask(editingCard.id, {
+          title: cardForm.title,
+          description: cardForm.description,
+          assignee_id: cardForm.assignee || undefined,
+          due_date: cardForm.dueDate || undefined,
+        })
+      } else {
+        // Create new card
+        await createTask({
+          project_id: projectId,
+          title: cardForm.title,
+          description: cardForm.description,
+          status: selectedColumn.status,
+          priority: 'medium',
+          assignee_id: cardForm.assignee || undefined,
+          due_date: cardForm.dueDate || undefined,
+          position: selectedColumn.cards.length,
+          created_by: user.id,
+        })
       }
-      return col
-    })
 
-    saveKanban(updatedColumns)
-    setShowCardModal(false)
-    setCardForm({ title: "", description: "", assignee: "", dueDate: "" })
-    setEditingCard(null)
-  }
+      await loadKanban()
+      setShowCardModal(false)
+      setCardForm({ title: "", description: "", assignee: "", dueDate: "" })
+      setEditingCard(null)
+    } catch (err) {
+      console.error("Error saving card:", err)
+      setError("Failed to save card")
+    } finally {
+      setLoading(false)
+    }
+  }, [cardForm, editingCard, selectedColumnId, columns, projectId, loadKanban])
 
-  const handleDeleteCard = (columnId: string, cardId: string) => {
+  const handleDeleteCard = useCallback(async (columnId: string, cardId: string) => {
     if (!confirm(t.kanban.deleteCard + "?")) return
 
-    const updatedColumns = columns.map((col) =>
-      col.id === columnId ? { ...col, cards: col.cards.filter((card) => card.id !== cardId) } : col,
-    )
-    saveKanban(updatedColumns)
-  }
-
-  const handleAddColumn = () => {
-    if (!columnName) return
-
-    const newColumn: KanbanColumn = {
-      id: Date.now().toString(),
-      name: columnName,
-      cards: [],
+    try {
+      setLoading(true)
+      setError(null)
+      await deleteTask(cardId)
+      await loadKanban()
+    } catch (err) {
+      console.error("Error deleting card:", err)
+      setError("Failed to delete card")
+    } finally {
+      setLoading(false)
     }
-    saveKanban([...columns, newColumn])
-    setColumnName("")
-    setShowColumnModal(false)
-  }
-
-  const handleDeleteColumn = (columnId: string) => {
-    if (!confirm(t.kanban.deleteColumn + "?")) return
-    saveKanban(columns.filter((col) => col.id !== columnId))
-  }
+  }, [t.kanban.deleteCard, loadKanban])
 
   const handleDragStart = (card: KanbanCard) => {
     setDraggedCard(card)
@@ -175,29 +218,42 @@ export default function KanbanPage() {
     e.preventDefault()
   }
 
-  const handleDrop = (targetColumnId: string) => {
+  const handleDrop = useCallback(async (targetColumnId: string) => {
     if (!draggedCard) return
 
-    const updatedColumns = columns.map((col) => {
-      // Remove card from source column
-      if (col.id === draggedCard.columnId) {
-        return { ...col, cards: col.cards.filter((card) => card.id !== draggedCard.id) }
-      }
-      // Add card to target column
-      if (col.id === targetColumnId) {
-        return { ...col, cards: [...col.cards, { ...draggedCard, columnId: targetColumnId }] }
-      }
-      return col
-    })
+    try {
+      setLoading(true)
+      setError(null)
 
-    saveKanban(updatedColumns)
-    setDraggedCard(null)
-  }
+      const targetColumn = columns.find(col => col.id === targetColumnId)
+      if (!targetColumn) return
+
+      // Update task status in Supabase
+      await updateTask(draggedCard.id, {
+        status: targetColumn.status,
+        position: targetColumn.cards.length,
+      })
+
+      await loadKanban()
+      setDraggedCard(null)
+    } catch (err) {
+      console.error("Error moving card:", err)
+      setError("Failed to move card")
+    } finally {
+      setLoading(false)
+    }
+  }, [draggedCard, columns, loadKanban])
 
   if (!project) return null
 
   return (
     <div className="p-8 space-y-8">
+      {error && (
+        <div className="bg-destructive/10 text-destructive px-4 py-2 rounded">
+          {error}
+        </div>
+      )}
+      
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border pb-8">
         <div className="flex items-center gap-4">
@@ -214,10 +270,6 @@ export default function KanbanPage() {
             <p className="text-muted-foreground">{t.kanban.title}</p>
           </div>
         </div>
-        <Button onClick={() => setShowColumnModal(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          {t.kanban.addColumn}
-        </Button>
       </div>
 
       {/* Kanban Board */}
@@ -234,17 +286,9 @@ export default function KanbanPage() {
                 {column.name} ({column.cards.length})
               </h3>
               <div className="flex gap-2">
-                <button onClick={() => handleOpenCardModal(column.id)} className="text-primary hover:text-primary/80">
+                <button onClick={() => handleOpenCardModal(column.id)} className="text-primary hover:text-primary/80" title="Add card">
                   <Plus className="h-4 w-4" />
                 </button>
-                {columns.length > 1 && (
-                  <button
-                    onClick={() => handleDeleteColumn(column.id)}
-                    className="text-destructive hover:text-destructive/80"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
               </div>
             </div>
 
@@ -267,12 +311,16 @@ export default function KanbanPage() {
                         <button
                           onClick={() => handleOpenCardModal(column.id, card)}
                           className="text-foreground hover:text-primary"
+                          title="Edit card"
+                          aria-label="Edit card"
                         >
                           <Pencil className="h-3 w-3" />
                         </button>
                         <button
                           onClick={() => handleDeleteCard(column.id, card.id)}
                           className="text-foreground hover:text-destructive"
+                          title="Delete card"
+                          aria-label="Delete card"
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>
@@ -301,14 +349,20 @@ export default function KanbanPage() {
           <div className="w-full max-w-md border border-border bg-background p-8 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">{editingCard ? t.kanban.editCard : t.kanban.addCard}</h2>
-              <button onClick={() => setShowCardModal(false)} className="text-muted-foreground hover:text-foreground">
+              <button 
+                onClick={() => setShowCardModal(false)} 
+                className="text-muted-foreground hover:text-foreground"
+                title="Close"
+                aria-label="Close modal"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t.kanban.cardTitle}</label>
+                <label htmlFor="card-title" className="text-sm font-medium">{t.kanban.cardTitle}</label>
                 <input
+                  id="card-title"
                   type="text"
                   value={cardForm.title}
                   onChange={(e) => setCardForm({ ...cardForm, title: e.target.value })}
@@ -316,8 +370,9 @@ export default function KanbanPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t.kanban.cardDescription}</label>
+                <label htmlFor="card-description" className="text-sm font-medium">{t.kanban.cardDescription}</label>
                 <textarea
+                  id="card-description"
                   value={cardForm.description}
                   onChange={(e) => setCardForm({ ...cardForm, description: e.target.value })}
                   rows={3}
@@ -325,8 +380,9 @@ export default function KanbanPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t.kanban.assignee}</label>
+                <label htmlFor="card-assignee" className="text-sm font-medium">{t.kanban.assignee}</label>
                 <input
+                  id="card-assignee"
                   type="text"
                   value={cardForm.assignee}
                   onChange={(e) => setCardForm({ ...cardForm, assignee: e.target.value })}
@@ -334,8 +390,9 @@ export default function KanbanPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t.kanban.dueDate}</label>
+                <label htmlFor="card-due-date" className="text-sm font-medium">{t.kanban.dueDate}</label>
                 <input
+                  id="card-due-date"
                   type="date"
                   value={cardForm.dueDate}
                   onChange={(e) => setCardForm({ ...cardForm, dueDate: e.target.value })}
@@ -349,43 +406,6 @@ export default function KanbanPage() {
                 <Button
                   variant="outline"
                   onClick={() => setShowCardModal(false)}
-                  className="flex-1 border-foreground text-foreground hover:bg-foreground hover:text-background bg-transparent"
-                >
-                  {t.kanban.cancel}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Column Modal */}
-      {showColumnModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="w-full max-w-md border border-border bg-background p-8 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">{t.kanban.addColumn}</h2>
-              <button onClick={() => setShowColumnModal(false)} className="text-muted-foreground hover:text-foreground">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">{t.kanban.columnName}</label>
-                <input
-                  type="text"
-                  value={columnName}
-                  onChange={(e) => setColumnName(e.target.value)}
-                  className="w-full bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={handleAddColumn} className="flex-1">
-                  {t.kanban.create}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowColumnModal(false)}
                   className="flex-1 border-foreground text-foreground hover:bg-foreground hover:text-background bg-transparent"
                 >
                   {t.kanban.cancel}

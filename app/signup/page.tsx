@@ -24,7 +24,7 @@ export default function SignUpPage() {
     setT(getTranslations(getUserLanguage()))
   }, [])
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
@@ -45,11 +45,9 @@ export default function SignUpPage() {
     }
 
     // Sign up user
-    const result = signUp(email, password, name)
+    const result = await signUp(email, password, name)
 
     if (result.success) {
-      // Auto sign in after signup
-      localStorage.setItem("lab68_session", JSON.stringify(result.user))
       router.push("/dashboard")
     } else {
       setError(result.error || "Sign up failed")
