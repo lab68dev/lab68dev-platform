@@ -97,7 +97,9 @@ The build step runs Next.js static analysis, type-checking, and route bundling.
 | --- | --- |
 | **Dashboard Overview** | Snapshot of active projects, AI assistant, system metrics, and notifications. |
 | **Projects & Kanban** | Create projects, assign collaborators, manage roles, and move cards across kanban columns. |
-| **Team Management** | `lib/team.ts` exposes helpers for permissions, activity logging, and “time ago” formatting. |
+| **Team Management** | `lib/team.ts` exposes helpers for permissions, activity logging, and "time ago" formatting. |
+| **Chat & Messaging** | Real-time team communication with chat rooms, direct messages, typing indicators, reactions, and @mentions. |
+| **Comments System** | Contextual collaboration on tasks, diagrams, and projects with threaded comments, mentions, and resolution tracking. |
 | **Files Library** | Upload, categorize, and filter project files and links with type filters and metadata. |
 | **Meetings & Planning** | Schedule meetings, capture plans/milestones, and log progress. |
 | **Wiki & Community** | Knowledge base articles, category filtering, and community discussion threads. |

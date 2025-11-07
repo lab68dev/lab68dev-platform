@@ -302,6 +302,93 @@ export interface Translations {
     clear: string
     zoom: string
   }
+  // Chat & Messaging
+  chat: {
+    title: string
+    newChat: string
+    newGroup: string
+    searchMessages: string
+    typeMessage: string
+    send: string
+    edit: string
+    delete: string
+    reply: string
+    react: string
+    copyText: string
+    noMessages: string
+    startConversation: string
+    typing: string
+    isTyping: string
+    areTyping: string
+    online: string
+    offline: string
+    lastSeen: string
+    readBy: string
+    unread: string
+    markAsRead: string
+    createRoom: string
+    roomName: string
+    addMembers: string
+    directMessage: string
+    groupChat: string
+    projectChat: string
+    members: string
+    leaveChat: string
+    deleteChat: string
+    confirmDelete: string
+    cancel: string
+    edited: string
+    uploadFile: string
+    attachFile: string
+    sendingFile: string
+    fileUploaded: string
+    fileTooLarge: string
+    maxFileSize: string
+    selectEmoji: string
+  }
+  // Comments & Mentions
+  comments: {
+    title: string
+    addComment: string
+    typeComment: string
+    post: string
+    edit: string
+    delete: string
+    reply: string
+    resolve: string
+    resolved: string
+    unresolve: string
+    noComments: string
+    startDiscussion: string
+    mention: string
+    mentionSomeone: string
+    showResolved: string
+    hideResolved: string
+    sortBy: string
+    newest: string
+    oldest: string
+    mostReplies: string
+    cancel: string
+    save: string
+    confirmDelete: string
+    edited: string
+    replying: string
+    replyingTo: string
+    viewReplies: string
+    hideReplies: string
+    replies: string
+    react: string
+    reactions: string
+    mentionedYou: string
+    inComment: string
+    onTask: string
+    onDiagram: string
+    onProject: string
+    onFile: string
+    exportJSON: string
+    clear: string
+    zoom: string
+  }
   // Files feature
   files: {
     title: string
@@ -728,6 +815,88 @@ const translations: Record<Language, any> = {
       clear: "Clear Canvas",
       zoom: "Zoom",
       editLabel: ""
+    },
+    chat: {
+      title: "Chat & Messaging",
+      newChat: "New Chat",
+      newGroup: "New Group",
+      searchMessages: "Search messages...",
+      typeMessage: "Type a message...",
+      send: "Send",
+      edit: "Edit",
+      delete: "Delete",
+      reply: "Reply",
+      react: "React",
+      copyText: "Copy Text",
+      noMessages: "No messages yet",
+      startConversation: "Start the conversation",
+      typing: "typing...",
+      isTyping: "is typing...",
+      areTyping: "are typing...",
+      online: "Online",
+      offline: "Offline",
+      lastSeen: "Last seen",
+      readBy: "Read by",
+      unread: "Unread",
+      markAsRead: "Mark as Read",
+      createRoom: "Create Chat Room",
+      roomName: "Room Name",
+      addMembers: "Add Members",
+      directMessage: "Direct Message",
+      groupChat: "Group Chat",
+      projectChat: "Project Chat",
+      members: "Members",
+      leaveChat: "Leave Chat",
+      deleteChat: "Delete Chat",
+      confirmDelete: "Are you sure you want to delete this chat?",
+      cancel: "Cancel",
+      edited: "(edited)",
+      uploadFile: "Upload File",
+      attachFile: "Attach File",
+      sendingFile: "Sending file...",
+      fileUploaded: "File uploaded",
+      fileTooLarge: "File is too large",
+      maxFileSize: "Maximum file size is 10MB",
+      selectEmoji: "Select emoji",
+    },
+    comments: {
+      title: "Comments",
+      addComment: "Add Comment",
+      typeComment: "Type your comment...",
+      post: "Post",
+      edit: "Edit",
+      delete: "Delete",
+      reply: "Reply",
+      resolve: "Resolve",
+      resolved: "Resolved",
+      unresolve: "Unresolve",
+      noComments: "No comments yet",
+      startDiscussion: "Start the discussion by adding a comment",
+      mention: "Mention",
+      mentionSomeone: "Type @ to mention someone",
+      showResolved: "Show Resolved",
+      hideResolved: "Hide Resolved",
+      sortBy: "Sort by",
+      newest: "Newest First",
+      oldest: "Oldest First",
+      mostReplies: "Most Replies",
+      cancel: "Cancel",
+      save: "Save",
+      confirmDelete: "Are you sure you want to delete this comment?",
+      edited: "(edited)",
+      replying: "Replying",
+      replyingTo: "Replying to",
+      viewReplies: "View Replies",
+      hideReplies: "Hide Replies",
+      replies: "Replies",
+      react: "React",
+      reactions: "Reactions",
+      mentionedYou: "mentioned you",
+      inComment: "in a comment",
+      onTask: "on task",
+      onDiagram: "on diagram",
+      onProject: "on project",
+      onFile: "on file",
     },
     files: {
       title: "Files & Documents",
