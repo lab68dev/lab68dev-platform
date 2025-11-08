@@ -8,21 +8,85 @@ import Link from "next/link"
 import Image from "next/image"
 import { getTranslations, getUserLanguage } from "@/lib/i18n"
 import { useEffect, useState } from "react"
+import dynamic from "next/dynamic"
+
+const LightRays = dynamic(() => import("@/components/light-rays"), { ssr: false })
 
 export default function HomePage() {
   const [t, setT] = useState(getTranslations("en"))
+  const [typedText, setTypedText] = useState("")
+  const [isTyping, setIsTyping] = useState(true)
+  const fullText = "Think. Code. Test. Ship."
+  
+  // Logo animation state
+  const technologies = [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "Supabase",
+    "Vercel"
+  ]
+  const [currentTechIndex, setCurrentTechIndex] = useState(0)
 
   useEffect(() => {
     setT(getTranslations(getUserLanguage()))
   }, [])
 
-  return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <Header />
+  // Typing animation effect
+  useEffect(() => {
+    if (!isTyping) return
 
-      {/* Hero Section */}
-      <section className="flex-1 border-b border-border">
-        <div className="container mx-auto px-4 py-24 md:py-32">
+    let index = 0
+    const typingInterval = setInterval(() => {
+      if (index <= fullText.length) {
+        setTypedText(fullText.slice(0, index))
+        index++
+      } else {
+        clearInterval(typingInterval)
+        setIsTyping(false)
+      }
+    }, 100) // Typing speed: 100ms per character
+
+    return () => clearInterval(typingInterval)
+  }, [isTyping])
+
+  // Logo loop animation effect
+  useEffect(() => {
+    const logoInterval = setInterval(() => {
+      setCurrentTechIndex((prevIndex) => (prevIndex + 1) % technologies.length)
+    }, 2000) // Change technology every 2 seconds
+
+    return () => clearInterval(logoInterval)
+  }, [])
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background text-foreground relative">
+      {/* Light Rays Background */}
+      <div className="fixed inset-0 z-0">
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#00FF99"
+          raysSpeed={0.5}
+          lightSpread={1.5}
+          rayLength={1.5}
+          pulsating={true}
+          fadeDistance={1.2}
+          saturation={0.8}
+          followMouse={true}
+          mouseInfluence={0.15}
+          noiseAmount={0.05}
+          distortion={0.1}
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10">
+        <Header />
+
+        {/* Hero Section */}
+        <section className="flex-1 border-b border-border">
+          <div className="container mx-auto px-4 py-24 md:py-32">
           <div className="mx-auto max-w-4xl text-center space-y-8">
             <div className="mb-12">
               <Image
@@ -34,7 +98,8 @@ export default function HomePage() {
               />
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance">
-              {t.landing.hero.title}
+              {typedText}
+              <span className="animate-pulse">|</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">{t.landing.hero.subtitle}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
@@ -70,11 +135,68 @@ export default function HomePage() {
           <div className="mx-auto max-w-4xl">
             <h2 className="text-3xl md:text-5xl font-bold mb-12 text-balance">{t.landing.techStack.title}</h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {["React", "Next.js", "Java", "Python", "C++"].map((tech) => (
-                <div key={tech} className="border border-border p-6 hover:border-primary transition-colors">
-                  <p className="text-xl font-bold text-center">{tech}</p>
+              {[
+                { name: "React", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
+                { name: "Next.js", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
+                { name: "Java", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" },
+                { name: "Python", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
+                { name: "C++", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" }
+              ].map((tech) => (
+                <div key={tech.name} className="border border-border p-6 hover:border-primary transition-colors flex flex-col items-center justify-center gap-3">
+                  <Image 
+                    src={tech.logo} 
+                    alt={tech.name}
+                    width={64}
+                    height={64}
+                    className="object-contain"
+                  />
+                  <p className="text-sm font-medium text-center">{tech.name}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Technology Loop Animation */}
+      <section className="border-b border-border bg-muted/30">
+        <div className="container mx-auto px-4 py-16">
+          <div className="mx-auto max-w-6xl">
+            <h3 className="text-2xl font-bold text-center mb-8">Powered By</h3>
+            <div className="relative overflow-hidden">
+              {/* Infinite Scroll Animation */}
+              <div className="flex animate-scroll">
+                {[
+                  { name: "Next.js", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
+                  { name: "React", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
+                  { name: "TypeScript", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
+                  { name: "Tailwind CSS", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg" },
+                  { name: "Supabase", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg" },
+                  { name: "Vercel", logo: "https://assets.vercel.com/image/upload/front/favicon/vercel/180x180.png" },
+                  { name: "Next.js", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
+                  { name: "React", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
+                  { name: "TypeScript", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
+                  { name: "Tailwind CSS", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg" },
+                  { name: "Supabase", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg" },
+                  { name: "Vercel", logo: "https://assets.vercel.com/image/upload/front/favicon/vercel/180x180.png" }
+                ].map((tech, index) => (
+                  <div
+                    key={`${tech.name}-${index}`}
+                    className="flex-shrink-0 mx-8 flex flex-col items-center justify-center"
+                  >
+                    <div className="h-16 w-16 flex items-center justify-center mb-2">
+                      <Image
+                        src={tech.logo}
+                        alt={tech.name}
+                        width={64}
+                        height={64}
+                        className="object-contain"
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-center whitespace-nowrap">{tech.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -118,7 +240,7 @@ export default function HomePage() {
               {[
                 { name: "lab68dev-platform", desc: "Next.js web application with AI integration", status: "Active", github: "https://github.com/lab68dev/lab68dev-platform" },
                 { name: "lab68dev-AutoPR", desc: "Automate pull request reviews with an AI that understands context, best practices, and your org’s style guide", status: "Soon" },
-                { name: "Project Gamma", desc: "React component library", status: "In Progress" },
+                { name: "lab68dev-internal-hub", desc: "Internal Hub", status: "Soon" },
               ].map((project) => (
                 <div key={project.name} className="border border-border p-6 hover:border-primary transition-colors">
                   <div className="flex items-start justify-between mb-4">
@@ -133,7 +255,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   )
 }
