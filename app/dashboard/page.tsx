@@ -21,6 +21,14 @@ type Weather = {
   location: string
 }
 
+type Meeting = {
+  id: string
+  title: string
+  date: Date
+  time: string
+  status: string
+}
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [lang, setLang] = useState<Language>("en")
@@ -34,6 +42,8 @@ export default function DashboardPage() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [weather, setWeather] = useState<Weather | null>(null)
   const [weatherLoading, setWeatherLoading] = useState(true)
+  const [upcomingMeetings, setUpcomingMeetings] = useState<Meeting[]>([])
+  const [selectedDate, setSelectedDate] = useState(new Date())
   const router = useRouter()
 
   useEffect(() => {
@@ -104,6 +114,19 @@ export default function DashboardPage() {
         milestones: milestones.filter(m => m.status !== "completed").length, // Only count active milestones
         meetings: meetings.length,
       })
+
+      // Load upcoming meetings with dates
+      const meetingsWithDates: Meeting[] = meetings.map((m: any) => ({
+        id: m.id,
+        title: m.title,
+        date: new Date(m.scheduled_at || Date.now()),
+        time: new Date(m.scheduled_at || Date.now()).toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        status: m.status || 'scheduled'
+      }))
+      setUpcomingMeetings(meetingsWithDates)
     } catch (error) {
       console.error("Failed to load dashboard counts:", error)
     } finally {
@@ -175,92 +198,225 @@ export default function DashboardPage() {
             <p className="text-muted-foreground">{t.dashboard.happeningToday}</p>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             {/* Animated Digital Clock */}
-            <div className="border border-border bg-card p-3 w-[180px]">
-              <div className="space-y-2">
-                <div className="text-[10px] text-muted-foreground font-medium text-center">
-                  Time
+            <div className="border border-border bg-card p-4 min-w-[220px]">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 border-b border-border pb-2">
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
+                  <div className="text-xs text-muted-foreground font-medium">
+                    Current Time
+                  </div>
                 </div>
-                <div className="flex items-center justify-center gap-0.5 font-mono">
+                <div className="flex items-center justify-center gap-1 font-mono">
                   {/* Hours */}
-                  <div className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent animate-pulse">
-                    {hours}
+                  <div className="flex flex-col items-center">
+                    <div className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+                      {hours}
+                    </div>
+                    <div className="text-[8px] text-muted-foreground mt-1">Hours</div>
                   </div>
                   
                   {/* Separator */}
-                  <div className="text-2xl font-bold text-primary animate-pulse">:</div>
+                  <div className="text-3xl font-bold text-primary animate-pulse px-1">:</div>
                   
                   {/* Minutes */}
-                  <div className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent animate-pulse">
-                    {minutes}
+                  <div className="flex flex-col items-center">
+                    <div className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+                      {minutes}
+                    </div>
+                    <div className="text-[8px] text-muted-foreground mt-1">Mins</div>
                   </div>
                   
                   {/* Separator */}
-                  <div className="text-2xl font-bold text-primary animate-pulse">:</div>
+                  <div className="text-3xl font-bold text-primary animate-pulse px-1">:</div>
                   
                   {/* Seconds */}
-                  <div className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
-                    {seconds}
+                  <div className="flex flex-col items-center">
+                    <div className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+                      {seconds}
+                    </div>
+                    <div className="text-[8px] text-muted-foreground mt-1">Secs</div>
                   </div>
                 </div>
                 
                 {/* Date */}
-                <div className="text-[10px] text-muted-foreground text-center border-t border-border pt-2">
-                  {currentTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                <div className="text-xs text-muted-foreground text-center border-t border-border pt-2">
+                  {currentTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                 </div>
               </div>
             </div>
 
             {/* Animated Weather Widget */}
-            <div className="border border-border bg-card p-3 w-[180px]">
+            <div className="border border-border bg-card p-4 min-w-[220px]">
               {weatherLoading ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="animate-spin text-primary">
-                    <Cloud className="h-5 w-5" />
+                    <Cloud className="h-6 w-6" />
                   </div>
                 </div>
               ) : weather ? (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {/* Weather Header */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between border-b border-border pb-2">
                     <div>
-                      <h3 className="text-[10px] font-medium text-muted-foreground">Weather</h3>
-                      <p className="text-[9px] text-muted-foreground/70">{weather.location}</p>
+                      <h3 className="text-xs font-medium text-foreground">Weather</h3>
+                      <p className="text-[10px] text-muted-foreground">{weather.location}</p>
                     </div>
                     <div className="animate-bounce">
                       {(() => {
                         const WeatherIcon = getWeatherIcon(weather.condition)
-                        return <WeatherIcon className="h-5 w-5 text-primary" />
+                        return <WeatherIcon className="h-6 w-6 text-primary" />
                       })()}
                     </div>
                   </div>
 
-                  {/* Temperature */}
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
-                      {weather.temp}°
-                    </span>
-                    <span className="text-xs text-muted-foreground">C</span>
+                  {/* Temperature & Condition */}
+                  <div className="text-center">
+                    <div className="flex items-baseline justify-center gap-1 mb-1">
+                      <span className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+                        {weather.temp}°
+                      </span>
+                      <span className="text-sm text-muted-foreground">C</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground capitalize">
+                      {weather.condition}
+                    </div>
                   </div>
 
                   {/* Weather Details */}
                   <div className="flex items-center justify-around pt-2 border-t border-border">
-                    <div className="flex items-center gap-1">
-                      <Droplets className="h-3 w-3 text-primary animate-pulse" />
+                    <div className="flex flex-col items-center gap-1">
+                      <Droplets className="h-4 w-4 text-primary animate-pulse" />
                       <span className="text-[10px] font-medium">{weather.humidity}%</span>
+                      <span className="text-[8px] text-muted-foreground">Humidity</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Wind className="h-3 w-3 text-primary animate-pulse" />
-                      <span className="text-[10px] font-medium">{weather.windSpeed}</span>
+                    <div className="flex flex-col items-center gap-1">
+                      <Wind className="h-4 w-4 text-primary animate-pulse" />
+                      <span className="text-[10px] font-medium">{weather.windSpeed} km/h</span>
+                      <span className="text-[8px] text-muted-foreground">Wind</span>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="text-center text-[10px] text-muted-foreground flex items-center justify-center h-full">
+                <div className="text-center text-xs text-muted-foreground flex items-center justify-center h-full">
                   Weather unavailable
                 </div>
               )}
+            </div>
+
+            {/* Calendar Widget */}
+            <div className="border border-border bg-card p-3 w-[280px]">
+              <div className="space-y-2">
+                {/* Calendar Header */}
+                <div className="text-[10px] text-muted-foreground font-medium text-center border-b border-border pb-2">
+                  {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </div>
+
+                {/* Mini Calendar */}
+                <div className="grid grid-cols-7 gap-1 text-center text-[9px]">
+                  {/* Day headers */}
+                  {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
+                    <div key={day} className="text-muted-foreground font-medium p-1">
+                      {day}
+                    </div>
+                  ))}
+
+                  {/* Calendar days */}
+                  {(() => {
+                    const year = selectedDate.getFullYear()
+                    const month = selectedDate.getMonth()
+                    const firstDay = new Date(year, month, 1).getDay()
+                    const daysInMonth = new Date(year, month + 1, 0).getDate()
+                    const today = new Date()
+                    const days = []
+
+                    // Empty cells for days before month starts
+                    for (let i = 0; i < firstDay; i++) {
+                      days.push(<div key={`empty-${i}`} className="p-1" />)
+                    }
+
+                    // Days of the month
+                    for (let day = 1; day <= daysInMonth; day++) {
+                      const currentDate = new Date(year, month, day)
+                      const isToday = 
+                        day === today.getDate() &&
+                        month === today.getMonth() &&
+                        year === today.getFullYear()
+                      
+                      const hasMeeting = upcomingMeetings.some(meeting => {
+                        const meetingDate = new Date(meeting.date)
+                        return (
+                          meetingDate.getDate() === day &&
+                          meetingDate.getMonth() === month &&
+                          meetingDate.getFullYear() === year
+                        )
+                      })
+
+                      days.push(
+                        <div
+                          key={day}
+                          className={`p-1 cursor-pointer transition-all rounded ${
+                            isToday
+                              ? 'bg-primary text-primary-foreground font-bold'
+                              : hasMeeting
+                              ? 'bg-primary/20 text-primary font-medium border border-primary'
+                              : 'hover:bg-muted'
+                          }`}
+                          onClick={() => setSelectedDate(currentDate)}
+                        >
+                          {day}
+                        </div>
+                      )
+                    }
+
+                    return days
+                  })()}
+                </div>
+
+                {/* Meetings for selected date */}
+                <div className="border-t border-border pt-2 max-h-[100px] overflow-y-auto scrollbar-hide">
+                  <div className="text-[9px] text-muted-foreground mb-1 font-medium">
+                    Meetings Today
+                  </div>
+                  {(() => {
+                    const todayMeetings = upcomingMeetings.filter(meeting => {
+                      const meetingDate = new Date(meeting.date)
+                      const selected = selectedDate
+                      return (
+                        meetingDate.getDate() === selected.getDate() &&
+                        meetingDate.getMonth() === selected.getMonth() &&
+                        meetingDate.getFullYear() === selected.getFullYear()
+                      )
+                    })
+
+                    if (todayMeetings.length === 0) {
+                      return (
+                        <div className="text-[9px] text-muted-foreground/50 italic py-1">
+                          No meetings scheduled
+                        </div>
+                      )
+                    }
+
+                    return todayMeetings.map((meeting) => (
+                      <div
+                        key={meeting.id}
+                        className="flex items-start gap-1 py-1 border-l-2 border-primary pl-2 mb-1 hover:bg-muted/50 transition-colors"
+                      >
+                        <Calendar className="h-2.5 w-2.5 text-primary mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[9px] font-medium truncate">
+                            {meeting.title}
+                          </div>
+                          <div className="text-[8px] text-muted-foreground">
+                            {meeting.time}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  })()}
+                </div>
+              </div>
             </div>
           </div>
         </div>
