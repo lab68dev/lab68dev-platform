@@ -316,7 +316,7 @@ export default function DiagramEditorPage() {
       y: (200 - offset.y) / zoom,
       width: type === "decision" || type === "hexagon" ? 120 : type === "text" ? 150 : 100,
       height: type === "decision" || type === "hexagon" ? 120 : type === "text" ? 40 : 60,
-      label: type === "text" ? "Text" : t.diagrams.nodeTypes[type] || type,
+      label: type === "text" ? "Text" : (t.diagrams.nodeTypes as any)[type] || type,
       fillColor: nodeFillColor,
       borderColor: nodeBorderColor,
       textColor: nodeTextColor,
@@ -483,7 +483,7 @@ export default function DiagramEditorPage() {
         updatedAt: new Date().toISOString(),
       }
       localStorage.setItem("lab68_diagrams", JSON.stringify(allDiagrams))
-      alert(t.diagrams.saved || "Diagram saved successfully!")
+      alert((t.diagrams as any).saved || "Diagram saved successfully!")
     }
   }
 
@@ -527,7 +527,7 @@ export default function DiagramEditorPage() {
       <div className="flex flex-1 overflow-hidden">
         <div className="w-80 border-r border-border p-4 space-y-4 overflow-y-auto">
           <div>
-            <h3 className="font-bold mb-2">{t.diagrams.tools?.title || "Tools"}</h3>
+            <h3 className="font-bold mb-2">Tools</h3>
             <div className="space-y-2">
               <button
                 onClick={() => {
@@ -583,12 +583,16 @@ export default function DiagramEditorPage() {
                     value={nodeFillColor}
                     onChange={(e) => setNodeFillColor(e.target.value)}
                     className="w-12 h-8 border border-border cursor-pointer"
+                    aria-label="Node fill color picker"
+                    title="Choose fill color"
                   />
                   <input
                     type="text"
                     value={nodeFillColor}
                     onChange={(e) => setNodeFillColor(e.target.value)}
                     className="flex-1 bg-background border border-border px-2 py-1 text-xs focus:outline-none focus:border-primary"
+                    aria-label="Fill color hex value"
+                    placeholder="#000000"
                   />
                 </div>
               </div>
@@ -600,12 +604,16 @@ export default function DiagramEditorPage() {
                     value={nodeBorderColor}
                     onChange={(e) => setNodeBorderColor(e.target.value)}
                     className="w-12 h-8 border border-border cursor-pointer"
+                    aria-label="Node border color picker"
+                    title="Choose border color"
                   />
                   <input
                     type="text"
                     value={nodeBorderColor}
                     onChange={(e) => setNodeBorderColor(e.target.value)}
                     className="flex-1 bg-background border border-border px-2 py-1 text-xs focus:outline-none focus:border-primary"
+                    aria-label="Border color hex value"
+                    placeholder="#00FF99"
                   />
                 </div>
               </div>
@@ -617,12 +625,16 @@ export default function DiagramEditorPage() {
                     value={nodeTextColor}
                     onChange={(e) => setNodeTextColor(e.target.value)}
                     className="w-12 h-8 border border-border cursor-pointer"
+                    aria-label="Node text color picker"
+                    title="Choose text color"
                   />
                   <input
                     type="text"
                     value={nodeTextColor}
                     onChange={(e) => setNodeTextColor(e.target.value)}
                     className="flex-1 bg-background border border-border px-2 py-1 text-xs focus:outline-none focus:border-primary"
+                    aria-label="Text color hex value"
+                    placeholder="#FFFFFF"
                   />
                 </div>
               </div>
@@ -648,12 +660,16 @@ export default function DiagramEditorPage() {
                     value={connectionColor}
                     onChange={(e) => setConnectionColor(e.target.value)}
                     className="w-12 h-8 border border-border cursor-pointer"
+                    aria-label="Connection line color picker"
+                    title="Choose line color"
                   />
                   <input
                     type="text"
                     value={connectionColor}
                     onChange={(e) => setConnectionColor(e.target.value)}
                     className="flex-1 bg-background border border-border px-2 py-1 text-xs focus:outline-none focus:border-primary"
+                    aria-label="Line color hex value"
+                    placeholder="#00FF99"
                   />
                 </div>
               </div>
@@ -666,6 +682,8 @@ export default function DiagramEditorPage() {
                   value={connectionWidth}
                   onChange={(e) => setConnectionWidth(Number(e.target.value))}
                   className="w-full"
+                  aria-label="Connection line width"
+                  title={`Line width: ${connectionWidth}px`}
                 />
                 <div className="text-xs text-center">{connectionWidth}px</div>
               </div>
@@ -675,6 +693,8 @@ export default function DiagramEditorPage() {
                   value={connectionStyle}
                   onChange={(e) => setConnectionStyle(e.target.value as "solid" | "dashed" | "dotted")}
                   className="w-full bg-background border border-border px-2 py-1 text-sm focus:outline-none focus:border-primary"
+                  aria-label="Connection line style"
+                  title="Choose line style"
                 >
                   <option value="solid">Solid</option>
                   <option value="dashed">Dashed</option>
@@ -766,18 +786,24 @@ export default function DiagramEditorPage() {
               <button
                 onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
                 className="flex-1 flex items-center justify-center px-4 py-2 border border-border hover:border-primary transition-colors"
+                aria-label="Zoom out"
+                title="Zoom out"
               >
                 <ZoomOut className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setZoom(1)}
                 className="flex-1 px-4 py-2 border border-border hover:border-primary transition-colors text-sm"
+                aria-label="Reset zoom to 100%"
+                title="Reset zoom"
               >
                 {Math.round(zoom * 100)}%
               </button>
               <button
                 onClick={() => setZoom(Math.min(2, zoom + 0.1))}
                 className="flex-1 flex items-center justify-center px-4 py-2 border border-border hover:border-primary transition-colors"
+                aria-label="Zoom in"
+                title="Zoom in"
               >
                 <ZoomIn className="h-4 w-4" />
               </button>
@@ -823,6 +849,9 @@ export default function DiagramEditorPage() {
               onChange={(e) => setEditLabel(e.target.value)}
               className="w-full bg-background border border-border px-4 py-2 focus:outline-none focus:border-primary mb-6"
               autoFocus
+              aria-label="Node label"
+              placeholder="Enter node label"
+              title="Edit node label"
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleLabelSave()
                 if (e.key === "Escape") {

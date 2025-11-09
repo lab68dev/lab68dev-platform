@@ -290,6 +290,11 @@ export interface Translations {
       decision: string
       end: string
       data: string
+      document: string
+      cloud: string
+      hexagon: string
+      parallelogram: string
+      text: string
     }
     tools: {
       select: string
@@ -301,6 +306,7 @@ export interface Translations {
     exportJSON: string
     clear: string
     zoom: string
+    saved: string
   }
   // Chat & Messaging
   chat: {
@@ -845,6 +851,11 @@ const translations: Record<Language, any> = {
         decision: "Decision",
         end: "End",
         data: "Data",
+        document: "Document",
+        cloud: "Cloud",
+        hexagon: "Hexagon",
+        parallelogram: "Parallelogram",
+        text: "Text",
       },
       tools: {
         select: "Select",
@@ -856,7 +867,8 @@ const translations: Record<Language, any> = {
       exportJSON: "Export as JSON",
       clear: "Clear Canvas",
       zoom: "Zoom",
-      editLabel: ""
+      saved: "Diagram saved successfully!",
+      editLabel: "Edit Label"
     },
     chat: {
       title: "Chat & Messaging",
@@ -1322,6 +1334,11 @@ const translations: Record<Language, any> = {
         decision: "Decisiión",
         end: "Fin",
         data: "Datos",
+        document: "Documento",
+        cloud: "Nube",
+        hexagon: "Hexágono",
+        parallelogram: "Paralelogramo",
+        text: "Texto",
       },
       tools: {
         select: "Seleccionar",
@@ -1333,7 +1350,8 @@ const translations: Record<Language, any> = {
       exportJSON: "Exportar como JSON",
       clear: "Limpiar Lienzo",
       zoom: "Zoom",
-      editLabel: ""
+      saved: "¡Diagrama guardado con éxito!",
+      editLabel: "Editar Etiqueta"
     },
     files: {
       title: "Archivos y Documentos",
@@ -1677,6 +1695,11 @@ const translations: Record<Language, any> = {
         decision: "Décision",
         end: "Fin",
         data: "Données",
+        document: "Document",
+        cloud: "Nuage",
+        hexagon: "Hexagone",
+        parallelogram: "Parallélogramme",
+        text: "Texte",
       },
       tools: {
         select: "Sélectionner",
@@ -1688,7 +1711,8 @@ const translations: Record<Language, any> = {
       exportJSON: "Exporter en JSON",
       clear: "Effacer le Canevas",
       zoom: "Zoom",
-      editLabel: ""
+      saved: "Diagramme enregistré avec succès!",
+      editLabel: "Modifier l'Étiquette"
     },
     files: {
       title: "Fichiers et Documents",
@@ -2031,6 +2055,11 @@ const translations: Record<Language, any> = {
         decision: "Entscheidung",
         end: "Ende",
         data: "Daten",
+        document: "Dokument",
+        cloud: "Wolke",
+        hexagon: "Sechseck",
+        parallelogram: "Parallelogramm",
+        text: "Text",
       },
       tools: {
         select: "Auswählen",
@@ -2042,7 +2071,8 @@ const translations: Record<Language, any> = {
       exportJSON: "Als JSON Exportieren",
       clear: "Leinwand Löschen",
       zoom: "Zoom",
-      editLabel: ""
+      saved: "Diagramm erfolgreich gespeichert!",
+      editLabel: "Etikett Bearbeiten"
     },
     files: {
       title: "Files & Documents",
