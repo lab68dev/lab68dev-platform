@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { ArrowLeft, Plus, X, Trash2, Pencil, Tag, Calendar, User, Flag } from "lucide-react"
+import { ArrowLeft, Plus, X, Trash2, Pencil, Tag, Calendar, User, Flag, MoreVertical } from "lucide-react"
 import { getTranslations, getUserLanguage, type Language } from "@/lib/i18n"
 import { getProjects, type Project as DBProject } from "@/lib/database"
 import { getCurrentUser } from "@/lib/auth"
@@ -17,8 +17,6 @@ import {
   createLabel,
   updateLabel,
   deleteLabel,
-  getTasksByStatus,
-  reorderTasks,
   type Task,
   type Label,
   DEFAULT_LABEL_COLORS,
@@ -292,25 +290,25 @@ export default function KanbanPage() {
   }
 
   const toggleTaskLabel = (labelId: string) => {
-    const labels = taskForm.labels.includes(labelId)
+    const updatedLabels = taskForm.labels.includes(labelId)
       ? taskForm.labels.filter(id => id !== labelId)
       : [...taskForm.labels, labelId]
     
-    setTaskForm({ ...taskForm, labels })
+    setTaskForm({ ...taskForm, labels: updatedLabels })
   }
 
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {
-      case 'urgent': return 'text-red-500'
-      case 'high': return 'text-orange-500'
-      case 'medium': return 'text-yellow-500'
-      case 'low': return 'text-green-500'
-      default: return 'text-gray-500'
+      case 'urgent': return 'text-red-500 border-red-500'
+      case 'high': return 'text-orange-500 border-orange-500'
+      case 'medium': return 'text-yellow-500 border-yellow-500'
+      case 'low': return 'text-green-500 border-green-500'
+      default: return 'text-gray-500 border-gray-500'
     }
   }
 
   const getPriorityIcon = (priority: Task['priority']) => {
-    return <Flag className={`h-3 w-3 ${getPriorityColor(priority)}`} />
+    return <Flag className={`h-3 w-3 ${getPriorityColor(priority)}`} fill="currentColor" />
   }
 
   if (loading) {
@@ -358,6 +356,11 @@ export default function KanbanPage() {
             <Tag className="h-4 w-4" />
             Manage Labels
           </Button>
+          <Link href={`/dashboard/projects/${projectId}/sprint`}>
+            <Button variant="outline" size="sm">
+              Sprint View
+            </Button>
+          </Link>
           <Link href={`/dashboard/projects/${projectId}/backlog`}>
             <Button variant="outline" size="sm">
               Backlog
@@ -505,12 +508,7 @@ export default function KanbanPage() {
               <h2 className="text-xl font-bold">
                 {editingTask ? 'Edit Task' : 'New Task'}
               </h2>
-              <button 
-                onClick={handleCloseTaskModal} 
-                className="text-muted-foreground hover:text-foreground"
-                aria-label="Close modal"
-                title="Close"
-              >
+              <button onClick={handleCloseTaskModal} className="text-muted-foreground hover:text-foreground">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -543,13 +541,11 @@ export default function KanbanPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Priority */}
                 <div className="space-y-2">
-                  <label htmlFor="kanban-task-priority" className="text-sm font-medium">Priority</label>
+                  <label className="text-sm font-medium">Priority</label>
                   <select
-                    id="kanban-task-priority"
                     value={taskForm.priority}
                     onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value as Task['priority'] })}
                     className="w-full bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
-                    aria-label="Task priority"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -560,43 +556,36 @@ export default function KanbanPage() {
 
                 {/* Story Points */}
                 <div className="space-y-2">
-                  <label htmlFor="kanban-task-story-points" className="text-sm font-medium">Story Points</label>
+                  <label className="text-sm font-medium">Story Points</label>
                   <input
-                    id="kanban-task-story-points"
                     type="number"
                     min="0"
                     value={taskForm.storyPoints}
                     onChange={(e) => setTaskForm({ ...taskForm, storyPoints: parseInt(e.target.value) || 0 })}
                     className="w-full bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
-                    aria-label="Story points"
-                    placeholder="0"
                   />
                 </div>
 
                 {/* Assignee */}
                 <div className="space-y-2">
-                  <label htmlFor="kanban-task-assignee" className="text-sm font-medium">Assignee</label>
+                  <label className="text-sm font-medium">Assignee</label>
                   <input
-                    id="kanban-task-assignee"
                     type="text"
                     value={taskForm.assignee}
                     onChange={(e) => setTaskForm({ ...taskForm, assignee: e.target.value })}
                     placeholder="Assignee name"
                     className="w-full bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
-                    aria-label="Task assignee"
                   />
                 </div>
 
                 {/* Due Date */}
                 <div className="space-y-2">
-                  <label htmlFor="kanban-task-due-date" className="text-sm font-medium">Due Date</label>
+                  <label className="text-sm font-medium">Due Date</label>
                   <input
-                    id="kanban-task-due-date"
                     type="date"
                     value={taskForm.dueDate}
                     onChange={(e) => setTaskForm({ ...taskForm, dueDate: e.target.value })}
                     className="w-full bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
-                    aria-label="Due date"
                   />
                 </div>
               </div>
@@ -652,12 +641,7 @@ export default function KanbanPage() {
           <div className="w-full max-w-md border border-border bg-background p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">Manage Labels</h2>
-              <button 
-                onClick={handleCloseLabelModal} 
-                className="text-muted-foreground hover:text-foreground"
-                aria-label="Close modal"
-                title="Close"
-              >
+              <button onClick={handleCloseLabelModal} className="text-muted-foreground hover:text-foreground">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -687,8 +671,6 @@ export default function KanbanPage() {
                         labelForm.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''
                       }`}
                       style={{ backgroundColor: color }}
-                      aria-label={`Select color ${color}`}
-                      title={`Color: ${color}`}
                     />
                   ))}
                 </div>

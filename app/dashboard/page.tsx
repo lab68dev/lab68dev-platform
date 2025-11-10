@@ -187,21 +187,21 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 pt-20 lg:pt-8">
       {/* Welcome Header with Digital Clock and Weather */}
-      <div className="border-b border-border pb-8">
-        <div className="flex items-start justify-between gap-4">
+      <div className="border-b border-border pb-6 lg:pb-8">
+        <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold mb-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
               {t.dashboard.welcomeBack}, {user.name}
             </h1>
-            <p className="text-muted-foreground">{t.dashboard.happeningToday}</p>
+            <p className="text-sm sm:text-base text-muted-foreground">{t.dashboard.happeningToday}</p>
           </div>
           
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
             {/* Animated Digital Clock */}
-            <div className="border border-border bg-card p-4 min-w-[220px]">
-              <div className="space-y-3">
+            <div className="border border-border bg-card p-3 sm:p-4 min-w-[200px] sm:min-w-[220px]">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-2 border-b border-border pb-2">
                   <div className="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
                   <div className="text-xs text-muted-foreground font-medium">
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-center gap-1 font-mono">
                   {/* Hours */}
                   <div className="flex flex-col items-center">
-                    <div className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+                    <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
                       {hours}
                     </div>
                     <div className="text-[8px] text-muted-foreground mt-1">Hours</div>
@@ -306,7 +306,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Calendar Widget */}
-            <div className="border border-border bg-card p-3 w-[280px]">
+            <div className="border border-border bg-card p-3 w-full sm:w-[280px]">
               <div className="space-y-2">
                 {/* Calendar Header */}
                 <div className="text-[10px] text-muted-foreground font-medium text-center border-b border-border pb-2">
@@ -427,14 +427,14 @@ export default function DashboardPage() {
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
-            <Card key={stat.label} className="border-border p-6 bg-card">
+            <Card key={stat.label} className="border-border p-4 sm:p-6 bg-card">
               <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                  <p className="text-3xl font-bold">{stat.value}</p>
-                  <p className="text-xs text-primary">{stat.change}</p>
+                <div className="space-y-1 sm:space-y-2">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">{stat.label}</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{stat.value}</p>
+                  <p className="text-[10px] sm:text-xs text-primary">{stat.change}</p>
                 </div>
-                <Icon className="h-8 w-8 text-muted-foreground" />
+                <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
               </div>
             </Card>
           )
@@ -443,21 +443,21 @@ export default function DashboardPage() {
 
       {/* Recent Projects */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold">{t.dashboard.recentProjects}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold">{t.dashboard.recentProjects}</h2>
         {recentProjects.length === 0 ? (
-          <div className="border border-border p-8 text-center">
-            <p className="text-muted-foreground">No projects yet. Start building!</p>
+          <div className="border border-border p-6 sm:p-8 text-center">
+            <p className="text-sm sm:text-base text-muted-foreground">No projects yet. Start building!</p>
           </div>
         ) : (
           <div className="space-y-2">
             {recentProjects.map((project) => (
-              <div key={project.name} className="border border-border p-4 hover:border-primary transition-colors">
-                <div className="flex items-center justify-between">
+              <div key={project.name} className="border border-border p-3 sm:p-4 hover:border-primary transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
                   <div>
-                    <h3 className="font-bold">{project.name}</h3>
-                    <p className="text-sm text-muted-foreground">{project.updated}</p>
+                    <h3 className="text-sm sm:text-base font-bold">{project.name}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{project.updated}</p>
                   </div>
-                  <span className="text-xs border border-primary text-primary px-3 py-1">{project.status}</span>
+                  <span className="text-xs border border-primary text-primary px-2 sm:px-3 py-1 self-start sm:self-auto">{project.status}</span>
                 </div>
               </div>
             ))}
@@ -467,22 +467,22 @@ export default function DashboardPage() {
 
       {/* AI Assistant Preview */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold">{t.dashboard.aiAssistant}</h2>
-        <div className="border border-border p-6 bg-card space-y-4">
+        <h2 className="text-xl sm:text-2xl font-bold">{t.dashboard.aiAssistant}</h2>
+        <div className="border border-border p-4 sm:p-6 bg-card space-y-4">
           <div className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-primary mt-2" />
+            <div className="w-2 h-2 bg-primary mt-2 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-medium mb-1">System</p>
-              <p className="text-sm text-muted-foreground">How can I assist you with your development today?</p>
+              <p className="text-xs sm:text-sm font-medium mb-1">System</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">How can I assist you with your development today?</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               placeholder={t.dashboard.askAnything}
-              className="flex-1 bg-background border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
+              className="flex-1 bg-background border border-border px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-primary"
             />
-            <button className="bg-primary text-primary-foreground px-6 py-2 text-sm font-medium hover:opacity-90 transition-opacity">
+            <button className="bg-primary text-primary-foreground px-4 sm:px-6 py-2 text-xs sm:text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap">
               {t.dashboard.send}
             </button>
           </div>
@@ -491,28 +491,28 @@ export default function DashboardPage() {
 
       {/* System Status */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold">{t.dashboard.systemStatus}</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="border border-border p-4">
+        <h2 className="text-xl sm:text-2xl font-bold">{t.dashboard.systemStatus}</h2>
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <div className="border border-border p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 bg-primary" />
-              <p className="text-sm font-medium">API Status</p>
+              <div className="w-2 h-2 bg-primary flex-shrink-0" />
+              <p className="text-xs sm:text-sm font-medium">API Status</p>
             </div>
-            <p className="text-xs text-muted-foreground">{t.dashboard.allSystemsOperational}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">{t.dashboard.allSystemsOperational}</p>
           </div>
-          <div className="border border-border p-4">
+          <div className="border border-border p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 bg-primary" />
-              <p className="text-sm font-medium">Build Queue</p>
+              <div className="w-2 h-2 bg-primary flex-shrink-0" />
+              <p className="text-xs sm:text-sm font-medium">Build Queue</p>
             </div>
-            <p className="text-xs text-muted-foreground">0 {t.dashboard.buildsInProgress}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">0 {t.dashboard.buildsInProgress}</p>
           </div>
-          <div className="border border-border p-4">
+          <div className="border border-border p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 bg-primary" />
-              <p className="text-sm font-medium">Database</p>
+              <div className="w-2 h-2 bg-primary flex-shrink-0" />
+              <p className="text-xs sm:text-sm font-medium">Database</p>
             </div>
-            <p className="text-xs text-muted-foreground">{t.dashboard.connectedAndHealthy}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">{t.dashboard.connectedAndHealthy}</p>
           </div>
         </div>
       </div>

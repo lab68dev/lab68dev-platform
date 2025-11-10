@@ -9,7 +9,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-background">
       <DashboardSidebar />
-      <main className="ml-64 min-h-screen border-l border-border bg-background">{children}</main>
+      <main className="lg:ml-64 min-h-screen lg:border-l border-border bg-background">{children}</main>
     </div>
   )
 }

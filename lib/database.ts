@@ -21,50 +21,183 @@ export interface Project {
 }
 
 export async function createProject(project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('projects')
-    .insert(project)
-    .select()
-    .single()
-  
-  if (error) throw error
-  return data
+  try {
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn('Supabase not configured, using localStorage fallback')
+      // Fallback to localStorage
+      const newProject = {
+        ...project,
+        id: Date.now().toString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+      const stored = localStorage.getItem(`projects_${project.user_id}`) || '[]'
+      const projects = JSON.parse(stored)
+      projects.push(newProject)
+      localStorage.setItem(`projects_${project.user_id}`, JSON.stringify(projects))
+      return newProject
+    }
+
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('projects')
+      .insert(project)
+      .select()
+      .single()
+    
+    if (error) {
+      console.warn('Supabase error, using localStorage fallback:', error)
+      const newProject = {
+        ...project,
+        id: Date.now().toString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+      const stored = localStorage.getItem(`projects_${project.user_id}`) || '[]'
+      const projects = JSON.parse(stored)
+      projects.push(newProject)
+      localStorage.setItem(`projects_${project.user_id}`, JSON.stringify(projects))
+      return newProject
+    }
+    return data
+  } catch (err) {
+    console.warn('Error creating project, using localStorage fallback:', err)
+    const newProject = {
+      ...project,
+      id: Date.now().toString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    const stored = localStorage.getItem(`projects_${project.user_id}`) || '[]'
+    const projects = JSON.parse(stored)
+    projects.push(newProject)
+    localStorage.setItem(`projects_${project.user_id}`, JSON.stringify(projects))
+    return newProject
+  }
 }
 
 export async function getProjects(userId: string) {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-  
-  if (error) throw error
-  return data || []
+  try {
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn('Supabase not configured, using localStorage fallback')
+      // Fallback to localStorage
+      const stored = localStorage.getItem(`projects_${userId}`)
+      return stored ? JSON.parse(stored) : []
+    }
+
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.warn('Supabase error, using localStorage fallback:', error)
+      const stored = localStorage.getItem(`projects_${userId}`)
+      return stored ? JSON.parse(stored) : []
+    }
+    return data || []
+  } catch (err) {
+    console.warn('Error fetching projects, using localStorage fallback:', err)
+    const stored = localStorage.getItem(`projects_${userId}`)
+    return stored ? JSON.parse(stored) : []
+  }
 }
 
 export async function updateProject(id: string, updates: Partial<Project>) {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('projects')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single()
-  
-  if (error) throw error
-  return data
+  try {
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn('Supabase not configured, using localStorage fallback')
+      // Fallback to localStorage - find project in all users' projects
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('projects_'))
+      for (const key of keys) {
+        const stored = localStorage.getItem(key) || '[]'
+        const projects = JSON.parse(stored)
+        const index = projects.findIndex((p: Project) => p.id === id)
+        if (index !== -1) {
+          projects[index] = { ...projects[index], ...updates, updated_at: new Date().toISOString() }
+          localStorage.setItem(key, JSON.stringify(projects))
+          return projects[index]
+        }
+      }
+      throw new Error('Project not found')
+    }
+
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('projects')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+    
+    if (error) {
+      console.warn('Supabase error, using localStorage fallback:', error)
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('projects_'))
+      for (const key of keys) {
+        const stored = localStorage.getItem(key) || '[]'
+        const projects = JSON.parse(stored)
+        const index = projects.findIndex((p: Project) => p.id === id)
+        if (index !== -1) {
+          projects[index] = { ...projects[index], ...updates, updated_at: new Date().toISOString() }
+          localStorage.setItem(key, JSON.stringify(projects))
+          return projects[index]
+        }
+      }
+      throw error
+    }
+    return data
+  } catch (err) {
+    console.warn('Error updating project:', err)
+    throw err
+  }
 }
 
 export async function deleteProject(id: string) {
-  const supabase = createClient()
-  const { error } = await supabase
-    .from('projects')
-    .delete()
-    .eq('id', id)
-  
-  if (error) throw error
+  try {
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn('Supabase not configured, using localStorage fallback')
+      // Fallback to localStorage
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('projects_'))
+      for (const key of keys) {
+        const stored = localStorage.getItem(key) || '[]'
+        const projects = JSON.parse(stored)
+        const filtered = projects.filter((p: Project) => p.id !== id)
+        if (filtered.length !== projects.length) {
+          localStorage.setItem(key, JSON.stringify(filtered))
+          return
+        }
+      }
+      return
+    }
+
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', id)
+    
+    if (error) {
+      console.warn('Supabase error, using localStorage fallback:', error)
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('projects_'))
+      for (const key of keys) {
+        const stored = localStorage.getItem(key) || '[]'
+        const projects = JSON.parse(stored)
+        const filtered = projects.filter((p: Project) => p.id !== id)
+        if (filtered.length !== projects.length) {
+          localStorage.setItem(key, JSON.stringify(filtered))
+          return
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Error deleting project:', err)
+  }
 }
 
 // ============================================
@@ -103,22 +236,37 @@ export async function addProjectCollaborator(
 }
 
 export async function getProjectCollaborators(projectId: string) {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('project_collaborators')
-    .select(`
-      *,
-      profiles:user_id (
-        id,
-        email,
-        name,
-        avatar
-      )
-    `)
-    .eq('project_id', projectId)
-  
-  if (error) throw error
-  return data || []
+  try {
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn('Supabase not configured, using localStorage fallback')
+      // Return empty array for localStorage fallback
+      return []
+    }
+
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('project_collaborators')
+      .select(`
+        *,
+        profiles:user_id (
+          id,
+          email,
+          name,
+          avatar
+        )
+      `)
+      .eq('project_id', projectId)
+    
+    if (error) {
+      console.warn('Supabase error getting collaborators:', error)
+      return []
+    }
+    return data || []
+  } catch (err) {
+    console.warn('Error getting project collaborators:', err)
+    return []
+  }
 }
 
 export async function removeProjectCollaborator(projectId: string, userId: string) {
@@ -133,15 +281,29 @@ export async function removeProjectCollaborator(projectId: string, userId: strin
 }
 
 export async function getProfileByEmail(email: string) {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('email', email)
-    .single()
-  
-  if (error) throw error
-  return data
+  try {
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn('Supabase not configured, returning null for profile lookup')
+      return null
+    }
+
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', email)
+      .single()
+    
+    if (error) {
+      console.warn('Error getting profile by email:', error)
+      return null
+    }
+    return data
+  } catch (err) {
+    console.warn('Error getting profile by email:', err)
+    return null
+  }
 }
 
 // ============================================

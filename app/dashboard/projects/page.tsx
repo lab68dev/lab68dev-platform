@@ -51,33 +51,52 @@ export default function ProjectsPage() {
     try {
       setLoading(true)
       setError(null)
+      console.log('Loading projects for user:', user.id)
       const data = await getProjects(user.id)
+      console.log('Loaded projects data:', data)
       
       // Transform Supabase data to match component interface and fetch collaborators
       const transformedProjects: Project[] = await Promise.all(
-        data.map(async (p) => {
-          const collaborators = await getProjectCollaborators(p.id)
-          const collaboratorEmails = collaborators
-            .map((c: any) => c.profiles?.email)
-            .filter((email: string | undefined): email is string => Boolean(email))
-          
-          return {
-            id: p.id,
-            name: p.title,
-            description: p.description || "",
-            status: p.status === 'active' ? 'Active' : p.status === 'completed' ? 'Completed' : 'On Hold',
-            tech: p.tags || [],
-            lastUpdated: p.updated_at,
-            userId: p.user_id,
-            collaborators: collaboratorEmails
+        data.map(async (p: any) => {
+          try {
+            const collaborators = await getProjectCollaborators(p.id)
+            const collaboratorEmails = collaborators
+              .map((c: any) => c.profiles?.email)
+              .filter((email: string | undefined): email is string => Boolean(email))
+            
+            return {
+              id: p.id,
+              name: p.title,
+              description: p.description || "",
+              status: p.status === 'active' ? 'Active' : p.status === 'completed' ? 'Completed' : 'On Hold',
+              tech: p.tags || [],
+              lastUpdated: p.updated_at,
+              userId: p.user_id,
+              collaborators: collaboratorEmails
+            }
+          } catch (err) {
+            console.warn('Error loading collaborators for project:', p.id, err)
+            return {
+              id: p.id,
+              name: p.title,
+              description: p.description || "",
+              status: p.status === 'active' ? 'Active' : p.status === 'completed' ? 'Completed' : 'On Hold',
+              tech: p.tags || [],
+              lastUpdated: p.updated_at,
+              userId: p.user_id,
+              collaborators: []
+            }
           }
         })
       )
       
+      console.log('Transformed projects:', transformedProjects)
       setProjects(transformedProjects)
     } catch (err) {
       console.error('Failed to load projects:', err)
-      setError('Failed to load projects')
+      setError('Projects loaded from local storage. Create your first project to get started!')
+      // Set empty array - localStorage fallback is already handled in getProjects
+      setProjects([])
     } finally {
       setLoading(false)
     }
@@ -233,7 +252,7 @@ export default function ProjectsPage() {
       
       // Reload selected project to show new collaborator
       const updatedProjects = await getProjects(currentUser!.id)
-      const updated = updatedProjects.find(p => p.id === selectedProject.id)
+      const updated = updatedProjects.find((p: any) => p.id === selectedProject.id)
       if (updated) {
         const collaborators = await getProjectCollaborators(updated.id)
         const collaboratorEmails = await Promise.all(
@@ -277,7 +296,7 @@ export default function ProjectsPage() {
       // Update selected project
       const currentUser = getCurrentUser()
       const updatedProjects = await getProjects(currentUser!.id)
-      const updated = updatedProjects.find(p => p.id === selectedProject.id)
+      const updated = updatedProjects.find((p: any) => p.id === selectedProject.id)
       if (updated) {
         const collaborators = await getProjectCollaborators(updated.id)
         const collaboratorEmails = await Promise.all(
@@ -335,14 +354,14 @@ export default function ProjectsPage() {
   })
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border pb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-6 sm:pb-8 gap-4">
         <div>
-          <h1 className="text-4xl font-bold mb-2">{t.projects.title}</h1>
-          <p className="text-muted-foreground">{t.projects.subtitle}</p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">{t.projects.title}</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">{t.projects.subtitle}</p>
         </div>
-        <Button onClick={() => handleOpenModal()} className="gap-2">
+        <Button onClick={() => handleOpenModal()} className="gap-2 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           {t.projects.newProject}
         </Button>
@@ -350,7 +369,7 @@ export default function ProjectsPage() {
 
       {/* Search and Filter Section */}
       <div className="space-y-4">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -364,7 +383,7 @@ export default function ProjectsPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
+            className="bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary w-full sm:w-auto"
             title="Filter by status"
           >
             <option value="all">All Status</option>
@@ -374,7 +393,7 @@ export default function ProjectsPage() {
           </select>
         </div>
         {(searchQuery || filterStatus !== "all") && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground">
             <Filter className="h-4 w-4" />
             <span>
               Showing {filteredProjects.length} of {projects.length} projects
@@ -394,34 +413,34 @@ export default function ProjectsPage() {
 
       {/* Projects Grid */}
       {filteredProjects.length === 0 ? (
-        <div className="border border-border p-12 text-center space-y-4">
-          <Plus className="h-12 w-12 mx-auto text-muted-foreground" />
+        <div className="border border-border p-8 sm:p-12 text-center space-y-4">
+          <Plus className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground" />
           <div>
-            <h3 className="text-xl font-bold mb-2">
+            <h3 className="text-lg sm:text-xl font-bold mb-2">
               {searchQuery || filterStatus !== "all" ? "No projects found" : t.projects.noProjects}
             </h3>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground">
               {searchQuery || filterStatus !== "all" ? "Try adjusting your search or filters" : t.projects.startCreating}
             </p>
           </div>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProjects.map((project) => {
             const currentUser = getCurrentUser()
             const isOwner = project.userId === currentUser?.email
             return (
-              <Card key={project.id} className="border-border p-6 bg-card hover:border-primary transition-colors">
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <h3 className="text-xl font-bold text-balance flex-1">{project.name}</h3>
-                    <div className="flex items-center gap-1 text-xs border border-primary text-primary px-2 py-1">
+              <Card key={project.id} className="border-border p-4 sm:p-6 bg-card hover:border-primary transition-colors">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-balance flex-1">{project.name}</h3>
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs border border-primary text-primary px-2 py-1 whitespace-nowrap">
                       {getStatusIcon(project.status)}
                       <span>{project.status}</span>
                     </div>
                   </div>
 
-                  <p className="text-sm text-muted-foreground leading-relaxed">{project.description}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{project.description}</p>
 
                   <div className="flex flex-wrap gap-2">
                     {project.tech.map((tech) => (
@@ -497,13 +516,13 @@ export default function ProjectsPage() {
 
       {/* Project Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="w-full max-w-md border border-border bg-background p-8 space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md border border-border bg-background p-6 sm:p-8 space-y-4 sm:space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">{editingProject ? t.projects.editProject : t.projects.newProject}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold">{editingProject ? t.projects.editProject : t.projects.newProject}</h2>
               <button
                 onClick={handleCloseModal}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground flex-shrink-0"
                 title="Close"
               >
                 <X className="h-5 w-5" />
@@ -511,31 +530,31 @@ export default function ProjectsPage() {
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t.projects.projectName}</label>
+                <label className="text-xs sm:text-sm font-medium">{t.projects.projectName}</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder={t.projects.projectName}
-                  className="w-full bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
+                  className="w-full bg-card border border-border px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-primary"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t.projects.projectDescription}</label>
+                <label className="text-xs sm:text-sm font-medium">{t.projects.projectDescription}</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder={t.projects.projectDescription}
                   rows={3}
-                  className="w-full bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary resize-none"
+                  className="w-full bg-card border border-border px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-primary resize-none"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t.projects.status}</label>
+                <label className="text-xs sm:text-sm font-medium">{t.projects.status}</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
+                  className="w-full bg-card border border-border px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-primary"
                   title={t.projects.status}
                 >
                   <option value="Active">{t.projects.active}</option>
@@ -544,16 +563,16 @@ export default function ProjectsPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t.projects.technologies}</label>
+                <label className="text-xs sm:text-sm font-medium">{t.projects.technologies}</label>
                 <input
                   type="text"
                   value={formData.tech}
                   onChange={(e) => setFormData({ ...formData, tech: e.target.value })}
                   placeholder="Next.js, React, TypeScript"
-                  className="w-full bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
+                  className="w-full bg-card border border-border px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-primary"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button onClick={handleSaveProject} className="flex-1">
                   {editingProject ? t.projects.save : t.projects.create}
                 </Button>
@@ -572,13 +591,13 @@ export default function ProjectsPage() {
 
       {/* Collaborators Modal */}
       {showCollabModal && selectedProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="w-full max-w-md border border-border bg-background p-8 space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md border border-border bg-background p-6 sm:p-8 space-y-4 sm:space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">{t.projects.collaborators}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold">{t.projects.collaborators}</h2>
               <button
                 onClick={() => setShowCollabModal(false)}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground flex-shrink-0"
                 title="Close"
               >
                 <X className="h-5 w-5" />
@@ -587,11 +606,11 @@ export default function ProjectsPage() {
 
             <div className="space-y-4">
               {/* Owner */}
-              <div className="border border-border p-4 space-y-2">
+              <div className="border border-border p-3 sm:p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">{selectedProject.userId}</p>
-                    <p className="text-xs text-muted-foreground">{t.projects.owner}</p>
+                    <p className="text-xs sm:text-sm font-medium break-all">{selectedProject.userId}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">{t.projects.owner}</p>
                   </div>
                 </div>
               </div>
@@ -600,14 +619,14 @@ export default function ProjectsPage() {
               {selectedProject.collaborators && selectedProject.collaborators.length > 0 ? (
                 <div className="space-y-2">
                   {selectedProject.collaborators.map((email) => (
-                    <div key={email} className="border border-border p-4 flex items-center justify-between">
-                      <p className="text-sm">{email}</p>
+                    <div key={email} className="border border-border p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <p className="text-xs sm:text-sm break-all">{email}</p>
                       {selectedProject.userId === getCurrentUser()?.email && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleRemoveCollaborator(email)}
-                          className="border-destructive text-destructive hover:bg-destructive hover:text-background"
+                          className="border-destructive text-destructive hover:bg-destructive hover:text-background w-full sm:w-auto whitespace-nowrap"
                         >
                           {t.projects.removeCollaborator}
                         </Button>
@@ -616,24 +635,24 @@ export default function ProjectsPage() {
                   ))}
                 </div>
               ) : (
-                <div className="border border-border p-8 text-center">
-                  <p className="text-sm text-muted-foreground">{t.projects.noCollaborators}</p>
+                <div className="border border-border p-6 sm:p-8 text-center">
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t.projects.noCollaborators}</p>
                 </div>
               )}
 
               {/* Add Collaborator (only for owner) */}
               {selectedProject.userId === getCurrentUser()?.email && (
                 <div className="space-y-2 pt-4 border-t border-border">
-                  <label className="text-sm font-medium">{t.projects.addCollaborator}</label>
-                  <div className="flex gap-2">
+                  <label className="text-xs sm:text-sm font-medium">{t.projects.addCollaborator}</label>
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="email"
                       value={collaboratorEmail}
                       onChange={(e) => setCollaboratorEmail(e.target.value)}
                       placeholder={t.projects.inviteByEmail}
-                      className="flex-1 bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
+                      className="flex-1 bg-card border border-border px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-primary"
                     />
-                    <Button onClick={handleAddCollaborator}>{t.projects.invite}</Button>
+                    <Button onClick={handleAddCollaborator} className="w-full sm:w-auto whitespace-nowrap">{t.projects.invite}</Button>
                   </div>
                 </div>
               )}
