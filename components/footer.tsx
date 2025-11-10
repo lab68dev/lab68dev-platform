@@ -134,14 +134,18 @@ export function Footer() {
               © {currentYear} lab68dev. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
                 Terms of Service
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="/cookies" className="text-muted-foreground hover:text-primary transition-colors">
                 Cookie Policy
+              </Link>
+              <span className="text-muted-foreground">•</span>
+              <Link href="/staff/login" className="text-muted-foreground hover:text-primary transition-colors">
+                Staff Portal
               </Link>
             </div>
           </div>

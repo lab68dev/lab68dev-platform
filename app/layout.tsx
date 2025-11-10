@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { JetBrains_Mono } from "next/font/google"
 import "./globals.css"
+import { LiveChatWidget } from "@/components/live-chat-widget"
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] })
 
@@ -49,6 +50,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <LiveChatWidget />
       </body>
     </html>
   )

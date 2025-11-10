@@ -8,16 +8,19 @@
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform/issues)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-yellow.svg?style=for-the-badge&logo=buymeacoffee)](https://www.buymeacoffee.com/lab68dev)
 
-**Lab68 Dev Platform** is a monorepo that powers a collaborative product development workspace. It provides dashboards for planning, documentation, meetings, AI-assisted workflows, and role-aware access controls—built on top of **Next.js App Router**, **TypeScript**, and a modular component system.
+**Lab68 Dev Platform** is a comprehensive collaborative product development workspace with integrated staff management. It provides dashboards for planning, documentation, meetings, AI-assisted workflows, role-aware access controls, live customer support, and a complete staff portal for platform administration—built on top of **Next.js App Router**, **TypeScript**, and a modular component system.
 
 ---
 
 ## Highlights
 
+- **Enterprise-Grade Security** 🔐 – bcrypt password hashing, JWT sessions, Two-Factor Authentication (2FA), rate limiting, and automated email notifications.
 - **Role-Based Collaboration** – project-level roles (owner, admin, editor, viewer) with granular permission checks and activity logging.
+- **Staff Management Portal** – dedicated staff authentication, user management, support queue, analytics dashboard, and approval workflows.
+- **Live Customer Support** – real-time chat widget with staff dashboard for 24/7 support management.
+- **Supabase Backend** – PostgreSQL database with Row-Level Security (RLS), indexed queries, and automatic session cleanup.
 - **Multilingual UI** – centralized translation registry (`lib/i18n.ts`) covering nine locales with automatic English fallbacks.
 - **Productivity Surface** – dashboards for projects, kanban, meetings, files, wiki, diagrams, community discussions, and AI tools.
-- **Client-Side Auth Utilities** – mock authentication and user preference helpers ready to swap for a real provider.
 - **Theme & Layout Framework** – dark/light theme support, sidebar navigation, reusable UI primitives, and responsive Tailwind styling.
 - **Automation Scripts** – translation restoration and encoding-fix utilities for keeping locale data consistent.
 
@@ -29,6 +32,10 @@
 | --- | --- |
 | Framework | [Next.js 16](https://nextjs.org/) with the App Router |
 | Language | [TypeScript 5](https://www.typescriptlang.org/) |
+| Database | [Supabase](https://supabase.com/) PostgreSQL with RLS policies |
+| Authentication | JWT sessions, bcrypt password hashing, TOTP-based 2FA |
+| Email | Nodemailer with SMTP (Gmail, SendGrid, Mailgun, SES) |
+| Security | Rate limiting, session management, activity logging |
 | Styling | Tailwind CSS + custom utility components |
 | Package Manager | pnpm |
 | Tooling | ESLint, Prettier, PostCSS |
@@ -41,15 +48,34 @@
 ```text
 lab68dev-platform/
 ├── app/                      # Route groups and feature areas
-│   ├── api/chat/route.ts     # Edge-friendly chat endpoint
+│   ├── api/
+│   │   ├── chat/route.ts     # Edge-friendly chat endpoint
+│   │   └── staff/            # Staff authentication APIs
+│   │       ├── signup/route.ts    # Staff registration with rate limiting
+│   │       ├── login/route.ts     # JWT authentication with 2FA
+│   │       └── 2fa/route.ts       # Two-Factor Auth management
 │   ├── dashboard/            # Authenticated workspace experience
-│   ├── login/, signup/       # Auth flows (mocked)
+│   ├── staff/                # Staff portal
+│   │   ├── login/, signup/   # Staff authentication flows
+│   │   └── dashboard/        # Staff management dashboard
+│   ├── login/, signup/       # User auth flows
 │   └── layout.tsx            # Root layout with theme provider
 ├── components/               # Reusable UI atoms/molecules (sidebar, header, etc.)
-├── lib/                      # Domain logic (auth, RBAC, i18n, team utilities)
+├── lib/                      # Domain logic
+│   ├── staff-security.ts     # Security infrastructure (bcrypt, JWT, 2FA)
+│   ├── staff-email.ts        # Email notification system
+│   ├── auth.ts, team.ts      # RBAC and user management
+│   └── i18n.ts               # Internationalization
+├── docs/                     # Comprehensive documentation
+│   ├── SECURITY_QUICKSTART.md     # 5-minute security setup
+│   ├── SECURITY_IMPLEMENTATION.md # Technical guide
+│   ├── SECURITY_COMPLETE.md       # Complete summary
+│   ├── STAFF_PORTAL.md            # Staff portal guide
+│   └── SUPABASE_SETUP.md          # Database setup
 ├── public/                   # Static assets
-├── styles/                   # Tailwind extension layer
-├── scripts/                  # Translation repair helpers (see root *.js files)
+├── scripts/                  # Translation repair helpers
+├── supabase-staff-schema.sql # PostgreSQL database schema
+├── .env.example              # Environment variable template
 ├── next.config.mjs           # Next.js configuration
 ├── tsconfig.json             # Type checking configuration
 └── package.json              # Workspace scripts
@@ -72,6 +98,42 @@ cd lab68dev-platform
 pnpm install
 ```
 
+### Quick Setup (Security Features)
+
+**Follow the 5-minute setup guide:** See **[docs/SECURITY_QUICKSTART.md](./docs/SECURITY_QUICKSTART.md)**
+
+**Or manually configure:**
+
+1. **Generate JWT Secret:**
+
+   ```powershell
+   # PowerShell (Windows)
+   [Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))
+   
+   # Or Linux/Mac
+   openssl rand -base64 32
+   ```
+
+2. **Setup Gmail App Password:**
+   - Enable 2FA on your Google account
+   - Visit <https://myaccount.google.com/apppasswords>
+   - Create an app password for "Mail"
+
+3. **Create Supabase Project:**
+   - Sign up at <https://supabase.com>
+   - Create new project
+   - Run `supabase-staff-schema.sql` in SQL Editor
+   - Copy Project URL and Anon Key
+
+4. **Configure Environment:**
+
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local with your credentials
+   ```
+
+For detailed instructions, see **[docs/SECURITY_IMPLEMENTATION.md](./docs/SECURITY_IMPLEMENTATION.md)**.
+
 ### Development
 
 ```bash
@@ -82,21 +144,49 @@ Visit [http://localhost:3000](http://localhost:3000) while the dev server is run
 
 ### Authentication Setup
 
-This project uses **Supabase** for authentication. Follow these steps to set up:
+This project uses **Supabase** for authentication and **enterprise-grade security**:
+
+**✅ Implemented Security Features:**
+
+- 🔐 **Password Hashing:** bcrypt with 12 salt rounds
+- 🎫 **JWT Sessions:** 24-hour expiry with signed tokens
+- 📱 **Two-Factor Auth:** TOTP with QR codes and backup codes
+- 🛡️ **Rate Limiting:** 5 login attempts per 15 minutes
+- 📧 **Email Notifications:** Professional templates for all events
+- 🗄️ **Supabase Database:** PostgreSQL with RLS policies
+
+**Quick Setup:**
 
 1. **Create a Supabase project** at [https://supabase.com/dashboard](https://supabase.com/dashboard)
-2. **Get your API credentials** from Project Settings → API
-3. **Add them to `.env.local`**:
+2. **Run the database schema:** Execute `supabase-staff-schema.sql` in the SQL Editor
+3. **Configure environment variables** in `.env.local`:
 
    ```env
+   # Supabase
    NEXT_PUBLIC_SUPABASE_URL=your-project-url.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   
+   # JWT
+   JWT_SECRET=your-generated-secret-from-above
+   
+   # Email (Gmail example)
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=your-email@gmail.com
+   SMTP_PASSWORD=your-app-password
+   SMTP_FROM_EMAIL=your-email@gmail.com
+   SMTP_FROM_NAME=Lab68 Dev Platform
    ```
 
-4. **Run the database schema** by executing `supabase-schema.sql` in the SQL Editor
-5. **Restart your dev server**
+4. **Restart your dev server:** `pnpm dev`
 
-For detailed setup instructions, see **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**.
+**Default Admin Account:**
+
+- Email: `admin@lab68dev.com`
+- Password: `Admin@123456`
+- ⚠️ **Change this immediately in production!**
+
+For detailed setup instructions, see **[docs/SECURITY_QUICKSTART.md](./docs/SECURITY_QUICKSTART.md)**.
 
 ### Production Build
 
@@ -113,6 +203,8 @@ The build step runs Next.js static analysis, type-checking, and route bundling.
 
 | Area | Summary |
 | --- | --- |
+| **🔐 Security** | Enterprise-grade security with bcrypt password hashing (12 rounds), JWT sessions (24h expiry), TOTP-based 2FA with QR codes, rate limiting (5 login/15min), professional email notifications (6 templates), and Supabase PostgreSQL with RLS policies. |
+| **👥 Staff Portal** | Dedicated staff authentication system with sign-up approval workflow, staff dashboard, user management, analytics, activity logging, and role-based access control (admin/support/moderator). |
 | **Dashboard Overview** | Snapshot of active projects, AI assistant, system metrics, and notifications. |
 | **Projects & Kanban** | Create projects, assign collaborators, manage roles, and move cards across kanban columns. |
 | **Team Management** | `lib/team.ts` exposes helpers for permissions, activity logging, and "time ago" formatting. |

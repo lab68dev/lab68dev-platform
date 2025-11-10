@@ -10,6 +10,7 @@ import Link from "next/link"
 import { signIn, checkRememberMe } from "@/lib/auth"
 import { getTranslations, getUserLanguage } from "@/lib/i18n"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { Eye, EyeOff } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [t, setT] = useState(getTranslations("en"))
 
   useEffect(() => {
@@ -80,14 +82,24 @@ export default function LoginPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{t.auth.password}</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-card border-border"
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-card border-border pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="flex items-center space-x-2">
               <input

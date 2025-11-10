@@ -21,6 +21,7 @@ import {
   Gamepad2,
   Menu,
   X,
+  Headphones,
 } from "lucide-react"
 import { getCurrentUser, signOut } from "@/lib/auth"
 import { useEffect, useState } from "react"
@@ -42,6 +43,7 @@ const navItems = [
   { href: "/dashboard/community", label: "Community", icon: MessageSquare },
   { href: "/dashboard/entertainment", label: "Entertainment", icon: Gamepad2 },
   { href: "/dashboard/ai-tools", label: "AI Tools", icon: Sparkles },
+  { href: "/dashboard/support", label: "Live Support", icon: Headphones },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ]
 

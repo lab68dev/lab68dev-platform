@@ -10,6 +10,7 @@ import Link from "next/link"
 import { signUp } from "@/lib/auth"
 import { getTranslations, getUserLanguage } from "@/lib/i18n"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { Eye, EyeOff } from "lucide-react"
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -18,6 +19,8 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [t, setT] = useState(getTranslations("en"))
 
   useEffect(() => {
@@ -98,28 +101,48 @@ export default function SignUpPage() {
 
             <div className="space-y-2">
               <Label htmlFor="password">{t.auth.password}</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Min. 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-card border-border"
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Min. 6 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-card border-border pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm {t.auth.password}</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Re-enter password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="bg-card border-border"
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Re-enter password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="bg-card border-border pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             <Button type="submit" className="w-full">
