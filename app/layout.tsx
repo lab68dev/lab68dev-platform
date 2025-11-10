@@ -44,7 +44,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${jetbrainsMono.className} font-mono antialiased bg-background text-foreground`}>
+      <body 
+        className={`${jetbrainsMono.className} font-mono antialiased bg-background text-foreground`}
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>
