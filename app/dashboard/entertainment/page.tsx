@@ -47,6 +47,14 @@ const games: Game[] = [
     href: "/dashboard/entertainment/word-scramble"
   },
   {
+    id: "typing-game",
+    name: "Typing Speed Test",
+    description: "Test your typing speed & accuracy",
+    category: "casual",
+    icon: "typing-game",
+    href: "/dashboard/entertainment/typing-game"
+  },
+  {
     id: "snake",
     name: "Snake",
     description: "Classic snake game",
@@ -143,6 +151,34 @@ function GameIcon({ type }: { type: string }) {
             <rect x="25" y="80" width="4" height="8" fill="white"/>
             <rect x="35" y="80" width="4" height="8" fill="white"/>
             <rect x="45" y="80" width="4" height="8" fill="white"/>
+          </svg>
+        </div>
+      )
+    case "typing-game":
+      return (
+        <div className="w-24 h-24 bg-gradient-to-br from-cyan-500 to-cyan-700 rounded-lg flex items-center justify-center shadow-lg">
+          <svg viewBox="0 0 100 100" className="w-20 h-20">
+            <rect x="10" y="30" width="80" height="45" rx="3" fill="rgba(0,0,0,0.3)" stroke="white" strokeWidth="2"/>
+            {/* Keys */}
+            <rect x="15" y="40" width="8" height="8" rx="1" fill="white"/>
+            <rect x="25" y="40" width="8" height="8" rx="1" fill="white"/>
+            <rect x="35" y="40" width="8" height="8" rx="1" fill="white"/>
+            <rect x="45" y="40" width="8" height="8" rx="1" fill="white"/>
+            <rect x="55" y="40" width="8" height="8" rx="1" fill="white"/>
+            <rect x="65" y="40" width="8" height="8" rx="1" fill="white"/>
+            <rect x="75" y="40" width="8" height="8" rx="1" fill="white"/>
+            <rect x="18" y="50" width="8" height="8" rx="1" fill="white"/>
+            <rect x="28" y="50" width="8" height="8" rx="1" fill="white"/>
+            <rect x="38" y="50" width="8" height="8" rx="1" fill="white"/>
+            <rect x="48" y="50" width="8" height="8" rx="1" fill="#00FF99"/>
+            <rect x="58" y="50" width="8" height="8" rx="1" fill="white"/>
+            <rect x="68" y="50" width="8" height="8" rx="1" fill="white"/>
+            <rect x="25" y="60" width="20" height="8" rx="1" fill="white"/>
+            <rect x="55" y="60" width="20" height="8" rx="1" fill="white"/>
+            {/* Speed lines */}
+            <line x1="85" y1="35" x2="92" y2="35" stroke="#00FF99" strokeWidth="2"/>
+            <line x1="85" y1="45" x2="95" y2="45" stroke="#00FF99" strokeWidth="2"/>
+            <line x1="85" y1="55" x2="92" y2="55" stroke="#00FF99" strokeWidth="2"/>
           </svg>
         </div>
       )
