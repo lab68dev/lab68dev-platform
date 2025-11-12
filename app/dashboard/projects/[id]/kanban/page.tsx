@@ -127,6 +127,10 @@ export default function KanbanPage() {
   const handleOpenTaskModal = (status: Task['status'], task?: Task) => {
     if (task) {
       setEditingTask(task)
+      // Convert labels to string[] if it's Label[]
+      const labelIds = Array.isArray(task.labels) 
+        ? task.labels.map(l => typeof l === 'string' ? l : l.id)
+        : []
       setTaskForm({
         title: task.title,
         description: task.description,
@@ -134,7 +138,7 @@ export default function KanbanPage() {
         dueDate: task.dueDate || "",
         priority: task.priority,
         storyPoints: task.storyPoints || 0,
-        labels: task.labels,
+        labels: labelIds,
       })
     } else {
       setEditingTask(null)
@@ -406,7 +410,11 @@ export default function KanbanPage() {
               >
                 <div className="space-y-2">
                   {columnTasks.map((task) => {
-                    const taskLabels = labels.filter(l => task.labels.includes(l.id))
+                    // Convert labels to string[] for filtering
+                    const labelIds = Array.isArray(task.labels) 
+                      ? task.labels.map(l => typeof l === 'string' ? l : l.id)
+                      : []
+                    const taskLabels = labels.filter(l => labelIds.includes(l.id))
                     
                     return (
                       <Card

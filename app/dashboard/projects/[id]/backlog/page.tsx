@@ -108,6 +108,10 @@ export default function BacklogPage() {
   const handleOpenTaskModal = (task?: Task) => {
     if (task) {
       setEditingTask(task)
+      // Convert labels to string[] if it's Label[]
+      const labelIds = Array.isArray(task.labels) 
+        ? task.labels.map(l => typeof l === 'string' ? l : l.id)
+        : []
       setTaskForm({
         title: task.title,
         description: task.description,
@@ -115,7 +119,7 @@ export default function BacklogPage() {
         dueDate: task.dueDate || "",
         priority: task.priority,
         storyPoints: task.storyPoints || 0,
-        labels: task.labels,
+        labels: labelIds,
       })
     } else {
       setEditingTask(null)
@@ -282,7 +286,11 @@ export default function BacklogPage() {
               <h3 className="font-semibold text-primary">{activeSprint.name}</h3>
               <p className="text-sm text-muted-foreground">{activeSprint.goal}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                {new Date(activeSprint.startDate).toLocaleDateString()} - {new Date(activeSprint.endDate).toLocaleDateString()}
+                {activeSprint.startDate && activeSprint.endDate && (
+                  <>
+                    {new Date(activeSprint.startDate).toLocaleDateString()} - {new Date(activeSprint.endDate).toLocaleDateString()}
+                  </>
+                )}
               </p>
             </div>
             <Link href={`/dashboard/projects/${projectId}/sprint`}>
@@ -311,7 +319,11 @@ export default function BacklogPage() {
         ) : (
           <div className="space-y-2">
             {backlogTasks.map((task) => {
-              const taskLabels = labels.filter(l => task.labels.includes(l.id))
+              // Convert labels to string[] for filtering
+              const labelIds = Array.isArray(task.labels) 
+                ? task.labels.map(l => typeof l === 'string' ? l : l.id)
+                : []
+              const taskLabels = labels.filter(l => labelIds.includes(l.id))
 
               return (
                 <Card key={task.id} className="p-4 border-border bg-card">
