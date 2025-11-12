@@ -18,8 +18,14 @@ export function LanguageSwitcher() {
     setUserLanguage(lang)
     setCurrentLang(lang)
     setIsOpen(false)
-    // Reload to apply language changes
-    window.location.reload()
+    // Notify other parts of the app in the same window to update without a full reload
+    try {
+      const evt = new CustomEvent("lab68_language_change", { detail: { lang } })
+      window.dispatchEvent(evt)
+    } catch (e) {
+      // fallback to reload if CustomEvent isn't available
+      window.location.reload()
+    }
   }
 
   return (

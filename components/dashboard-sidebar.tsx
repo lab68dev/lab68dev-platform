@@ -27,32 +27,36 @@ import { getCurrentUser, signOut } from "@/lib/auth"
 import { useEffect, useState } from "react"
 import type { User } from "@/lib/auth"
 import { NotificationsPanel } from "./notifications-panel"
+import { useLanguage } from "@/lib/i18n"
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
-  { href: "/dashboard/collaborators", label: "Collaborators", icon: Users },
-  { href: "/dashboard/chat", label: "Chat", icon: MessageCircle },
-  { href: "/dashboard/whiteboard", label: "Whiteboard", icon: Palette },
-  { href: "/dashboard/todo", label: "To Do", icon: CheckSquare },
-  { href: "/dashboard/meeting", label: "Meeting", icon: Calendar },
-  { href: "/dashboard/planning", label: "Planning", icon: ClipboardList },
-  { href: "/dashboard/diagrams", label: "Flow & Diagrams", icon: Workflow },
-  { href: "/dashboard/files", label: "Files", icon: FileText },
-  { href: "/dashboard/wiki", label: "Knowledge Base", icon: BookOpen },
-  { href: "/dashboard/community", label: "Community", icon: MessageSquare },
-  { href: "/dashboard/entertainment", label: "Entertainment", icon: Gamepad2 },
-  { href: "/dashboard/ai-tools", label: "AI Tools", icon: Sparkles },
-  { href: "/dashboard/support", label: "Live Support", icon: Headphones },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-]
+// navItems will be created inside the component so labels come from translations
 
 export function DashboardSidebar() {
+  const { t } = useLanguage()
   const pathname = usePathname()
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const navItems = [
+    { href: "/dashboard", label: t.nav.dashboard || "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard/projects", label: t.nav.projects || "Projects", icon: FolderKanban },
+    { href: "/dashboard/collaborators", label: t.projects?.collaborators || "Collaborators", icon: Users },
+    { href: "/dashboard/chat", label: t.chat?.title || "Chat", icon: MessageCircle },
+    { href: "/dashboard/whiteboard", label: t.whiteboard?.title || "Whiteboard", icon: Palette },
+    { href: "/dashboard/todo", label: t.todo?.title || "To Do", icon: CheckSquare },
+    { href: "/dashboard/meeting", label: t.meeting?.title || "Meeting", icon: Calendar },
+    { href: "/dashboard/planning", label: t.planning?.title || "Planning", icon: ClipboardList },
+    { href: "/dashboard/diagrams", label: t.diagrams?.title || "Flow & Diagrams", icon: Workflow },
+    { href: "/dashboard/files", label: t.files?.title || "Files", icon: FileText },
+    { href: "/dashboard/wiki", label: t.wiki?.title || "Knowledge Base", icon: BookOpen },
+    { href: "/dashboard/community", label: t.community?.title || "Community", icon: MessageSquare },
+    { href: "/dashboard/entertainment", label: t.landing?.community?.title || "Entertainment", icon: Gamepad2 },
+    { href: "/dashboard/ai-tools", label: t.nav.aiTools || "AI Tools", icon: Sparkles },
+    { href: "/dashboard/support", label: "Live Support", icon: Headphones },
+    { href: "/dashboard/settings", label: t.nav.settings || "Settings", icon: Settings },
+  ]
 
   useEffect(() => {
     const currentUser = getCurrentUser()
@@ -197,7 +201,7 @@ export function DashboardSidebar() {
                 <div className="p-1.5 border border-border group-hover:border-red-500 transition-colors">
                   <LogOut className="h-4 w-4 group-hover:text-red-500 transition-colors" />
                 </div>
-                <span>Log Out</span>
+                <span>{t.nav.signOut || "Log Out"}</span>
               </div>
             </button>
           </div>

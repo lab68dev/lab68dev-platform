@@ -3795,8 +3795,25 @@ export function useLanguage() {
       }
     }
 
+    // Listen for in-window language change events (dispatched by LanguageSwitcher)
+    const handleCustomEvent = (e: Event) => {
+      try {
+        // support CustomEvent with detail
+        const ce = e as CustomEvent
+        const newLang = (ce?.detail?.lang as Language) || getUserLanguage()
+        setLanguage(newLang)
+        setTranslations(getTranslations(newLang))
+      } catch (err) {
+        // ignore
+      }
+    }
+
     window.addEventListener("storage", handleStorageChange)
-    return () => window.removeEventListener("storage", handleStorageChange)
+    window.addEventListener("lab68_language_change", handleCustomEvent)
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener("lab68_language_change", handleCustomEvent)
+    }
   }, [])
 
   return {
