@@ -19,10 +19,17 @@ import {
   deleteLabel,
   getTasksByStatus,
   reorderTasks,
+  fetchIssuesAPI,
+  createIssueAPI,
+  updateIssueAPI,
+  deleteIssueAPI,
+  fetchLabelsAPI,
+  createLabelAPI,
   type Task,
   type Label,
   DEFAULT_LABEL_COLORS,
 } from "@/lib/project-management"
+import { IssueDetailModal } from "@/components/issue-detail-modal"
 import Link from "next/link"
 
 interface KanbanColumn {
@@ -49,6 +56,8 @@ export default function KanbanPage() {
   const [labels, setLabels] = useState<Label[]>([])
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [showLabelModal, setShowLabelModal] = useState(false)
+  const [showDetailModal, setShowDetailModal] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [editingLabel, setEditingLabel] = useState<Label | null>(null)
   const [selectedColumnStatus, setSelectedColumnStatus] = useState<Task['status']>('todo')
@@ -72,7 +81,12 @@ export default function KanbanPage() {
 
   const [language, setLanguage] = useState<Language>(getUserLanguage())
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const t = getTranslations(language)
+
+  // Check if we should use API backend
+  const useAPI = typeof window !== 'undefined' && 
+    process.env.NEXT_PUBLIC_USE_SUPABASE_BACKEND === 'true'
 
   const loadProject = useCallback(async () => {
     const user = getCurrentUser()
@@ -95,23 +109,38 @@ export default function KanbanPage() {
     }
   }, [projectId, router])
 
-  const loadKanban = useCallback(() => {
+  const loadKanban = useCallback(async () => {
     try {
       setLoading(true)
-      const allTasks = getTasks(projectId)
-      const allLabels = getLabels(projectId)
+      setError(null)
       
-      // Filter out backlog tasks (they're shown in backlog view)
-      const kanbanTasks = allTasks.filter(t => t.status !== 'backlog')
-      
-      setTasks(kanbanTasks)
-      setLabels(allLabels)
+      if (useAPI) {
+        // Use API backend
+        const [allTasks, allLabels] = await Promise.all([
+          fetchIssuesAPI(projectId, { status: 'todo,in-progress,review,done' }),
+          fetchLabelsAPI(projectId),
+        ])
+        
+        setTasks(allTasks)
+        setLabels(allLabels)
+      } else {
+        // Use localStorage fallback
+        const allTasks = getTasks(projectId)
+        const allLabels = getLabels(projectId)
+        
+        // Filter out backlog tasks (they're shown in backlog view)
+        const kanbanTasks = allTasks.filter(t => t.status !== 'backlog')
+        
+        setTasks(kanbanTasks)
+        setLabels(allLabels)
+      }
     } catch (err) {
       console.error('Failed to load kanban:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load kanban data')
     } finally {
       setLoading(false)
     }
-  }, [projectId])
+  }, [projectId, useAPI])
 
   useEffect(() => {
     loadProject()
@@ -170,45 +199,101 @@ export default function KanbanPage() {
     })
   }
 
-  const handleSaveTask = () => {
+  const handleSaveTask = async () => {
     if (!taskForm.title.trim()) return
 
     try {
-      if (editingTask) {
-        updateTask(projectId, editingTask.id, {
-          title: taskForm.title,
-          description: taskForm.description,
-          assignee: taskForm.assignee || undefined,
-          dueDate: taskForm.dueDate || undefined,
-          priority: taskForm.priority,
-          storyPoints: taskForm.storyPoints,
-          labels: taskForm.labels,
-        })
+      setLoading(true)
+      setError(null)
+      
+      if (useAPI) {
+        // Use API backend
+        if (editingTask) {
+          await updateIssueAPI(projectId, editingTask.id, {
+            title: taskForm.title,
+            description: taskForm.description,
+            assignee: taskForm.assignee || undefined,
+            assignee_id: taskForm.assignee || undefined,
+            dueDate: taskForm.dueDate || undefined,
+            due_date: taskForm.dueDate || undefined,
+            priority: taskForm.priority,
+            storyPoints: taskForm.storyPoints,
+            story_points: taskForm.storyPoints,
+            labels: taskForm.labels,
+          })
+        } else {
+          await createIssueAPI(projectId, {
+            title: taskForm.title,
+            description: taskForm.description,
+            status: selectedColumnStatus,
+            priority: taskForm.priority,
+            assignee: taskForm.assignee || undefined,
+            assignee_id: taskForm.assignee || undefined,
+            dueDate: taskForm.dueDate || undefined,
+            due_date: taskForm.dueDate || undefined,
+            labels: taskForm.labels,
+            storyPoints: taskForm.storyPoints,
+            story_points: taskForm.storyPoints,
+            projectId,
+            project_id: projectId,
+          })
+        }
       } else {
-        createTask(projectId, {
-          title: taskForm.title,
-          description: taskForm.description,
-          status: selectedColumnStatus,
-          priority: taskForm.priority,
-          assignee: taskForm.assignee || undefined,
-          dueDate: taskForm.dueDate || undefined,
-          labels: taskForm.labels,
-          storyPoints: taskForm.storyPoints,
-          projectId,
-        })
+        // Use localStorage fallback
+        if (editingTask) {
+          updateTask(projectId, editingTask.id, {
+            title: taskForm.title,
+            description: taskForm.description,
+            assignee: taskForm.assignee || undefined,
+            dueDate: taskForm.dueDate || undefined,
+            priority: taskForm.priority,
+            storyPoints: taskForm.storyPoints,
+            labels: taskForm.labels,
+          })
+        } else {
+          createTask(projectId, {
+            title: taskForm.title,
+            description: taskForm.description,
+            status: selectedColumnStatus,
+            priority: taskForm.priority,
+            assignee: taskForm.assignee || undefined,
+            dueDate: taskForm.dueDate || undefined,
+            labels: taskForm.labels,
+            storyPoints: taskForm.storyPoints,
+            projectId,
+          })
+        }
       }
       
-      loadKanban()
+      await loadKanban()
       handleCloseTaskModal()
     } catch (err) {
       console.error('Failed to save task:', err)
+      setError(err instanceof Error ? err.message : 'Failed to save task')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleDeleteTask = (taskId: string) => {
+  const handleDeleteTask = async (taskId: string) => {
     if (confirm('Are you sure you want to delete this task?')) {
-      deleteTask(projectId, taskId)
-      loadKanban()
+      try {
+        setLoading(true)
+        setError(null)
+        
+        if (useAPI) {
+          await deleteIssueAPI(projectId, taskId)
+        } else {
+          deleteTask(projectId, taskId)
+        }
+        
+        await loadKanban()
+      } catch (err) {
+        console.error('Failed to delete task:', err)
+        setError(err instanceof Error ? err.message : 'Failed to delete task')
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -239,31 +324,79 @@ export default function KanbanPage() {
     })
   }
 
-  const handleSaveLabel = () => {
+  const handleSaveLabel = async () => {
     if (!labelForm.name.trim()) return
 
     try {
-      if (editingLabel) {
-        updateLabel(projectId, editingLabel.id, {
-          name: labelForm.name,
-          color: labelForm.color,
-        })
+      setLoading(true)
+      setError(null)
+      
+      if (useAPI) {
+        // Use API backend
+        if (editingLabel) {
+          // Note: Update label API not implemented yet, will need to add updateLabelAPI
+          console.warn('Update label via API not yet implemented')
+          updateLabel(projectId, editingLabel.id, {
+            name: labelForm.name,
+            color: labelForm.color,
+          })
+        } else {
+          await createLabelAPI(projectId, labelForm.name, labelForm.color)
+        }
+        
+        const allLabels = await fetchLabelsAPI(projectId)
+        setLabels(allLabels)
       } else {
-        createLabel(projectId, labelForm.name, labelForm.color)
+        // Use localStorage fallback
+        if (editingLabel) {
+          updateLabel(projectId, editingLabel.id, {
+            name: labelForm.name,
+            color: labelForm.color,
+          })
+        } else {
+          createLabel(projectId, labelForm.name, labelForm.color)
+        }
+        
+        setLabels(getLabels(projectId))
       }
       
-      setLabels(getLabels(projectId))
       handleCloseLabelModal()
     } catch (err) {
       console.error('Failed to save label:', err)
+      setError(err instanceof Error ? err.message : 'Failed to save label')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleDeleteLabel = (labelId: string) => {
+  const handleDeleteLabel = async (labelId: string) => {
     if (confirm('Are you sure you want to delete this label?')) {
-      deleteLabel(projectId, labelId)
-      setLabels(getLabels(projectId))
-      loadKanban()
+      try {
+        setLoading(true)
+        setError(null)
+        
+        if (useAPI) {
+          // Note: Delete label API not implemented yet, will need to add deleteLabelAPI
+          console.warn('Delete label via API not yet implemented')
+          deleteLabel(projectId, labelId)
+        } else {
+          deleteLabel(projectId, labelId)
+        }
+        
+        if (useAPI) {
+          const allLabels = await fetchLabelsAPI(projectId)
+          setLabels(allLabels)
+        } else {
+          setLabels(getLabels(projectId))
+        }
+        
+        await loadKanban()
+      } catch (err) {
+        console.error('Failed to delete label:', err)
+        setError(err instanceof Error ? err.message : 'Failed to delete label')
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -281,15 +414,30 @@ export default function KanbanPage() {
     setDragOverColumn(null)
   }
 
-  const handleDrop = (e: React.DragEvent, targetStatus: Task['status']) => {
+  const handleDrop = async (e: React.DragEvent, targetStatus: Task['status']) => {
     e.preventDefault()
     setDragOverColumn(null)
 
     if (!draggedTask) return
 
     if (draggedTask.status !== targetStatus) {
-      updateTask(projectId, draggedTask.id, { status: targetStatus })
-      loadKanban()
+      try {
+        setLoading(true)
+        setError(null)
+        
+        if (useAPI) {
+          await updateIssueAPI(projectId, draggedTask.id, { status: targetStatus })
+        } else {
+          updateTask(projectId, draggedTask.id, { status: targetStatus })
+        }
+        
+        await loadKanban()
+      } catch (err) {
+        console.error('Failed to update task status:', err)
+        setError(err instanceof Error ? err.message : 'Failed to update task status')
+      } finally {
+        setLoading(false)
+      }
     }
 
     setDraggedTask(null)
@@ -348,8 +496,10 @@ export default function KanbanPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">{project.title}</h1>
-            <p className="text-sm text-muted-foreground">Kanban Board</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">{project?.title || 'Loading...'}</h1>
+            <p className="text-sm text-muted-foreground">
+              Kanban Board {useAPI && <span className="text-xs text-green-600">(Supabase)</span>}
+            </p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -358,6 +508,7 @@ export default function KanbanPage() {
             size="sm"
             onClick={() => handleOpenLabelModal()}
             className="gap-2"
+            disabled={loading}
           >
             <Tag className="h-4 w-4" />
             Manage Labels
@@ -370,9 +521,31 @@ export default function KanbanPage() {
         </div>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+          <button 
+            onClick={() => setError(null)} 
+            className="text-red-600 dark:text-red-400 text-xs underline mt-2"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && !tasks.length && (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading kanban board...</p>
+        </div>
+      )}
+
       {/* Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {KANBAN_COLUMNS.map((column) => {
+      {!loading || tasks.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {KANBAN_COLUMNS.map((column) => {
           const columnTasks = getTasksByColumn(column.status)
           const isDragOver = dragOverColumn === column.id
 
@@ -421,7 +594,11 @@ export default function KanbanPage() {
                         key={task.id}
                         draggable
                         onDragStart={() => handleDragStart(task)}
-                        className="p-3 cursor-move hover:shadow-md transition-shadow border-border bg-card"
+                        onClick={() => {
+                          setSelectedTask(task)
+                          setShowDetailModal(true)
+                        }}
+                        className="p-3 cursor-pointer hover:shadow-md transition-shadow border-border bg-card"
                       >
                         <div className="space-y-2">
                           {/* Task Header */}
@@ -434,7 +611,10 @@ export default function KanbanPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleOpenTaskModal(column.status, task)}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleOpenTaskModal(column.status, task)
+                                }}
                                 className="h-6 w-6 p-0"
                               >
                                 <Pencil className="h-3 w-3" />
@@ -442,7 +622,10 @@ export default function KanbanPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleDeleteTask(task.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteTask(task.id)
+                                }}
                                 className="h-6 w-6 p-0 text-destructive"
                               >
                                 <Trash2 className="h-3 w-3" />
@@ -504,6 +687,7 @@ export default function KanbanPage() {
           )
         })}
       </div>
+      ) : null}
 
       {/* Task Modal */}
       {showTaskModal && (
@@ -751,6 +935,53 @@ export default function KanbanPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Issue Detail Modal */}
+      {selectedTask && (
+        <IssueDetailModal
+          issue={selectedTask}
+          projectId={projectId}
+          labels={labels}
+          isOpen={showDetailModal}
+          onClose={() => {
+            setShowDetailModal(false)
+            setSelectedTask(null)
+          }}
+          onUpdate={async (updates) => {
+            // Update the task via API or localStorage
+            if (useAPI) {
+              await updateIssueAPI(projectId, selectedTask.id, {
+                title: updates.title,
+                description: updates.description,
+                status: updates.status || selectedTask.status,
+                priority: updates.priority,
+                assignee: updates.assignee,
+                due_date: updates.dueDate,
+                story_points: updates.storyPoints,
+              })
+            } else {
+              updateTask(projectId, selectedTask.id, {
+                ...selectedTask,
+                ...updates,
+              })
+            }
+            await loadKanban()
+            setShowDetailModal(false)
+            setSelectedTask(null)
+          }}
+          onDelete={async () => {
+            if (useAPI) {
+              await deleteIssueAPI(projectId, selectedTask.id)
+            } else {
+              deleteTask(projectId, selectedTask.id)
+            }
+            await loadKanban()
+            setShowDetailModal(false)
+            setSelectedTask(null)
+          }}
+          useAPI={useAPI}
+        />
       )}
     </div>
   )
