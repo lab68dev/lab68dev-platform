@@ -14,7 +14,7 @@
 
 ## Highlights
 
-- **Enterprise-Grade Security** 🔐 – bcrypt password hashing, JWT sessions, Two-Factor Authentication (2FA), rate limiting, and automated email notifications.
+- **Enterprise-Grade Security** – bcrypt password hashing, JWT sessions, Two-Factor Authentication (2FA), rate limiting, and automated email notifications.
 - **Role-Based Collaboration** – project-level roles (owner, admin, editor, viewer) with granular permission checks and activity logging.
 - **Staff Management Portal** – dedicated staff authentication, user management, support queue, analytics dashboard, and approval workflows.
 - **Live Customer Support** – real-time chat widget with staff dashboard for 24/7 support management.
@@ -146,14 +146,14 @@ Visit [http://localhost:3000](http://localhost:3000) while the dev server is run
 
 This project uses **Supabase** for authentication and **enterprise-grade security**:
 
-**✅ Implemented Security Features:**
+**Implemented Security Features:**
 
-- 🔐 **Password Hashing:** bcrypt with 12 salt rounds
-- 🎫 **JWT Sessions:** 24-hour expiry with signed tokens
-- 📱 **Two-Factor Auth:** TOTP with QR codes and backup codes
-- 🛡️ **Rate Limiting:** 5 login attempts per 15 minutes
-- 📧 **Email Notifications:** Professional templates for all events
-- 🗄️ **Supabase Database:** PostgreSQL with RLS policies
+- **Password Hashing:** bcrypt with 12 salt rounds
+- **JWT Sessions:** 24-hour expiry with signed tokens
+- **Two-Factor Auth:** TOTP with QR codes and backup codes
+- **Rate Limiting:** 5 login attempts per 15 minutes
+- **Email Notifications:** Professional templates for all events
+- **Supabase Database:** PostgreSQL with RLS policies
 
 **Quick Setup:**
 
@@ -184,7 +184,7 @@ This project uses **Supabase** for authentication and **enterprise-grade securit
 
 - Email: `admin@lab68dev.com`
 - Password: `Admin@123456`
-- ⚠️ **Change this immediately in production!**
+- **Change this immediately in production!**
 
 For detailed setup instructions, see **[docs/SECURITY_QUICKSTART.md](./docs/SECURITY_QUICKSTART.md)**.
 
@@ -203,8 +203,8 @@ The build step runs Next.js static analysis, type-checking, and route bundling.
 
 | Area | Summary |
 | --- | --- |
-| **🔐 Security** | Enterprise-grade security with bcrypt password hashing (12 rounds), JWT sessions (24h expiry), TOTP-based 2FA with QR codes, rate limiting (5 login/15min), professional email notifications (6 templates), and Supabase PostgreSQL with RLS policies. |
-| **👥 Staff Portal** | Dedicated staff authentication system with sign-up approval workflow, staff dashboard, user management, analytics, activity logging, and role-based access control (admin/support/moderator). |
+| **Security** | Enterprise-grade security with bcrypt password hashing (12 rounds), JWT sessions (24h expiry), TOTP-based 2FA with QR codes, rate limiting (5 login/15min), professional email notifications (6 templates), and Supabase PostgreSQL with RLS policies. |
+| **Staff Portal** | Dedicated staff authentication system with sign-up approval workflow, staff dashboard, user management, analytics, activity logging, and role-based access control (admin/support/moderator). |
 | **Dashboard Overview** | Snapshot of active projects, AI assistant, system metrics, and notifications. |
 | **Projects & Kanban** | Create projects, assign collaborators, manage roles, and move cards across kanban columns. |
 | **Team Management** | `lib/team.ts` exposes helpers for permissions, activity logging, and "time ago" formatting. |
