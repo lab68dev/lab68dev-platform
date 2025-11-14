@@ -2,7 +2,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.1.0-blue.svg)](https://www.typescriptlang.org/)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/lab68dev/lab68dev-platform)
 [![Version](https://img.shields.io/github/package-json/v/F4P1E/lab68dev-platform?style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform/issues)
