@@ -2,31 +2,31 @@
 
 # **Lab68 Dev Platform**
 
-<!-- Badges -->
+<!-- Classic badges (no for-the-badge) -->
 <a href="./LICENSE">
-  <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" />
 </a>
 <a href="https://nextjs.org/">
-  <img src="https://img.shields.io/badge/Next.js-16-black.svg?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Next.js-16-black.svg" />
 </a>
 <a href="https://www.typescriptlang.org/">
-  <img src="https://img.shields.io/badge/TypeScript-5.9.3-blue.svg?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/TypeScript-5.9.3-blue.svg" />
 </a>
-<img src="https://img.shields.io/github/commit-activity/w/lab68dev/lab68dev-platform?style=for-the-badge" />
+<img src="https://img.shields.io/github/commit-activity/w/lab68dev/lab68dev-platform" />
 <a href="https://github.com/F4P1E/lab68dev-platform">
-  <img src="https://img.shields.io/github/package-json/v/F4P1E/lab68dev-platform?style=for-the-badge" />
+  <img src="https://img.shields.io/github/package-json/v/F4P1E/lab68dev-platform" />
 </a>
 <a href="https://github.com/F4P1E/lab68dev-platform/issues">
-  <img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg" />
 </a>
 <a href="https://www.buymeacoffee.com/lab68dev">
-  <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-yellow.svg?style=for-the-badge&logo=buymeacoffee" />
+  <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-yellow.svg?logo=buymeacoffee" />
 </a>
 
 ---
 
 **Lab68 Dev Platform** is a comprehensive collaborative product development workspace with integrated staff management.  
-It provides dashboards for planning, documentation, meetings, AI-assisted workflows, role-aware access controls, live customer support, and a complete staff portal for administration—built with **Next.js App Router**, **TypeScript**, and a modular component system.
+It provides dashboards for planning, documentation, meetings, AI-assisted workflows, role-aware access controls, live customer support, and a complete staff portal — built with **Next.js App Router**, **TypeScript**, and a modular component system.
 
 </div>
 
