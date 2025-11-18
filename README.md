@@ -1,14 +1,34 @@
-# Lab68 Dev Platform
+<div align="center">
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/lab68dev/lab68dev-platform)
-[![Version](https://img.shields.io/github/package-json/v/F4P1E/lab68dev-platform?style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform)
-[![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge)](https://github.com/F4P1E/lab68dev-platform/issues)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-yellow.svg?style=for-the-badge&logo=buymeacoffee)](https://www.buymeacoffee.com/lab68dev)
+# **Lab68 Dev Platform**
 
-**Lab68 Dev Platform** is a comprehensive collaborative product development workspace with integrated staff management. It provides dashboards for planning, documentation, meetings, AI-assisted workflows, role-aware access controls, live customer support, and a complete staff portal for platform administration—built on top of **Next.js App Router**, **TypeScript**, and a modular component system.
+<!-- Badges -->
+<a href="./LICENSE">
+  <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge" />
+</a>
+<a href="https://nextjs.org/">
+  <img src="https://img.shields.io/badge/Next.js-16-black.svg?style=for-the-badge" />
+</a>
+<a href="https://www.typescriptlang.org/">
+  <img src="https://img.shields.io/badge/TypeScript-5.9.3-blue.svg?style=for-the-badge" />
+</a>
+<img src="https://img.shields.io/github/commit-activity/w/lab68dev/lab68dev-platform?style=for-the-badge" />
+<a href="https://github.com/F4P1E/lab68dev-platform">
+  <img src="https://img.shields.io/github/package-json/v/F4P1E/lab68dev-platform?style=for-the-badge" />
+</a>
+<a href="https://github.com/F4P1E/lab68dev-platform/issues">
+  <img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge" />
+</a>
+<a href="https://www.buymeacoffee.com/lab68dev">
+  <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-yellow.svg?style=for-the-badge&logo=buymeacoffee" />
+</a>
+
+---
+
+**Lab68 Dev Platform** is a comprehensive collaborative product development workspace with integrated staff management.  
+It provides dashboards for planning, documentation, meetings, AI-assisted workflows, role-aware access controls, live customer support, and a complete staff portal for administration—built with **Next.js App Router**, **TypeScript**, and a modular component system.
+
+</div>
 
 ---
 
