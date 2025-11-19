@@ -289,14 +289,14 @@ export default function HomePage() {
                   </p>
                 </div>
 
-                {/* Entertainment Hub */}
+                {/* Games Hub */}
                 <div className="border border-border p-6 hover:border-primary transition-all duration-300 group">
                   <div className="mb-4 text-primary">
                     <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Entertainment Hub</h3>
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Games Hub</h3>
                   <p className="text-muted-foreground">
                     Take a break with games and challenges. From Sudoku and Tetris to typing tests and brain teasers.
                   </p>

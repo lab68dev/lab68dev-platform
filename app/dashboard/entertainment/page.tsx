@@ -253,7 +253,7 @@ export default function EntertainmentPage() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Entertainment</h1>
+        <h1 className="text-4xl font-bold mb-2">Games</h1>
         <p className="text-muted-foreground">Take a break with our collection of offline games</p>
       </div>
 

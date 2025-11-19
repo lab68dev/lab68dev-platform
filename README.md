@@ -233,6 +233,7 @@ The build step runs Next.js static analysis, type-checking, and route bundling.
 | **Comments System** | Contextual collaboration on tasks, diagrams, and projects with threaded comments, mentions, and resolution tracking. |
 | **Whiteboard** | Collaborative drawing canvas with freehand pen, shapes (rectangle, circle, line), text, color picker, stroke width, fill options, undo/redo, export to PNG/SVG, and collaborator invitations. |
 | **Files Library** | Upload files from your computer (max 10MB), add external links, categorize by project/task/meeting, search and filter by type and category. |
+| **Resume Editor** | Live WYSIWYG resume builder with drag-and-drop section reordering, real-time color picker, 6 professional fonts, 3 font sizes, 5 customizable templates (Modern, Classic, Minimal, Creative, Professional with photo support), A4 paper preview (210mm × 297mm), section visibility controls, and localStorage persistence. Export-ready for PDF generation. |
 | **Meetings & Planning** | Schedule meetings, capture plans/milestones, and log progress. |
 | **Wiki & Community** | Knowledge base articles, category filtering, and community discussion threads. |
 | **AI Tools** | Scaffolding for AI-assisted workflows via the `/dashboard/ai-tools` route. |
@@ -246,6 +247,51 @@ The build step runs Next.js static analysis, type-checking, and route bundling.
 - Additional locales provide override objects; missing keys automatically fall back to English.
 - Translation maintenance scripts (e.g., `restore_translations.js`, `fix_final_issues.js`) exist for bulk fixes and encoding repair.
 - To add a new locale, extend the `Language` union and append a dictionary entry mirroring the existing structure.
+
+---
+
+## Resume Editor
+
+The **Live Resume Editor** (`/dashboard/resume`) is a professional WYSIWYG resume builder with real-time preview and extensive customization options.
+
+### Key Features
+
+- **Live Preview** – A4 paper format (210mm × 297mm) with instant updates as you type
+- **Drag-and-Drop Sections** – Reorder resume sections (Summary, Experience, Education, Skills, Certifications) by dragging
+- **Color Customization** – Primary and secondary color pickers with hex input for brand consistency
+- **Font Selection** – 6 professional fonts: Inter, Arial, Georgia, Roboto, Times New Roman, Courier New
+- **Font Sizing** – Three size presets (Small, Medium, Large) for readability control
+- **5 Professional Templates:**
+  - **Modern** – Clean design with circular photo, blue accents, and modern borders
+  - **Classic** – Traditional professional layout without photo
+  - **Minimal** – Simple and elegant with lots of whitespace
+  - **Creative** – Colorful gradient design with rounded cards and square photo
+  - **Professional** – Executive 2-column layout with sidebar and photo
+- **Section Visibility** – Show/hide sections without deleting content
+- **Photo Upload** – Add profile photos to templates that support them (Modern, Creative, Professional)
+- **Auto-save** – LocalStorage persistence to prevent data loss
+- **Sample Data** – Pre-filled professional example for quick start
+
+### Usage
+
+1. Navigate to **Dashboard → Resume Editor**
+2. Select a template from the left sidebar
+3. Customize colors and fonts using the style controls
+4. Fill in your information in the center panel
+5. Drag sections to reorder them
+6. Toggle section visibility with the eye icon
+7. Upload a photo (for compatible templates)
+8. View live changes in the A4 preview on the right
+9. Click **Save** to persist to browser storage
+10. Click **Download PDF** when ready (feature in development)
+
+### Technical Details
+
+- **Component:** `app/dashboard/resume/page.tsx`
+- **State Management:** React hooks with TypeScript strict mode
+- **Layout:** 12-column grid (2:4:6 ratio for controls:editor:preview)
+- **Responsive:** Scrollable panels with hidden scrollbars for clean UI
+- **Export Ready:** Structured for future PDF generation integration
 
 ---
 
