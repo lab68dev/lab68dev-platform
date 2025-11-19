@@ -23,6 +23,20 @@
   <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-yellow.svg?logo=buymeacoffee" />
 </a>
 
+<!-- Added Tool Badges -->
+<a href="https://github.com/">
+  <img src="https://img.shields.io/badge/GitHub-181717.svg?logo=github&logoColor=white" />
+</a>
+<a href="https://vercel.com/">
+  <img src="https://img.shields.io/badge/Vercel-000000.svg?logo=vercel&logoColor=white" />
+</a>
+<a href="https://supabase.com/">
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E.svg?logo=supabase&logoColor=white" />
+</a>
+<a href="https://jwt.io/">
+  <img src="https://img.shields.io/badge/JWT-000000.svg?logo=jsonwebtokens&logoColor=white" />
+</a>
+
 ---
 
 **Lab68 Dev Platform** is a comprehensive collaborative product development workspace with integrated staff management.  
