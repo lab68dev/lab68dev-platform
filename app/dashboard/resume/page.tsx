@@ -23,9 +23,13 @@ import {
   Type,
   EyeOff,
   Eye,
+  Loader2,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { createClient } from "@/lib/supabase"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 interface Experience {
   id: string
@@ -173,7 +177,13 @@ export default function ResumeEditorPage() {
   const [resumeData, setResumeData] = useState<ResumeData>(defaultResumeData)
   const [selectedTemplate, setSelectedTemplate] = useState<Template>('modern')
   const [draggedSection, setDraggedSection] = useState<SectionType | null>(null)
+  const [resumeTitle, setResumeTitle] = useState('My Resume')
+  const [resumeId, setResumeId] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
   const editorRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+  const supabase = createClient()
 
   const templates: { value: Template; label: string; description: string; hasPhoto: boolean }[] = [
     { value: 'modern', label: 'Modern', description: 'Clean and contemporary design', hasPhoto: true },
@@ -286,14 +296,160 @@ export default function ResumeEditorPage() {
     })
   }
 
-  const handleSave = () => {
-    localStorage.setItem('resumeData', JSON.stringify(resumeData))
-    alert('Resume saved successfully!')
+  const handleSave = async () => {
+    try {
+      setIsSaving(true)
+      
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !user) {
+        toast.error('Please login to save your resume')
+        router.push('/login')
+        return
+      }
+
+      const resumePayload = {
+        title: resumeTitle,
+        template: selectedTemplate,
+        personalInfo: resumeData.personalInfo,
+        summary: resumeData.summary,
+        experience: resumeData.experience,
+        education: resumeData.education,
+        skills: resumeData.skills,
+        certifications: resumeData.certifications,
+        sectionOrder: resumeData.sectionOrder,
+        styleSettings: resumeData.styleSettings,
+      }
+
+      if (resumeId) {
+        // Update existing resume
+        const response = await fetch(`/api/resumes/${resumeId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(resumePayload),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update resume')
+        }
+
+        toast.success('Resume updated successfully!')
+      } else {
+        // Create new resume
+        const response = await fetch('/api/resumes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(resumePayload),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to save resume')
+        }
+
+        const { resume } = await response.json()
+        setResumeId(resume.id)
+        toast.success('Resume saved successfully!')
+      }
+    } catch (error) {
+      console.error('Error saving resume:', error)
+      toast.error('Failed to save resume. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleDownload = () => {
-    alert('Download feature coming soon! Currently saves to localStorage.')
-    handleSave()
+    try {
+      setIsDownloading(true)
+      
+      if (!editorRef.current) {
+        toast.error('Resume editor not found')
+        setIsDownloading(false)
+        return
+      }
+
+      // Create a new window with the resume content for printing
+      const printWindow = window.open('', '_blank')
+      if (!printWindow) {
+        toast.error('Please allow popups to download PDF')
+        setIsDownloading(false)
+        return
+      }
+
+      const resumeContent = editorRef.current.innerHTML
+      
+      // Create a clean HTML document for printing
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${resumeTitle}</title>
+            <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+              body {
+                font-family: Arial, sans-serif;
+                padding: 20px;
+                background: white;
+              }
+              @media print {
+                body {
+                  padding: 0;
+                }
+                @page {
+                  size: A4;
+                  margin: 0;
+                }
+              }
+              /* Copy relevant styles from the resume */
+              .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+              .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+              .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+              .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+              .font-bold { font-weight: 700; }
+              .font-semibold { font-weight: 600; }
+              .mb-2 { margin-bottom: 0.5rem; }
+              .mb-4 { margin-bottom: 1rem; }
+              .mb-6 { margin-bottom: 1.5rem; }
+              .mt-2 { margin-top: 0.5rem; }
+              .mt-4 { margin-top: 1rem; }
+              .space-y-2 > * + * { margin-top: 0.5rem; }
+              .space-y-4 > * + * { margin-top: 1rem; }
+              .flex { display: flex; }
+              .items-center { align-items: center; }
+              .gap-2 { gap: 0.5rem; }
+              img { max-width: 100px; height: auto; border-radius: 50%; }
+            </style>
+          </head>
+          <body>
+            ${resumeContent}
+          </body>
+        </html>
+      `)
+      printWindow.document.close()
+
+      // Wait for content to load, then trigger print
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print()
+          toast.success('Print dialog opened! Save as PDF from the print options.')
+          setIsDownloading(false)
+        }, 500)
+      }
+
+      // Handle if user closes the window without printing
+      setTimeout(() => {
+        setIsDownloading(false)
+      }, 2000)
+      
+    } catch (error) {
+      console.error('Error downloading resume:', error)
+      toast.error(`Failed to download resume: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      setIsDownloading(false)
+    }
   }
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -482,19 +638,42 @@ export default function ResumeEditorPage() {
                 </Button>
               </Link>
               <div className="h-6 w-px bg-border" />
-              <h1 className="text-xl font-bold flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <FileText className="h-5 w-5" />
-                Live Resume Editor
-              </h1>
+                <Input
+                  value={resumeTitle}
+                  onChange={(e) => setResumeTitle(e.target.value)}
+                  className="h-8 w-64 text-sm font-semibold"
+                  placeholder="Resume Title"
+                />
+              </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleSave}>
-                <Save className="h-4 w-4 mr-2" />
-                Save
+              <Button variant="outline" size="sm" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save
+                  </>
+                )}
               </Button>
-              <Button size="sm" onClick={handleDownload}>
-                <Download className="h-4 w-4 mr-2" />
-                Download
+              <Button size="sm" onClick={handleDownload} disabled={isDownloading}>
+                {isDownloading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Downloading...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Download PDF
+                  </>
+                )}
               </Button>
             </div>
           </div>
