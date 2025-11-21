@@ -491,6 +491,7 @@ export default function ResumeEditorPage() {
                       styleSettings: { ...resumeData.styleSettings, fontFamily: e.target.value }
                     })}
                     className="w-full mt-1 px-2 py-1.5 bg-background text-foreground border border-border rounded-md text-xs"
+                    aria-label="Font family"
                   >
                     {fontOptions.map(font => (
                       <option key={font.value} value={font.value}>{font.label}</option>
