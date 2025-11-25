@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Github, Linkedin, Instagram, Facebook, Mail, Code2 } from "lucide-react"
+import { Github, Linkedin, Instagram, Facebook, Mail, Code2, Youtube } from "lucide-react"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -96,15 +96,6 @@ export function Footer() {
                 <Linkedin className="h-5 w-5" />
               </Link>
               <Link
-              href="https://www.youtube.com/@lab68dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 border border-border hover:border-primary hover:text-primary transition-colors"
-              aria-label="YouTube"
-              >
-               <Youtube
-              </Link>
-              <Link
                 href="https://www.instagram.com/lab68dev/"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -134,10 +125,18 @@ export function Footer() {
                 </svg>
               </Link>
               <Link
+                href="https://www.youtube.com/@lab68dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 border border-border hover:border-primary hover:text-primary transition-colors"
+                aria-label="YouTube"
+              >
+                <Youtube className="h-5 w-5" />
+              </Link>
               <Link
                 href="mailto:lab68dev@gmail.com"
-                className="p-2 border border-border hover:border-primary hover:text-primary transition-colors"
                 aria-label="Email"
+                className="p-2 border border-border hover:border-primary hover:text-primary transition-colors"
               >
                 <Mail className="h-5 w-5" />
               </Link>
