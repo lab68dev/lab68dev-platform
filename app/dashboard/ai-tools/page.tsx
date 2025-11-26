@@ -73,7 +73,7 @@ export default function AIToolsPage() {
 
       setMessages((prev) => [...prev, aiMessage])
     } catch (error) {
-      console.error("[v0] Error calling Gemini API:", error)
+      console.error("Error calling Gemini API:", error)
       const errorMessage: Message = {
         role: "assistant",
         content:
