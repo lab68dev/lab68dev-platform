@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { getTranslations } from "@/lib/i18n"
+import { getTranslations } from "@/lib/config"
 import {
   getContextComments,
   addComment,
@@ -11,8 +11,8 @@ import {
   resolveComment,
   parseMentions,
   type Comment,
-} from "@/lib/chat"
-import { getTimeAgo } from "@/lib/team"
+} from "@/lib/features/chat"
+import { getTimeAgo } from "@/lib/features/team"
 
 interface CommentSectionProps {
   contextId: string
