@@ -9,9 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 import { User, Bell, Shield, Palette, Globe, Camera } from "lucide-react"
-import { getCurrentUser, updateUserProfile, type User as UserType } from "@/lib/auth"
-import { getUserLanguage, setUserLanguage, getTranslations, getLanguageName, type Language } from "@/lib/i18n"
-import { getTheme, setTheme, type Theme } from "@/lib/theme"
+import { getCurrentUser, updateUserProfile, type User as UserType } from "@/lib/features/auth"
+import { getUserLanguage, setUserLanguage, getTranslations, getLanguageName, type Language } from "@/lib/config"
+import { getTheme, setTheme, type Theme } from "@/lib/config"
 
 export default function SettingsPage() {
   const [user, setUser] = useState<UserType | null>(null)
