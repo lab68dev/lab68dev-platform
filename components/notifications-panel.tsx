@@ -85,7 +85,7 @@ export function NotificationsPanel() {
           />
           
           {/* Notification Panel */}
-          <div className="absolute right-0 top-full mt-2 w-96 bg-card border-2 border-border shadow-2xl z-50 rounded-lg overflow-hidden">
+          <div className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-md bg-card border-2 border-border shadow-2xl z-50 rounded-lg overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b-2 border-border bg-muted/50">
               <div className="flex items-center gap-2">
@@ -103,7 +103,7 @@ export function NotificationsPanel() {
             </div>
 
             {/* Content */}
-            <div className="max-h-[500px] overflow-y-auto">
+            <div className="max-h-[calc(100vh-12rem)] sm:max-h-[500px] overflow-y-auto">
               {upcomingMeetings.length === 0 ? (
                 <div className="p-8 text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
@@ -124,16 +124,16 @@ export function NotificationsPanel() {
                       className="p-4 hover:bg-muted/50 transition-colors cursor-pointer"
                     >
                       {/* Meeting Title */}
-                      <h4 className="font-semibold text-base mb-3 text-foreground">
+                      <h4 className="font-semibold text-base mb-3 text-foreground break-words">
                         {meeting.title}
                       </h4>
                       
                       {/* Meeting Details */}
                       <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                           <div className="flex items-center gap-1.5 bg-muted px-2 py-1 rounded">
-                            <Calendar className="h-4 w-4 text-primary" />
-                            <span className="font-medium">
+                            <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="font-medium whitespace-nowrap">
                               {new Date(meeting.date).toLocaleDateString('en-US', { 
                                 weekday: 'short', 
                                 month: 'short', 
@@ -142,8 +142,8 @@ export function NotificationsPanel() {
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5 bg-muted px-2 py-1 rounded">
-                            <Clock className="h-4 w-4 text-primary" />
-                            <span className="font-medium">{meeting.time}</span>
+                            <Clock className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="font-medium whitespace-nowrap">{meeting.time}</span>
                           </div>
                         </div>
                         
@@ -152,14 +152,14 @@ export function NotificationsPanel() {
                           <div className="flex-1 h-1 bg-primary/20 rounded-full overflow-hidden">
                             <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: '60%' }} />
                           </div>
-                          <span className="text-xs font-bold text-primary">
+                          <span className="text-xs font-bold text-primary whitespace-nowrap">
                             {t.notifications?.startsIn || "Starts in"} {formatTimeUntil(meeting.date, meeting.time)}
                           </span>
                         </div>
                         
                         {/* Duration Badge */}
                         <div className="flex justify-end">
-                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
                             {meeting.duration} min
                           </span>
                         </div>
@@ -173,7 +173,7 @@ export function NotificationsPanel() {
             {/* Footer */}
             {upcomingMeetings.length > 0 && (
               <div className="p-3 border-t-2 border-border bg-muted/50 text-center">
-                <button className="text-sm text-primary hover:underline font-medium">
+                <button className="text-sm text-primary hover:underline font-medium transition-colors">
                   View All Meetings →
                 </button>
               </div>
