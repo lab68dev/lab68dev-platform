@@ -17,7 +17,7 @@ import {
   ArrowRight,
   ArrowLeft,
 } from "lucide-react"
-import type { Task, Sprint } from "@/lib/project-management"
+import type { Task, Sprint } from "@/lib/services"
 
 interface SprintPlanningModalProps {
   sprint: Sprint
