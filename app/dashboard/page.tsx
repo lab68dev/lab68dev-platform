@@ -4,8 +4,8 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Activity, GitBranch, Users, Zap, FolderKanban, ListTodo, Calendar, MessageSquare, Cloud, CloudRain, Sun, CloudSnow, Wind, Droplets } from "lucide-react"
-import { getCurrentUser, type User } from "@/lib/auth"
-import { getUserLanguage, getTranslations, type Language } from "@/lib/i18n"
+import { getCurrentUser, type User } from "@/lib/features/auth"
+import { getUserLanguage, getTranslations, type Language } from "@/lib/config"
 import { 
   getProjects, 
   getTodos, 
