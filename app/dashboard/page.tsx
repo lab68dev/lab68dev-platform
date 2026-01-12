@@ -217,16 +217,6 @@ export default function DashboardPage() {
       {/* Breadcrumb */}
       <Breadcrumb />
 
-      {/* Welcome Section */}
-      <div className="space-y-2">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-          {t.dashboard.welcomeBack}, {user.name}
-        </h1>
-        <p className="text-muted-foreground">
-          {t.dashboard.happeningToday}
-        </p>
-      </div>
-
       {/* Welcome Header with Digital Clock and Weather */}
       <div className="border-b border-border pb-6 lg:pb-8">
         <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
