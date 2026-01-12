@@ -19,16 +19,29 @@
   --muted-foreground: oklch(0.65 0 0);
   --accent: oklch(0.85 0.2 145); /* neon green */
   --accent-foreground: oklch(0.04 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.6 0.24 27); /* #FF1744 - neon red for errors */
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.18 0 0); /* #2D2D2D */
   --input: oklch(0.18 0 0);
   --ring: oklch(0.85 0.2 145);
-  --chart-1: oklch(0.85 0.2 145);
-  --chart-2: oklch(0.7 0.15 200);
-  --chart-3: oklch(0.7 0.15 280);
-  --chart-4: oklch(0.7 0.15 60);
-  --chart-5: oklch(0.7 0.15 320);
+  
+  /* Enhanced Cyberpunk Accent Colors */
+  --accent-cyan: oklch(0.85 0.17 200); /* #00E5FF - electric cyan */
+  --accent-purple: oklch(0.7 0.15 300); /* #BB86FC - neon purple */
+  --accent-pink: oklch(0.75 0.2 340); /* #FF6EC7 - neon pink */
+  --warning: oklch(0.85 0.2 90); /* #FFD600 - electric yellow */
+  --warning-foreground: oklch(0.04 0 0);
+  --success: oklch(0.85 0.2 145); /* neon green - same as primary */
+  --success-foreground: oklch(0.04 0 0);
+  --info: oklch(0.85 0.17 200); /* cyan for info states */
+  --info-foreground: oklch(0.04 0 0);
+  
+  /* Chart colors with new accents */
+  --chart-1: oklch(0.85 0.2 145); /* neon green */
+  --chart-2: oklch(0.85 0.17 200); /* cyan */
+  --chart-3: oklch(0.7 0.15 300); /* purple */
+  --chart-4: oklch(0.75 0.2 340); /* pink */
+  --chart-5: oklch(0.85 0.2 90); /* yellow */
   --radius: 0rem; /* no rounded corners for brutalist style */
   --sidebar: oklch(0.04 0 0);
   --sidebar-foreground: oklch(1 0 0);
@@ -56,16 +69,29 @@
   --muted-foreground: oklch(0.45 0 0);
   --accent: oklch(0.45 0.2 145);
   --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.5 0.24 27); /* darker red for light mode */
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.85 0 0); /* #D9D9D9 */
   --input: oklch(0.92 0 0);
   --ring: oklch(0.45 0.2 145);
-  --chart-1: oklch(0.45 0.2 145);
-  --chart-2: oklch(0.5 0.15 200);
-  --chart-3: oklch(0.5 0.15 280);
-  --chart-4: oklch(0.5 0.15 60);
-  --chart-5: oklch(0.5 0.15 320);
+  
+  /* Enhanced Cyberpunk Accent Colors (Light Mode) */
+  --accent-cyan: oklch(0.5 0.17 200); /* darker cyan for light mode */
+  --accent-purple: oklch(0.5 0.15 300); /* darker purple */
+  --accent-pink: oklch(0.55 0.2 340); /* darker pink */
+  --warning: oklch(0.6 0.2 90); /* darker yellow */
+  --warning-foreground: oklch(1 0 0);
+  --success: oklch(0.45 0.2 145); /* darker green */
+  --success-foreground: oklch(1 0 0);
+  --info: oklch(0.5 0.17 200); /* darker cyan */
+  --info-foreground: oklch(1 0 0);
+  
+  /* Chart colors with new accents (Light Mode) */
+  --chart-1: oklch(0.45 0.2 145); /* green */
+  --chart-2: oklch(0.5 0.17 200); /* cyan */
+  --chart-3: oklch(0.5 0.15 300); /* purple */
+  --chart-4: oklch(0.55 0.2 340); /* pink */
+  --chart-5: oklch(0.6 0.2 90); /* yellow */
   --sidebar: oklch(0.98 0 0);
   --sidebar-foreground: oklch(0.04 0 0);
   --sidebar-primary: oklch(0.45 0.2 145);
