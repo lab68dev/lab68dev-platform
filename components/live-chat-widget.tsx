@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { MessageCircle, X, Send, Minimize2, Maximize2, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser } from "@/lib/features/auth"
 
 interface Message {
   id: string
