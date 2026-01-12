@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import Image from "next/image"
-import { getTranslations, getUserLanguage } from "@/lib/i18n"
+import { getTranslations, getUserLanguage } from "@/lib/config"
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 
