@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { getUserLanguage, setUserLanguage, getLanguageName, type Language } from "@/lib/i18n"
+import { getUserLanguage, setUserLanguage, getLanguageName, type Language } from "@/lib/config"
 import { Globe } from "lucide-react"
 
 export function LanguageSwitcher() {
