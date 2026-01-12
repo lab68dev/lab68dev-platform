@@ -4,7 +4,7 @@ import {
   createStaffInDatabase,
   checkRateLimit,
   supabase 
-} from '@/lib/staff-security'
+} from '@/lib/features/staff'
 
 export async function POST(request: NextRequest) {
   try {
