@@ -5,8 +5,8 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Users, Search, Mail, FolderKanban, X, Plus } from "lucide-react"
-import { getCurrentUser, getAllUsers } from "@/lib/auth"
-import { Translations, getUserLanguage, getTranslations, type Language } from "@/lib/i18n"
+import { getCurrentUser, getAllUsers } from "@/lib/features/auth"
+import { Translations, getUserLanguage, getTranslations, type Language } from "@/lib/config"
 import Link from "next/link"
 
 interface Project {
