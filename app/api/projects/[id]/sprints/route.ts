@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase"
+import { createServerSupabaseClient } from "@/lib/database/supabase-server"
 
 // GET /api/projects/[id]/sprints - List all sprints
 export async function GET(
@@ -11,7 +11,7 @@ export async function GET(
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
 
-    const supabase = createClient()
+    const supabase = createServerClient()
 
     let query = supabase
       .from("sprints")
@@ -53,7 +53,7 @@ export async function POST(
 ) {
   try {
     const { id: projectId } = await params
-    const supabase = createClient()
+    const supabase = createServerClient()
 
     // Get current user
     const {
