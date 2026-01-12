@@ -12,7 +12,7 @@ import {
   ChevronDown,
   Check,
 } from "lucide-react"
-import type { Task, Label as LabelType } from "@/lib/project-management"
+import type { Task, Label as LabelType } from "@/lib/services"
 
 export interface FilterOptions {
   search: string
