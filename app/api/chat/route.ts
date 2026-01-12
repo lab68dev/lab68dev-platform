@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "No AI API key configured. Add DEEPSEEK_API_KEY or GEMINI_API_KEY to .env.local and restart the dev server.",
+            "No AI API key configured. Add DEEPSEEK_API_KEY to .env.local and restart the dev server.",
         },
         { status: 500 },
       )
