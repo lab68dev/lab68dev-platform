@@ -165,12 +165,21 @@ const defaultResumeData: ResumeData = {
 type Template = 'modern' | 'classic' | 'minimal' | 'creative' | 'professional'
 
 const fontOptions = [
-  { value: 'Inter', label: 'Inter (Modern)' },
-  { value: 'Arial', label: 'Arial (Classic)' },
-  { value: 'Georgia', label: 'Georgia (Elegant)' },
-  { value: 'Roboto', label: 'Roboto (Clean)' },
+  { value: 'Inter', label: 'Inter (Modern Sans-Serif)' },
+  { value: 'Arial', label: 'Arial (Classic Sans-Serif)' },
+  { value: 'Helvetica', label: 'Helvetica (Professional)' },
+  { value: 'Calibri', label: 'Calibri (Contemporary)' },
+  { value: 'Roboto', label: 'Roboto (Clean & Readable)' },
+  { value: 'Open Sans', label: 'Open Sans (Friendly)' },
+  { value: 'Lato', label: 'Lato (Elegant Sans-Serif)' },
+  { value: 'Georgia', label: 'Georgia (Elegant Serif)' },
   { value: 'Times New Roman', label: 'Times New Roman (Traditional)' },
+  { value: 'Garamond', label: 'Garamond (Classic Serif)' },
+  { value: 'Merriweather', label: 'Merriweather (Readable Serif)' },
+  { value: 'Playfair Display', label: 'Playfair Display (Luxury)' },
   { value: 'Courier New', label: 'Courier New (Monospace)' },
+  { value: 'Consolas', label: 'Consolas (Modern Monospace)' },
+  { value: 'Verdana', label: 'Verdana (Clear & Bold)' },
 ]
 
 export default function ResumeEditorPage() {
@@ -384,6 +393,7 @@ export default function ResumeEditorPage() {
         <html>
           <head>
             <title>${resumeTitle}</title>
+            <meta charset="UTF-8">
             <style>
               * {
                 margin: 0;
@@ -391,37 +401,102 @@ export default function ResumeEditorPage() {
                 box-sizing: border-box;
               }
               body {
-                font-family: Arial, sans-serif;
-                padding: 20px;
+                font-family: ${resumeData.styleSettings.fontFamily}, Arial, sans-serif;
                 background: white;
+                color: #000;
+                padding: 0;
+                margin: 0;
               }
               @media print {
                 body {
                   padding: 0;
+                  margin: 0;
                 }
                 @page {
                   size: A4;
-                  margin: 0;
+                  margin: 15mm;
                 }
               }
-              /* Copy relevant styles from the resume */
+              @media screen {
+                body {
+                  padding: 20px;
+                  background: #f5f5f5;
+                }
+              }
+              
+              /* Layout */
+              .flex { display: flex; }
+              .items-start { align-items: flex-start; }
+              .items-center { align-items: center; }
+              .justify-between { justify-content: space-between; }
+              .gap-1 { gap: 0.25rem; }
+              .gap-2 { gap: 0.5rem; }
+              .gap-4 { gap: 1rem; }
+              .flex-1 { flex: 1; }
+              .flex-shrink-0 { flex-shrink: 0; }
+              
+              /* Grid */
+              .grid { display: grid; }
+              .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+              
+              /* Typography */
               .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
               .text-2xl { font-size: 1.5rem; line-height: 2rem; }
               .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
               .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+              .text-base { font-size: 1rem; line-height: 1.5rem; }
+              .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+              .text-xs { font-size: 0.75rem; line-height: 1rem; }
               .font-bold { font-weight: 700; }
               .font-semibold { font-weight: 600; }
+              .font-medium { font-weight: 500; }
+              
+              /* Spacing */
+              .mb-1 { margin-bottom: 0.25rem; }
               .mb-2 { margin-bottom: 0.5rem; }
+              .mb-3 { margin-bottom: 0.75rem; }
               .mb-4 { margin-bottom: 1rem; }
               .mb-6 { margin-bottom: 1.5rem; }
+              .mt-1 { margin-top: 0.25rem; }
               .mt-2 { margin-top: 0.5rem; }
               .mt-4 { margin-top: 1rem; }
+              .pb-4 { padding-bottom: 1rem; }
+              .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+              .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+              .p-8 { padding: 2rem; }
+              .space-y-1 > * + * { margin-top: 0.25rem; }
               .space-y-2 > * + * { margin-top: 0.5rem; }
               .space-y-4 > * + * { margin-top: 1rem; }
-              .flex { display: flex; }
-              .items-center { align-items: center; }
-              .gap-2 { gap: 0.5rem; }
-              img { max-width: 100px; height: auto; border-radius: 50%; }
+              
+              /* Borders & Radius */
+              .rounded { border-radius: 0.25rem; }
+              .rounded-full { border-radius: 9999px; }
+              
+              /* Images */
+              img { 
+                max-width: 100%;
+                height: auto;
+                display: block;
+              }
+              
+              /* Lists */
+              .list-none { list-style: none; }
+              ul, ol { padding-left: 0; }
+              
+              /* Specific Resume Styles */
+              .w-2 { width: 0.5rem; }
+              .h-2 { height: 0.5rem; }
+              .w-24 { width: 6rem; }
+              .h-24 { height: 6rem; }
+              
+              /* Print Optimization */
+              @media print {
+                * {
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
+                }
+                .no-print { display: none; }
+              }
             </style>
           </head>
           <body>
