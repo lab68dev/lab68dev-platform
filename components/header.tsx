@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LanguageSwitcher } from "./language-switcher"
-import { getTranslations, getUserLanguage } from "@/lib/i18n"
+import { getTranslations, getUserLanguage } from "@/lib/config"
 import { useEffect, useState } from "react"
 import { Code2, FileText, Users, BookOpen, LogIn, UserPlus, Coffee } from "lucide-react"
 
