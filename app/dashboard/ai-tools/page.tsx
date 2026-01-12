@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Send, Sparkles } from "lucide-react"
-import { getTranslations, getUserLanguage } from "@/lib/i18n"
+import { getTranslations, getUserLanguage } from "@/lib/config"
 
 type Message = {
   role: "user" | "assistant"
