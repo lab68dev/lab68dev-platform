@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Bell, X, Calendar, Clock } from "lucide-react"
-import { getCurrentUser } from "@/lib/auth"
-import { getTranslations, getUserLanguage } from "@/lib/i18n"
+import { getCurrentUser } from "@/lib/features/auth"
+import { getTranslations, getUserLanguage } from "@/lib/config"
 
 interface Meeting {
   id: string
