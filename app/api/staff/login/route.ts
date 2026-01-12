@@ -8,8 +8,8 @@ import {
   resetRateLimit,
   logStaffActivity,
   supabase,
-} from '@/lib/staff-security'
-import { sendLoginAlertEmail } from '@/lib/staff-email'
+} from '@/lib/features/staff'
+import { sendLoginAlertEmail } from '@/lib/features/staff/email-service'
 
 export async function POST(request: NextRequest) {
   try {
