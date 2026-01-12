@@ -12,6 +12,10 @@ import {
   getMilestones,
   getMeetings 
 } from "@/lib/database"
+import { Breadcrumb } from "@/components/breadcrumb"
+import { RecentActivity } from "@/components/recent-activity"
+import { OnboardingFlow } from "@/components/onboarding-flow"
+import { StatCardSkeleton } from "@/components/skeleton"
 
 type Weather = {
   temp: number
@@ -44,6 +48,7 @@ export default function DashboardPage() {
   const [weatherLoading, setWeatherLoading] = useState(true)
   const [upcomingMeetings, setUpcomingMeetings] = useState<Meeting[]>([])
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -55,6 +60,12 @@ export default function DashboardPage() {
       const userLang = (currentUser.language as Language) || getUserLanguage()
       setLang(userLang)
       loadCounts(currentUser.id)
+      
+      // Check if first time user
+      const hasSeenOnboarding = localStorage.getItem('lab68_onboarding_completed')
+      if (!hasSeenOnboarding) {
+        setShowOnboarding(true)
+      }
     }
   }, [router])
 
@@ -178,6 +189,16 @@ export default function DashboardPage() {
 
   const recentProjects: Array<{ name: string; status: string; updated: string }> = []
 
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('lab68_onboarding_completed', 'true')
+    setShowOnboarding(false)
+  }
+
+  const handleOnboardingSkip = () => {
+    localStorage.setItem('lab68_onboarding_completed', 'true')
+    setShowOnboarding(false)
+  }
+
   if (!user) {
     return (
       <div className="p-8 flex items-center justify-center min-h-screen">
@@ -187,7 +208,25 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 pt-20 lg:pt-8">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8 pt-20 lg:pt-8">
+      {/* Onboarding Flow */}
+      {showOnboarding && (
+        <OnboardingFlow onComplete={handleOnboardingComplete} onSkip={handleOnboardingSkip} />
+      )}
+
+      {/* Breadcrumb */}
+      <Breadcrumb />
+
+      {/* Welcome Section */}
+      <div className="space-y-2">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          {t.dashboard.welcomeBack}, {user.name}
+        </h1>
+        <p className="text-muted-foreground">
+          {t.dashboard.happeningToday}
+        </p>
+      </div>
+
       {/* Welcome Header with Digital Clock and Weather */}
       <div className="border-b border-border pb-6 lg:pb-8">
         <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
@@ -424,21 +463,30 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon
-          return (
-            <Card key={stat.label} className="border-border p-4 sm:p-6 bg-card">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1 sm:space-y-2">
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl sm:text-3xl font-bold">{stat.value}</p>
-                  <p className="text-[10px] sm:text-xs text-primary">{stat.change}</p>
+        {loading ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : (
+          stats.map((stat) => {
+            const Icon = stat.icon
+            return (
+              <Card key={stat.label} className="border-border p-4 sm:p-6 bg-card hover:border-primary transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 sm:space-y-2">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    <p className="text-2xl sm:text-3xl font-bold">{stat.value}</p>
+                    <p className="text-[10px] sm:text-xs text-primary">{stat.change}</p>
+                  </div>
+                  <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
                 </div>
-                <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
-              </div>
-            </Card>
-          )
-        })}
+              </Card>
+            )
+          })
+        )}
       </div>
 
       {/* Recent Projects */}
@@ -463,6 +511,17 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Recent Activity Timeline */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl sm:text-2xl font-bold">Recent Activity</h2>
+          <button className="text-sm text-primary hover:underline">View All</button>
+        </div>
+        <div className="border border-border p-4 sm:p-6 bg-card">
+          <RecentActivity userId={user.id} limit={5} />
+        </div>
       </div>
 
       {/* AI Assistant Preview */}
