@@ -6,8 +6,8 @@ import {
   updateStaff2FA,
   generateBackupCodes,
   supabase,
-} from '@/lib/staff-security'
-import { send2FASetupEmail } from '@/lib/staff-email'
+} from '@/lib/features/staff'
+import { send2FASetupEmail } from '@/lib/features/staff/email-service'
 import QRCode from 'qrcode'
 
 export async function POST(request: NextRequest) {
