@@ -4,8 +4,8 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MessageSquare, X, Search, Filter } from "lucide-react"
-import { getCurrentUser } from "@/lib/auth"
-import { getTranslations, getUserLanguage, type Language } from "@/lib/i18n"
+import { getCurrentUser } from "@/lib/features/auth"
+import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
 
 interface Discussion {
   id: string
