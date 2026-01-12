@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase"
+import { createServerSupabaseClient } from "@/lib/database/supabase-server"
 
 // GET /api/projects/[id]/issues/[issueId] - Get single issue with full details
 export async function GET(
