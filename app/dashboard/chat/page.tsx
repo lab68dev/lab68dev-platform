@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { getTranslations } from "@/lib/i18n"
-import { getCurrentUser } from "@/lib/auth"
+import { getTranslations } from "@/lib/config"
+import { getCurrentUser } from "@/lib/features/auth"
 import {
   getChatRooms,
   getMessages,
@@ -21,7 +21,7 @@ import {
   type ChatRoom,
   type Message,
   type UserPresence,
-} from "@/lib/chat-supabase"
+} from "@/lib/features/chat"
 
 export default function ChatPage() {
   const t = getTranslations("en")
