@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Plus, Edit, Trash2 } from "lucide-react"
-import { getUserWhiteboards, createWhiteboard, deleteWhiteboard, type Whiteboard } from "@/lib/whiteboard"
-import { getTimeAgo } from "@/lib/team"
+import { getUserWhiteboards, createWhiteboard, deleteWhiteboard, type Whiteboard } from "@/lib/features/whiteboard"
+import { getTimeAgo } from "@/lib/features/team"
 
 export default function WhiteboardPage() {
   const [currentUser] = useState("user@example.com") // In real app, get from auth
