@@ -14,8 +14,8 @@ import {
   Filter,
   Tag,
 } from "lucide-react"
-import { getCurrentUser } from "@/lib/auth"
-import { getTranslations, getUserLanguage, type Language } from "@/lib/i18n"
+import { getCurrentUser } from "@/lib/features/auth"
+import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
 import { getWikiArticles, createWikiArticle, updateWikiArticle, deleteWikiArticle, type WikiArticle } from "@/lib/database"
 
 interface Article {
