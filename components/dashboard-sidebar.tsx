@@ -22,6 +22,8 @@ import {
   Menu,
   X,
   Headphones,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react"
 import { getCurrentUser, signOut } from "@/lib/features/auth"
 import { useEffect, useState } from "react"
@@ -29,7 +31,17 @@ import type { User } from "@/lib/features/auth"
 import { NotificationsPanel } from "./notifications-panel"
 import { useLanguage } from "@/lib/config"
 
-// navItems will be created inside the component so labels come from translations
+interface NavSection {
+  title: string
+  items: NavItem[]
+  defaultOpen?: boolean
+}
+
+interface NavItem {
+  href: string
+  label: string
+  icon: any
+}
 
 export function DashboardSidebar() {
   const { t } = useLanguage()
@@ -38,25 +50,54 @@ export function DashboardSidebar() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    main: true,
+    productivity: true,
+    collaboration: true,
+    tools: true,
+  })
 
-  const navItems = [
-    { href: "/dashboard", label: t.nav.dashboard || "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/projects", label: t.nav.projects || "Projects", icon: FolderKanban },
-    { href: "/dashboard/collaborators", label: t.projects?.collaborators || "Collaborators", icon: Users },
-    { href: "/dashboard/chat", label: t.chat?.title || "Chat", icon: MessageCircle },
-    { href: "/dashboard/whiteboard", label: t.whiteboard?.title || "Whiteboard", icon: Palette },
-    { href: "/dashboard/todo", label: t.todo?.title || "To Do", icon: CheckSquare },
-    { href: "/dashboard/meeting", label: t.meeting?.title || "Meeting", icon: Calendar },
-    { href: "/dashboard/planning", label: t.planning?.title || "Planning", icon: ClipboardList },
-    { href: "/dashboard/diagrams", label: t.diagrams?.title || "Flow & Diagrams", icon: Workflow },
-    { href: "/dashboard/files", label: t.files?.title || "Files", icon: FileText },
-    { href: "/dashboard/wiki", label: t.wiki?.title || "Knowledge Base", icon: BookOpen },
-    { href: "/dashboard/community", label: t.community?.title || "Community", icon: MessageSquare },
-    { href: "/dashboard/entertainment", label: "Games", icon: Gamepad2 },
-    { href: "/dashboard/resume", label: "Resume Editor", icon: FileText },
-    { href: "/dashboard/ai-tools", label: t.nav.aiTools || "AI Tools", icon: Sparkles },
-    { href: "/dashboard/support", label: "Live Support", icon: Headphones },
-    { href: "/dashboard/settings", label: t.nav.settings || "Settings", icon: Settings },
+  const navSections: NavSection[] = [
+    {
+      title: "Main",
+      defaultOpen: true,
+      items: [
+        { href: "/dashboard", label: t.nav.dashboard || "Dashboard", icon: LayoutDashboard },
+        { href: "/dashboard/projects", label: t.nav.projects || "Projects", icon: FolderKanban },
+      ],
+    },
+    {
+      title: "Productivity",
+      defaultOpen: true,
+      items: [
+        { href: "/dashboard/todo", label: t.todo?.title || "To Do", icon: CheckSquare },
+        { href: "/dashboard/meeting", label: t.meeting?.title || "Meeting", icon: Calendar },
+        { href: "/dashboard/planning", label: t.planning?.title || "Planning", icon: ClipboardList },
+      ],
+    },
+    {
+      title: "Collaboration",
+      defaultOpen: true,
+      items: [
+        { href: "/dashboard/collaborators", label: t.projects?.collaborators || "Collaborators", icon: Users },
+        { href: "/dashboard/chat", label: t.chat?.title || "Chat", icon: MessageCircle },
+        { href: "/dashboard/whiteboard", label: t.whiteboard?.title || "Whiteboard", icon: Palette },
+        { href: "/dashboard/community", label: t.community?.title || "Community", icon: MessageSquare },
+      ],
+    },
+    {
+      title: "Tools",
+      defaultOpen: true,
+      items: [
+        { href: "/dashboard/diagrams", label: t.diagrams?.title || "Flow & Diagrams", icon: Workflow },
+        { href: "/dashboard/files", label: t.files?.title || "Files", icon: FileText },
+        { href: "/dashboard/wiki", label: t.wiki?.title || "Knowledge Base", icon: BookOpen },
+        { href: "/dashboard/resume", label: "Resume Editor", icon: FileText },
+        { href: "/dashboard/ai-tools", label: t.nav.aiTools || "AI Tools", icon: Sparkles },
+        { href: "/dashboard/entertainment", label: "Games", icon: Gamepad2 },
+        { href: "/dashboard/support", label: "Live Support", icon: Headphones },
+      ],
+    },
   ]
 
   useEffect(() => {
@@ -77,6 +118,13 @@ export function DashboardSidebar() {
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false)
+  }
+
+  const toggleSection = (sectionTitle: string) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [sectionTitle.toLowerCase()]: !prev[sectionTitle.toLowerCase()],
+    }))
   }
 
   return (
@@ -145,51 +193,106 @@ export function DashboardSidebar() {
             </div>
           )}
 
-          {/* Staggered Navigation */}
-          <nav className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-hide">
-            {navItems.map((item, index) => {
-              const Icon = item.icon
-              const isActive = pathname === item.href
-              const delay = isLoaded ? 0 : index * 50 // Stagger delay in ms
+          {/* Staggered Navigation with Sections */}
+          <nav className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+            {navSections.map((section, sectionIndex) => {
+              const isExpanded = expandedSections[section.title.toLowerCase()]
               
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="block"
-                  onClick={closeMobileMenu}
-                  style={{
-                    animationName: isLoaded ? 'none' : 'staggerIn',
-                    animationDuration: isLoaded ? '0s' : '0.3s',
-                    animationTimingFunction: isLoaded ? 'ease-out' : 'ease-out',
-                    animationFillMode: isLoaded ? 'forwards' : 'forwards',
-                    animationDelay: `${delay}ms`,
-                    opacity: isLoaded ? 1 : 0,
-                    transform: isLoaded ? 'translateX(0)' : 'translateX(-20px)',
-                  }}
-                >
-                  <div
-                    className={`group relative flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 border ${
-                      isActive
-                        ? "bg-primary/10 border-primary shadow-md text-foreground"
-                        : "border-border bg-card hover:border-primary hover:shadow-lg hover:translate-x-1 text-muted-foreground hover:text-foreground"
-                    }`}
+                <div key={section.title}>
+                  {/* Section Header */}
+                  <button
+                    onClick={() => toggleSection(section.title)}
+                    className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors mb-2"
                   >
-                    <div className={`p-1.5 border transition-colors ${
-                      isActive ? 'border-primary bg-primary/20' : 'border-border group-hover:border-primary'
-                    }`}>
-                      <Icon className={`h-4 w-4 transition-colors ${
-                        isActive ? 'text-primary' : 'group-hover:text-primary'
-                      }`} />
-                    </div>
-                    <span className="transition-colors">{item.label}</span>
-                    {isActive && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
+                    <span>{section.title}</span>
+                    {isExpanded ? (
+                      <ChevronDown className="h-3 w-3" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3" />
                     )}
-                  </div>
-                </Link>
+                  </button>
+
+                  {/* Section Items */}
+                  {isExpanded && (
+                    <div className="space-y-2">
+                      {section.items.map((item, index) => {
+                        const Icon = item.icon
+                        const isActive = pathname === item.href
+                        const delay = isLoaded ? 0 : (sectionIndex * 50) + (index * 50)
+                        
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className="block"
+                            onClick={closeMobileMenu}
+                            style={{
+                              animationName: isLoaded ? 'none' : 'staggerIn',
+                              animationDuration: isLoaded ? '0s' : '0.3s',
+                              animationTimingFunction: isLoaded ? 'ease-out' : 'ease-out',
+                              animationFillMode: isLoaded ? 'forwards' : 'forwards',
+                              animationDelay: `${delay}ms`,
+                              opacity: isLoaded ? 1 : 0,
+                              transform: isLoaded ? 'translateX(0)' : 'translateX(-20px)',
+                            }}
+                          >
+                            <div
+                              className={`group relative flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 border ${
+                                isActive
+                                  ? "bg-primary/10 border-primary shadow-md text-foreground"
+                                  : "border-border bg-card hover:border-primary hover:shadow-lg hover:translate-x-1 text-muted-foreground hover:text-foreground"
+                              }`}
+                            >
+                              <div className={`p-1.5 border transition-colors ${
+                                isActive ? 'border-primary bg-primary/20' : 'border-border group-hover:border-primary'
+                              }`}>
+                                <Icon className={`h-4 w-4 transition-colors ${
+                                  isActive ? 'text-primary' : 'group-hover:text-primary'
+                                }`} />
+                              </div>
+                              <span className="transition-colors">{item.label}</span>
+                              {isActive && (
+                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
+                              )}
+                            </div>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
               )
             })}
+
+            {/* Settings (separate from sections) */}
+            <div className="pt-2 border-t border-border">
+              <Link
+                href="/dashboard/settings"
+                className="block"
+                onClick={closeMobileMenu}
+              >
+                <div
+                  className={`group relative flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 border ${
+                    pathname === "/dashboard/settings"
+                      ? "bg-primary/10 border-primary shadow-md text-foreground"
+                      : "border-border bg-card hover:border-primary hover:shadow-lg hover:translate-x-1 text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <div className={`p-1.5 border transition-colors ${
+                    pathname === "/dashboard/settings" ? 'border-primary bg-primary/20' : 'border-border group-hover:border-primary'
+                  }`}>
+                    <Settings className={`h-4 w-4 transition-colors ${
+                      pathname === "/dashboard/settings" ? 'text-primary' : 'group-hover:text-primary'
+                    }`} />
+                  </div>
+                  <span className="transition-colors">{t.nav.settings || "Settings"}</span>
+                  {pathname === "/dashboard/settings" && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
+                  )}
+                </div>
+              </Link>
+            </div>
           </nav>
 
           {/* Logout */}
