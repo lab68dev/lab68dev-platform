@@ -2,119 +2,199 @@
 
 import { useState, useEffect, useRef } from "react"
 import { getTranslations } from "@/lib/i18n"
+import { getCurrentUser } from "@/lib/auth"
 import {
-  getUserChatRooms,
-  getRoomMessages,
-  sendMessage,
-  createChatRoom,
-  setTyping,
-  clearTyping,
-  getRoomTypingUsers,
+  getChatRooms,
+  getMessages,
+  sendMessage as sendSupabaseMessage,
+  updateMessage,
+  deleteMessage,
   addReaction,
-  markRoomAsRead,
-  getUnreadCount,
-  parseMentions,
+  subscribeToMessages,
+  subscribeToMessageUpdates,
+  createChatRoom,
+  addRoomMember,
+  getOrCreateDirectChat,
+  updateUserPresence,
+  getAllUsersPresence,
+  subscribeToPresence,
   type ChatRoom,
   type Message,
-} from "@/lib/chat"
-import { updateMessage, deleteMessage } from "@/lib/chat-supabase"
+  type UserPresence,
+} from "@/lib/chat-supabase"
 
 export default function ChatPage() {
-  const t = getTranslations("en") // Default to English, make configurable if needed
-  const [currentUser] = useState("user@example.com") // In real app, get from auth
+  const t = getTranslations("en")
+  const user = getCurrentUser()
+  const currentUser = user?.email || "guest@example.com"
+  const currentUserId = user?.email || "guest"
+  
   const [rooms, setRooms] = useState<ChatRoom[]>([])
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [messageInput, setMessageInput] = useState("")
-  const [typingUsers, setTypingUsers] = useState<string[]>([])
   const [showNewChatModal, setShowNewChatModal] = useState(false)
+  const [chatType, setChatType] = useState<'direct' | 'group'>('direct')
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [editContent, setEditContent] = useState("")
+  const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([])
+  const [showCollaborators, setShowCollaborators] = useState(false)
+  
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const unsubscribeMessagesRef = useRef<(() => void) | null>(null)
+  const unsubscribeUpdatesRef = useRef<(() => void) | null>(null)
+  const unsubscribePresenceRef = useRef<(() => void) | null>(null)
 
-  // Load user's chat rooms
+  // Load user's chat rooms and set up presence
   useEffect(() => {
     loadRooms()
+    loadOnlineUsers()
+    
+    // Set user as online
+    updateUserPresence(currentUserId, currentUser, user?.name, 'online')
+    
+    // Subscribe to presence changes
+    unsubscribePresenceRef.current = subscribeToPresence((presence) => {
+      setOnlineUsers(prev => {
+        const filtered = prev.filter(p => p.user_id !== presence.user_id)
+        return [...filtered, presence]
+      })
+    })
+    
+    // Set user as offline on unmount
+    return () => {
+      updateUserPresence(currentUserId, currentUser, user?.name, 'offline')
+      unsubscribePresenceRef.current?.()
+    }
   }, [])
 
-  // Load messages when room changes
+  // Load messages and subscribe to real-time updates when room changes
   useEffect(() => {
     if (selectedRoom) {
       loadMessages(selectedRoom.id)
-      markRoomAsRead(selectedRoom.id, currentUser)
+      
+      // Unsubscribe from previous room
+      unsubscribeMessagesRef.current?.()
+      unsubscribeUpdatesRef.current?.()
+      
+      // Subscribe to new messages
+      unsubscribeMessagesRef.current = subscribeToMessages(selectedRoom.id, (newMessage) => {
+        setMessages(prev => [...prev, newMessage])
+        scrollToBottom()
+      })
+      
+      // Subscribe to message updates and deletes
+      unsubscribeUpdatesRef.current = subscribeToMessageUpdates(
+        selectedRoom.id,
+        (updatedMessage) => {
+          setMessages(prev => prev.map(msg => 
+            msg.id === updatedMessage.id ? updatedMessage : msg
+          ))
+        },
+        (deletedId) => {
+          setMessages(prev => prev.filter(msg => msg.id !== deletedId))
+        }
+      )
+    }
+    
+    return () => {
+      unsubscribeMessagesRef.current?.()
+      unsubscribeUpdatesRef.current?.()
     }
   }, [selectedRoom])
 
-  // Poll for typing indicators
-  useEffect(() => {
-    if (!selectedRoom) return
-
-    const interval = setInterval(() => {
-      const typing = getRoomTypingUsers(selectedRoom.id, currentUser)
-      setTypingUsers(typing)
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [selectedRoom, currentUser])
-
   // Auto-scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    scrollToBottom()
   }, [messages])
 
-  function loadRooms() {
-    const userRooms = getUserChatRooms(currentUser)
-    setRooms(userRooms)
+  function scrollToBottom() {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  function loadMessages(roomId: string) {
-    const roomMessages = getRoomMessages(roomId, 100)
-    setMessages(roomMessages.reverse()) // Show oldest first
+  async function loadRooms() {
+    try {
+      const userRooms = await getChatRooms(currentUserId)
+      setRooms(userRooms)
+    } catch (error) {
+      console.error("Failed to load rooms:", error)
+    }
   }
 
-  function handleSendMessage() {
+  async function loadMessages(roomId: string) {
+    try {
+      const roomMessages = await getMessages(roomId, 100)
+      setMessages(roomMessages)
+    } catch (error) {
+      console.error("Failed to load messages:", error)
+    }
+  }
+
+  async function loadOnlineUsers() {
+    try {
+      const users = await getAllUsersPresence()
+      setOnlineUsers(users)
+    } catch (error) {
+      console.error("Failed to load online users:", error)
+    }
+  }
+
+  async function handleSendMessage() {
     if (!selectedRoom || !messageInput.trim()) return
 
-    const mentions = parseMentions(messageInput)
-    const newMessage = sendMessage(selectedRoom.id, currentUser, currentUser, messageInput, {
-      mentions,
-    })
+    try {
+      await sendSupabaseMessage({
+        room_id: selectedRoom.id,
+        user_id: currentUserId,
+        content: messageInput,
+        mentions: [],
+        reactions: {}
+      })
 
-    setMessages((prev) => [...prev, newMessage])
-    setMessageInput("")
-    clearTyping(selectedRoom.id, currentUser)
-    loadRooms() // Refresh to update last message
-  }
-
-  function handleTyping() {
-    if (!selectedRoom) return
-
-    setTyping(selectedRoom.id, currentUser, currentUser)
-
-    // Clear previous timeout
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current)
-    }
-
-    // Set new timeout to clear typing after 3 seconds
-    typingTimeoutRef.current = setTimeout(() => {
-      clearTyping(selectedRoom.id, currentUser)
-    }, 3000)
-  }
-
-  function handleReaction(messageId: string, emoji: string) {
-    addReaction(messageId, emoji, currentUser, currentUser)
-    if (selectedRoom) {
-      loadMessages(selectedRoom.id)
+      setMessageInput("")
+      await loadRooms() // Refresh to update last message
+    } catch (error) {
+      console.error("Failed to send message:", error)
+      alert("Failed to send message")
     }
   }
 
-  function handleCreateRoom(name: string, members: string[]) {
-    const room = createChatRoom("group", "group", currentUser, [currentUser, ...members])
-    setRooms((prev) => [...prev, room])
-    setSelectedRoom(room)
-    setShowNewChatModal(false)
+  async function handleCreateRoom(name: string, members: string[], type: 'direct' | 'group') {
+    try {
+      const room = await createChatRoom({
+        name,
+        type,
+        created_by: currentUserId,
+        description: type === 'group' ? `Group chat: ${name}` : undefined
+      })
+
+      // Add creator as member
+      await addRoomMember(room.id, currentUserId)
+      
+      // Add other members
+      for (const memberEmail of members) {
+        await addRoomMember(room.id, memberEmail)
+      }
+
+      await loadRooms()
+      setSelectedRoom(room)
+      setShowNewChatModal(false)
+    } catch (error) {
+      console.error("Failed to create room:", error)
+      alert("Failed to create chat room")
+    }
+  }
+
+  async function handleStartDirectChat(userEmail: string) {
+    try {
+      const room = await getOrCreateDirectChat(currentUserId, userEmail)
+      await loadRooms()
+      setSelectedRoom(room)
+      setShowCollaborators(false)
+    } catch (error) {
+      console.error("Failed to start direct chat:", error)
+      alert("Failed to start chat")
+    }
   }
 
   function handleStartEdit(messageId: string, content: string) {
@@ -132,19 +212,8 @@ export default function ChatPage() {
 
     try {
       await updateMessage(messageId, editContent)
-      // Update local state
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === messageId
-            ? { ...msg, content: editContent, edited: true }
-            : msg
-        )
-      )
       setEditingMessageId(null)
       setEditContent("")
-      if (selectedRoom) {
-        loadMessages(selectedRoom.id)
-      }
     } catch (error) {
       console.error("Failed to update message:", error)
       alert("Failed to update message")
@@ -156,14 +225,17 @@ export default function ChatPage() {
 
     try {
       await deleteMessage(messageId)
-      // Update local state
-      setMessages((prev) => prev.filter((msg) => msg.id !== messageId))
-      if (selectedRoom) {
-        loadMessages(selectedRoom.id)
-      }
     } catch (error) {
       console.error("Failed to delete message:", error)
       alert("Failed to delete message")
+    }
+  }
+
+  async function handleReaction(messageId: string, emoji: string) {
+    try {
+      await addReaction(messageId, emoji, currentUserId)
+    } catch (error) {
+      console.error("Failed to add reaction:", error)
     }
   }
 
@@ -184,12 +256,21 @@ export default function ChatPage() {
       <div className="w-80 border border-border bg-card p-4 overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">{t.chat.title}</h2>
-          <button
-            onClick={() => setShowNewChatModal(true)}
-            className="px-3 py-1 bg-primary text-primary-foreground text-sm hover:bg-primary/90"
-          >
-            {t.chat.newChat}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowCollaborators(!showCollaborators)}
+              className="px-2 py-1 bg-secondary text-secondary-foreground text-xs hover:bg-secondary/80"
+              title="Show Collaborators"
+            >
+              👥
+            </button>
+            <button
+              onClick={() => setShowNewChatModal(true)}
+              className="px-3 py-1 bg-primary text-primary-foreground text-sm hover:bg-primary/90"
+            >
+              {t.chat.newChat}
+            </button>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -199,7 +280,11 @@ export default function ChatPage() {
             </p>
           ) : (
             rooms.map((room) => {
-              const unread = getUnreadCount(room.id, currentUser)
+              const isDirectChat = room.type === 'direct'
+              const roomName = isDirectChat 
+                ? room.name || 'Direct Chat'
+                : room.name
+              
               return (
                 <button
                   key={room.id}
@@ -210,22 +295,27 @@ export default function ChatPage() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium truncate">{room.name}</h3>
-                      {room.lastMessage && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          {room.lastMessage.content}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs">
+                          {isDirectChat ? '💬' : '👥'}
+                        </span>
+                        <h3 className="font-medium truncate">{roomName}</h3>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {isDirectChat ? 'Individual' : 'Group'} • {room.members?.length || 0} members
+                      </p>
+                      {room.last_message && (
+                        <p className="text-sm text-muted-foreground truncate mt-1">
+                          {room.last_message.content}
                         </p>
                       )}
                     </div>
-                    {unread > 0 && (
-                      <span className="ml-2 px-2 py-0.5 bg-primary text-primary-foreground text-xs font-medium rounded-full">
-                        {unread}
-                      </span>
-                    )}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {room.lastMessage && formatTime(room.lastMessage.createdAt)}
-                  </div>
+                  {room.last_message && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {formatTime(room.last_message.created_at)}
+                    </div>
+                  )}
                 </button>
               )
             })
@@ -233,16 +323,90 @@ export default function ChatPage() {
         </div>
       </div>
 
+      {/* Collaborators Sidebar */}
+      {showCollaborators && (
+        <div className="w-64 border border-border bg-card p-4 overflow-y-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold">Collaborators</h3>
+            <button
+              onClick={() => setShowCollaborators(false)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="space-y-2">
+            {onlineUsers
+              .filter(u => u.user_id !== currentUserId)
+              .map((userPresence) => {
+                const isOnline = userPresence.status === 'online'
+                return (
+                  <button
+                    key={userPresence.user_id}
+                    onClick={() => handleStartDirectChat(userPresence.user_id)}
+                    className="w-full text-left p-2 border border-border hover:bg-muted transition-colors flex items-center gap-2"
+                  >
+                    <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {userPresence.name || userPresence.email}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {isOnline ? 'Online' : 'Offline'}
+                      </p>
+                    </div>
+                  </button>
+                )
+              })}
+            
+            {onlineUsers.filter(u => u.user_id !== currentUserId).length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No collaborators found
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Chat Area */}
       <div className="flex-1 border border-border bg-card flex flex-col">
         {selectedRoom ? (
           <>
             {/* Chat Header */}
             <div className="p-4 border-b border-border">
-              <h2 className="text-lg font-bold">{selectedRoom.name}</h2>
-              <p className="text-sm text-muted-foreground">
-                {selectedRoom.members.length} {t.chat.members}
-              </p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">
+                  {selectedRoom.type === 'direct' ? '💬' : '👥'}
+                </span>
+                <h2 className="text-lg font-bold">{selectedRoom.name}</h2>
+              </div>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span>
+                  {selectedRoom.type === 'direct' ? 'Individual Chat' : 'Group Chat'}
+                </span>
+                <span>•</span>
+                <span>{selectedRoom.members?.length || 0} {t.chat.members}</span>
+                {selectedRoom.type === 'direct' && selectedRoom.members && (
+                  <>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      {(() => {
+                        const otherMember = selectedRoom.members.find(m => m.user_id !== currentUserId)
+                        if (!otherMember) return 'Unknown'
+                        const presence = onlineUsers.find(p => p.user_id === otherMember.user_id)
+                        const isOnline = presence?.status === 'online'
+                        return (
+                          <>
+                            <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`} />
+                            {isOnline ? 'Online' : 'Offline'}
+                          </>
+                        )
+                      })()}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Messages */}
@@ -250,17 +414,19 @@ export default function ChatPage() {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex ${msg.userId === currentUser ? "justify-end" : "justify-start"}`}
+                  className={`flex ${msg.user_id === currentUserId ? "justify-end" : "justify-start"}`}
                 >
                   <div
                     className={`max-w-[70%] ${
-                      msg.userId === currentUser
+                      msg.user_id === currentUserId
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted"
                     } p-3 rounded`}
                   >
-                    {msg.userId !== currentUser && (
-                      <p className="text-xs font-medium mb-1">{msg.userName}</p>
+                    {msg.user_id !== currentUserId && (
+                      <p className="text-xs font-medium mb-1">
+                        {selectedRoom.members?.find(m => m.user_id === msg.user_id)?.user_name || msg.user_id}
+                      </p>
                     )}
                     
                     {/* Edit mode */}
@@ -295,7 +461,7 @@ export default function ChatPage() {
                         <p className="text-sm break-words">{msg.content}</p>
                         
                         {/* Edit/Delete buttons for own messages */}
-                        {msg.userId === currentUser && (
+                        {msg.user_id === currentUserId && (
                           <div className="flex gap-2 mt-2">
                             <button
                               onClick={() => handleStartEdit(msg.id, msg.content)}
@@ -318,19 +484,19 @@ export default function ChatPage() {
                     
                     <div className="flex items-center justify-between mt-2 gap-2">
                       <span className="text-xs opacity-70">
-                        {formatTime(msg.createdAt)}
-                        {msg.edited && ` ${t.chat.edited}`}
+                        {formatTime(msg.created_at)}
+                        {msg.updated_at && msg.updated_at !== msg.created_at && ` (edited)`}
                       </span>
-                      {msg.reactions.length > 0 && (
+                      {msg.reactions && Object.keys(msg.reactions).length > 0 && (
                         <div className="flex gap-1">
-                          {msg.reactions.map((reaction, idx) => (
+                          {Object.entries(msg.reactions).map(([emoji, userIds]) => (
                             <button
-                              key={idx}
-                              onClick={() => handleReaction(msg.id, reaction.emoji)}
-                              className="text-sm hover:scale-110 transition-transform"
-                              title={reaction.userName}
+                              key={emoji}
+                              onClick={() => handleReaction(msg.id, emoji)}
+                              className="text-sm hover:scale-110 transition-transform px-1"
+                              title={`${(userIds as string[]).length} reaction(s)`}
                             >
-                              {reaction.emoji}
+                              {emoji} {(userIds as string[]).length}
                             </button>
                           ))}
                         </div>
@@ -354,13 +520,6 @@ export default function ChatPage() {
                 </div>
               ))}
               <div ref={messagesEndRef} />
-
-              {/* Typing Indicator */}
-              {typingUsers.length > 0 && (
-                <div className="text-sm text-muted-foreground italic">
-                  {typingUsers.join(", ")} {typingUsers.length === 1 ? t.chat.isTyping : t.chat.areTyping}
-                </div>
-              )}
             </div>
 
             {/* Message Input */}
@@ -369,10 +528,7 @@ export default function ChatPage() {
                 <input
                   type="text"
                   value={messageInput}
-                  onChange={(e) => {
-                    setMessageInput(e.target.value)
-                    handleTyping()
-                  }}
+                  onChange={(e) => setMessageInput(e.target.value)}
                   onKeyPress={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault()
@@ -390,16 +546,13 @@ export default function ChatPage() {
                   {t.chat.send}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {t.comments.mentionSomeone}
-              </p>
             </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
               <p className="text-lg mb-2">{t.chat.noMessages}</p>
-              <p className="text-sm">{t.chat.startConversation}</p>
+              <p className="text-sm">Select a chat or start a new conversation</p>
             </div>
           </div>
         )}
@@ -409,36 +562,89 @@ export default function ChatPage() {
       {showNewChatModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-card border border-border p-6 max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">{t.chat.createRoom}</h3>
+            <h3 className="text-lg font-bold mb-4">Create New Chat</h3>
+            
+            {/* Chat Type Selection */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Chat Type</label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setChatType('direct')}
+                  className={`flex-1 px-4 py-2 border ${
+                    chatType === 'direct'
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'border-border hover:bg-muted'
+                  }`}
+                >
+                  💬 Individual
+                </button>
+                <button
+                  onClick={() => setChatType('group')}
+                  className={`flex-1 px-4 py-2 border ${
+                    chatType === 'group'
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'border-border hover:bg-muted'
+                  }`}
+                >
+                  👥 Group
+                </button>
+              </div>
+            </div>
+            
             <form
               onSubmit={(e) => {
                 e.preventDefault()
                 const formData = new FormData(e.currentTarget)
                 const roomName = formData.get("roomName") as string
-                const members = (formData.get("members") as string).split(",").map((m) => m.trim())
-                handleCreateRoom(roomName, members)
+                const membersInput = formData.get("members") as string
+                const members = membersInput.split(",").map((m) => m.trim()).filter(m => m)
+                
+                if (chatType === 'direct' && members.length !== 1) {
+                  alert("Individual chat requires exactly one member email")
+                  return
+                }
+                
+                handleCreateRoom(roomName, members, chatType)
               }}
             >
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">{t.chat.roomName}</label>
+                {chatType === 'group' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Group Name</label>
+                    <input
+                      name="roomName"
+                      type="text"
+                      required
+                      placeholder="Enter group name"
+                      className="w-full px-4 py-2 border border-input bg-background"
+                    />
+                  </div>
+                )}
+                {chatType === 'direct' && (
                   <input
                     name="roomName"
-                    type="text"
-                    required
-                    placeholder="Enter room name"
-                    className="w-full px-4 py-2 border border-input bg-background"
+                    type="hidden"
+                    value="Direct Chat"
                   />
-                </div>
+                )}
                 <div>
-                  <label className="block text-sm font-medium mb-2">{t.chat.addMembers}</label>
+                  <label className="block text-sm font-medium mb-2">
+                    {chatType === 'direct' ? 'Member Email' : 'Add Members'}
+                  </label>
                   <input
                     name="members"
                     type="text"
-                    placeholder="email1@example.com, email2@example.com"
+                    required
+                    placeholder={
+                      chatType === 'direct'
+                        ? "user@example.com"
+                        : "email1@example.com, email2@example.com"
+                    }
                     className="w-full px-4 py-2 border border-input bg-background"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">Comma-separated emails</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {chatType === 'direct' ? 'Enter one email address' : 'Comma-separated emails'}
+                  </p>
                 </div>
               </div>
               <div className="flex gap-2 mt-6">
@@ -446,14 +652,17 @@ export default function ChatPage() {
                   type="submit"
                   className="flex-1 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  {t.chat.createRoom}
+                  Create Chat
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowNewChatModal(false)}
+                  onClick={() => {
+                    setShowNewChatModal(false)
+                    setChatType('direct')
+                  }}
                   className="flex-1 px-4 py-2 border border-border hover:bg-muted"
                 >
-                  {t.chat.cancel}
+                  Cancel
                 </button>
               </div>
             </form>
