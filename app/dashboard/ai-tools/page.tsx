@@ -24,7 +24,7 @@ export default function AIToolsPage() {
       {
         role: "assistant",
         content:
-          "Hello! I'm your AI development assistant powered by Google Gemini. I can help you with code generation, debugging, architecture decisions, and more. What would you like to work on today?",
+          "Hello! I'm your AI development assistant powered by DeepSeek AI. I can help you with code generation, debugging, architecture decisions, and more. What would you like to work on today?",
         timestamp: new Date().toLocaleTimeString(),
       },
     ])
@@ -73,11 +73,11 @@ export default function AIToolsPage() {
 
       setMessages((prev) => [...prev, aiMessage])
     } catch (error) {
-      console.error("Error calling Gemini API:", error)
+      console.error("Error calling AI API:", error)
       const errorMessage: Message = {
         role: "assistant",
         content:
-          "Sorry, I encountered an error. Please make sure you have set up your Google Gemini API key in the environment variables (GEMINI_API_KEY).",
+          "Sorry, I encountered an error. Please make sure you have set up your DeepSeek API key in the environment variables (DEEPSEEK_API_KEY).",
         timestamp: new Date().toLocaleTimeString(),
       }
       setMessages((prev) => [...prev, errorMessage])
@@ -94,7 +94,7 @@ export default function AIToolsPage() {
           <Sparkles className="h-8 w-8 text-primary" />
           <div>
             <h1 className="text-4xl font-bold">{t.nav.aiTools}</h1>
-            <p className="text-muted-foreground">Your intelligent development assistant powered by Google Gemini</p>
+            <p className="text-muted-foreground">Your intelligent development assistant powered by DeepSeek AI</p>
           </div>
         </div>
       </div>
@@ -152,7 +152,7 @@ export default function AIToolsPage() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Powered by Google Gemini AI. Responses are generated in real-time.
+            Powered by DeepSeek AI. Responses are generated in real-time.
           </p>
         </div>
       </div>
