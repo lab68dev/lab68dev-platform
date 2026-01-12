@@ -5,9 +5,9 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ArrowLeft, Plus, X, Trash2, Pencil, Tag, Calendar, User, Flag, MoveRight } from "lucide-react"
-import { getTranslations, getUserLanguage, type Language } from "@/lib/i18n"
+import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
 import { getProjects, type Project as DBProject } from "@/lib/database"
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser } from "@/lib/features/auth"
 import {
   getTasks,
   createTask,
@@ -27,7 +27,7 @@ import {
   getLabels,
   type Label,
   DEFAULT_LABEL_COLORS,
-} from "@/lib/project-management"
+} from "@/lib/services"
 import { IssueDetailModal } from "@/components/issue-detail-modal"
 import Link from "next/link"
 
