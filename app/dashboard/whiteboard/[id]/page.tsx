@@ -28,7 +28,7 @@ import {
   type DrawingElement,
   type Point,
   type Tool,
-} from "@/lib/whiteboard"
+} from "@/lib/features/whiteboard"
 
 export default function WhiteboardEditorPage() {
   const params = useParams()
