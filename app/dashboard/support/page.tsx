@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { MessageCircle, Send, User, Clock, CheckCircle2, XCircle } from "lucide-react"
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser } from "@/lib/features/auth"
 
 interface SupportChat {
   chatId: string
