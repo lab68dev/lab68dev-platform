@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase"
+import { createServerSupabaseClient } from "@/lib/database/supabase-server"
 
 // GET /api/projects/[id]/issues - List all issues for a project
 export async function GET(
@@ -18,7 +18,7 @@ export async function GET(
     const epicId = searchParams.get("epicId")
     const search = searchParams.get("search")
 
-    const supabase = createClient()
+    const supabase = createServerClient()
 
     // Build query
     let query = supabase
