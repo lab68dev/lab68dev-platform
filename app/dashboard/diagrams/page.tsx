@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser } from "@/lib/features/auth"
 import { Input } from "@/components/ui/input"
 import { Plus, Edit, Trash2, Search, Filter } from "lucide-react"
-import { useLanguage } from "@/lib/i18n"
+import { useLanguage } from "@/lib/config"
 import Link from "next/link"
 
 interface Diagram {
