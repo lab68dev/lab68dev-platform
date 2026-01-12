@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { JetBrains_Mono } from "next/font/google"
 import "./globals.css"
 import { LiveChatWidget } from "@/components/live-chat-widget"
+import { Toaster } from "sonner"
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] })
 
@@ -50,6 +51,19 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: 'hsl(var(--card))',
+              color: 'hsl(var(--card-foreground))',
+              border: '1px solid hsl(var(--border))',
+            },
+            className: 'font-mono',
+          }}
+          richColors
+          closeButton
+        />
         <LiveChatWidget />
       </body>
     </html>
