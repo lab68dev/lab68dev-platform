@@ -85,7 +85,7 @@ export function NotificationsPanel() {
           />
           
           {/* Notification Panel */}
-          <div className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-md bg-card border-2 border-border shadow-2xl z-50 rounded-lg overflow-hidden">
+          <div className="fixed right-2 top-20 sm:absolute sm:right-0 sm:left-auto sm:top-full mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-md bg-card border-2 border-border shadow-2xl z-50 rounded-lg overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b-2 border-border bg-muted/50">
               <div className="flex items-center gap-2">
