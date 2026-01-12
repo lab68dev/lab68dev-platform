@@ -15,10 +15,10 @@ import {
   Search,
   Filter,
 } from "lucide-react"
-import { getCurrentUser } from "@/lib/auth"
-import { getTranslations, getUserLanguage, type Language } from "@/lib/i18n"
+import { getCurrentUser } from "@/lib/features/auth"
+import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
 import { getFiles, createFile, deleteFile, type FileRecord } from "@/lib/database"
-import { createClient } from "@/lib/supabase"
+import { createClient } from "@/lib/database"
 
 interface File {
   id: string
