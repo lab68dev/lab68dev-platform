@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase"
+import { createServerSupabaseClient } from "@/lib/database/supabase-server"
 
 // GET /api/projects/[id]/labels - List all labels
 export async function GET(
