@@ -403,7 +403,7 @@ export default function HomePage() {
                   <div className="flex-shrink-0">
                     <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary/20 bg-white">
                       <Image
-                        src="/images/logos/Duong Phu Dong.png"
+                        src="/images/logos/fdag.jpg"
                         alt="F4P1E - Duong Phu Dong"
                         width={128}
                         height={128}
