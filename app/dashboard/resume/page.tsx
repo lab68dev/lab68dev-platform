@@ -27,7 +27,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { createClient } from "@/lib/supabase"
+import { createClient } from "@/lib/database"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
