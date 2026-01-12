@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { Eye, EyeOff, ShieldCheck } from "lucide-react"
-import { initializeStaffPortal } from "@/lib/staff-init"
+import { initializeStaffPortal } from "@/lib/features/staff"
 
 interface StaffUser {
   id: string
