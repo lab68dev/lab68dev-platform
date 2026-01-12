@@ -6,8 +6,8 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { getCurrentUser } from "@/lib/auth"
-import { getTranslations, getUserLanguage } from "@/lib/i18n"
+import { getCurrentUser } from "@/lib/features/auth"
+import { getTranslations, getUserLanguage } from "@/lib/config"
 import { getMilestones, createMilestone, updateMilestone, deleteMilestone } from "@/lib/database"
 import {
   Plus,
