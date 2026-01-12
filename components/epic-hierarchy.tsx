@@ -12,7 +12,7 @@ import {
   Flag,
   Calendar,
 } from "lucide-react"
-import type { Task } from "@/lib/project-management"
+import type { Task } from "@/lib/services"
 
 interface Epic {
   id: string
