@@ -23,11 +23,11 @@ import {
   X,
   Headphones,
 } from "lucide-react"
-import { getCurrentUser, signOut } from "@/lib/auth"
+import { getCurrentUser, signOut } from "@/lib/features/auth"
 import { useEffect, useState } from "react"
-import type { User } from "@/lib/auth"
+import type { User } from "@/lib/features/auth"
 import { NotificationsPanel } from "./notifications-panel"
-import { useLanguage } from "@/lib/i18n"
+import { useLanguage } from "@/lib/config"
 
 // navItems will be created inside the component so labels come from translations
 
