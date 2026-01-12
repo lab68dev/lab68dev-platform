@@ -19,7 +19,7 @@ import {
   Send,
   Link as LinkIcon
 } from "lucide-react"
-import type { Task, Label as LabelType } from "@/lib/project-management"
+import type { Task, Label as LabelType } from "@/lib/services"
 
 interface IssueComment {
   id: string
