@@ -4,8 +4,8 @@ import type React from "react"
 
 import { useEffect, useState, useRef } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { getCurrentUser } from "@/lib/auth"
-import { useLanguage } from "@/lib/i18n"
+import { getCurrentUser } from "@/lib/features/auth"
+import { useLanguage } from "@/lib/config"
 import {
   Save,
   Download,
