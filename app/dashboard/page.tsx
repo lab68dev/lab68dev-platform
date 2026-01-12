@@ -181,10 +181,10 @@ export default function DashboardPage() {
   })
 
   const stats = [
-    { label: "Active Projects", value: loading ? "..." : counts.projects.toString(), icon: FolderKanban, change: `${counts.projects} total` },
-    { label: "Pending Todos", value: loading ? "..." : counts.todos.toString(), icon: ListTodo, change: "Active tasks" },
-    { label: "Active Milestones", value: loading ? "..." : counts.milestones.toString(), icon: GitBranch, change: "In progress" },
-    { label: "Upcoming Meetings", value: loading ? "..." : counts.meetings.toString(), icon: Calendar, change: "Scheduled" },
+    { label: "Active Projects", value: loading ? "..." : counts.projects.toString(), icon: FolderKanban, change: `${counts.projects} total`, color: "primary" },
+    { label: "Pending Todos", value: loading ? "..." : counts.todos.toString(), icon: ListTodo, change: "Active tasks", color: "cyan" },
+    { label: "Active Milestones", value: loading ? "..." : counts.milestones.toString(), icon: GitBranch, change: "In progress", color: "purple" },
+    { label: "Upcoming Meetings", value: loading ? "..." : counts.meetings.toString(), icon: Calendar, change: "Scheduled", color: "pink" },
   ]
 
   const recentProjects: Array<{ name: string; status: string; updated: string }> = []
@@ -463,15 +463,30 @@ export default function DashboardPage() {
         ) : (
           stats.map((stat) => {
             const Icon = stat.icon
+            const colorMap = {
+              primary: "var(--primary)",
+              cyan: "var(--accent-cyan)",
+              purple: "var(--accent-purple)",
+              pink: "var(--accent-pink)",
+            }
+            const glowMap = {
+              primary: "hover:shadow-[0_0_20px_var(--primary)]",
+              cyan: "hover:shadow-[0_0_20px_var(--accent-cyan)]",
+              purple: "hover:shadow-[0_0_20px_var(--accent-purple)]",
+              pink: "hover:shadow-[0_0_20px_var(--accent-pink)]",
+            }
+            const iconColor = colorMap[stat.color as keyof typeof colorMap]
+            const glowEffect = glowMap[stat.color as keyof typeof glowMap]
+            
             return (
-              <Card key={stat.label} className="border-border p-4 sm:p-6 bg-card hover:border-primary transition-colors">
+              <Card key={stat.label} className={`border-border p-4 sm:p-6 bg-card hover:border-[${iconColor}] transition-all ${glowEffect}`}>
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 sm:space-y-2">
                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">{stat.label}</p>
                     <p className="text-2xl sm:text-3xl font-bold">{stat.value}</p>
-                    <p className="text-[10px] sm:text-xs text-primary">{stat.change}</p>
+                    <p className="text-[10px] sm:text-xs" style={{ color: iconColor }}>{stat.change}</p>
                   </div>
-                  <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
+                  <Icon className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: iconColor }} />
                 </div>
               </Card>
             )
