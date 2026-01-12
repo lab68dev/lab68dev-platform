@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Send, Sparkles } from "lucide-react"
 import { getTranslations, getUserLanguage } from "@/lib/config"
+import { ColorPaletteDemo } from "@/components/color-palette-demo"
 
 type Message = {
   role: "user" | "assistant"
@@ -90,13 +91,16 @@ export default function AIToolsPage() {
     <div className="flex h-screen flex-col">
       {/* Header */}
       <div className="border-b border-border p-8">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-6">
           <Sparkles className="h-8 w-8 text-primary" />
           <div>
             <h1 className="text-4xl font-bold">{t.nav.aiTools}</h1>
             <p className="text-muted-foreground">Your intelligent development assistant powered by DeepSeek AI</p>
           </div>
         </div>
+        
+        {/* Color Palette Demo Section */}
+        <ColorPaletteDemo />
       </div>
 
       {/* Chat Area */}
