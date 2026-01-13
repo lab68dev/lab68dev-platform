@@ -9,6 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^3.10.0",
     "@html2canvas/html2canvas": "^1.6.3",
     "@radix-ui/react-accordion": "1.2.2",
