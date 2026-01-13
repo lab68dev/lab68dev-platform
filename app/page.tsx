@@ -9,6 +9,24 @@ import Image from "next/image"
 import { getTranslations, getUserLanguage } from "@/lib/config"
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
+import {
+  SparklesIcon,
+  RocketLaunchIcon,
+  ClipboardDocumentListIcon,
+  LightBulbIcon,
+  UserGroupIcon,
+  FolderIcon,
+  PresentationChartLineIcon,
+  DocumentTextIcon,
+  FaceSmileIcon,
+  BookOpenIcon,
+  CalendarIcon,
+  ChatBubbleLeftRightIcon,
+  CheckCircleIcon,
+  BoltIcon,
+  ShieldCheckIcon,
+  ArrowRightIcon,
+} from '@heroicons/react/24/outline'
 
 const LightRays = dynamic(() => import("@/components/light-rays"), { ssr: false })
 
@@ -85,56 +103,108 @@ export default function HomePage() {
         <Header />
 
         {/* Hero Section */}
-        <section className="flex-1 border-b border-border">
-          <div className="container mx-auto px-4 py-24 md:py-32">
+        <section className="flex-1 border-b border-border relative overflow-hidden">
+          {/* Animated gradient orbs */}
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          
+          <div className="container mx-auto px-4 py-24 md:py-32 relative z-10">
             <div className="mx-auto max-w-4xl text-center space-y-8">
-              <div className="mb-12">
+              <div className="mb-12 animate-fade-in">
                 <Image
                   src="/images/design-mode/Lab68dev.png"
                   alt="Lab68dev"
                   width={400}
                   height={200}
-                  className="mx-auto"
+                  className="mx-auto hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance">
+              
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/50 bg-primary/10 mb-6 animate-fade-in-up">
+                <SparklesIcon className="h-5 w-5 text-primary animate-spin-slow" />
+                <span className="text-sm font-medium text-primary">Next-Gen Collaboration Platform</span>
+              </div>
+              
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance animate-fade-in-up">
                 {typedText}
                 <span className="animate-pulse">|</span>
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">{t.landing.hero.subtitle}</p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-                <Button asChild size="lg" className="w-full sm:w-auto">
-                  <Link href="/login">{t.landing.hero.cta}</Link>
+              
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in-up delay-300">
+                {t.landing.hero.subtitle}
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4 animate-fade-in-up delay-500">
+                <Button asChild size="lg" className="w-full sm:w-auto group hover:shadow-lg hover:shadow-primary/50 transition-all">
+                  <Link href="/login" className="flex items-center gap-2">
+                    {t.landing.hero.cta}
+                    <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
                 </Button>
                 <Button
                   asChild
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto border-foreground text-foreground hover:bg-foreground hover:text-background bg-transparent"
+                  className="w-full sm:w-auto border-foreground/20 text-foreground hover:bg-foreground hover:text-background bg-transparent group"
                 >
-                  <Link href="/#projects">{t.nav.projects}</Link>
+                  <Link href="/#projects" className="flex items-center gap-2">
+                    {t.nav.projects}
+                    <ArrowRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
                 </Button>
+              </div>
+              
+              {/* Stats Section */}
+              <div className="grid grid-cols-3 gap-8 pt-16 max-w-2xl mx-auto animate-fade-in-up delay-700">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-primary mb-2">10+</div>
+                  <div className="text-sm text-muted-foreground">Features</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-primary mb-2">100%</div>
+                  <div className="text-sm text-muted-foreground">Open Source</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-primary mb-2">24/7</div>
+                  <div className="text-sm text-muted-foreground">Available</div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Mission Section */}
-        <section id="mission" className="border-b border-border">
+        <section id="mission" className="border-b border-border relative">
           <div className="container mx-auto px-4 py-24">
             <div className="mx-auto max-w-4xl">
-              <h2 className="text-3xl md:text-5xl font-bold mb-8 text-balance">{t.landing.mission.title}</h2>
-              <p className="text-lg md:text-xl leading-relaxed">{t.landing.mission.description}</p>
+              <div className="flex items-start gap-6 group">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <BoltIcon className="h-8 w-8 text-primary" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-3xl md:text-5xl font-bold mb-8 text-balance group-hover:text-primary transition-colors">
+                    {t.landing.mission.title}
+                  </h2>
+                  <p className="text-lg md:text-xl leading-relaxed text-muted-foreground">
+                    {t.landing.mission.description}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Tech Stack Section */}
-        <section id="stack" className="border-b border-border">
+        <section id="stack" className="border-b border-border bg-muted/30">
           <div className="container mx-auto px-4 py-24">
             <div className="mx-auto max-w-4xl">
-              <h2 className="text-3xl md:text-5xl font-bold mb-12 text-balance">{t.landing.techStack.title}</h2>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-balance text-center">{t.landing.techStack.title}</h2>
+              <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+                Built with cutting-edge technologies for performance and scalability
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
                 {[
                   { name: "React", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
                   { name: "Next.js", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
@@ -142,15 +212,20 @@ export default function HomePage() {
                   { name: "Python", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
                   { name: "C++", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" }
                 ].map((tech) => (
-                  <div key={tech.name} className="border border-border p-6 hover:border-primary transition-colors flex flex-col items-center justify-center gap-3">
-                    <Image
-                      src={tech.logo}
-                      alt={tech.name}
-                      width={64}
-                      height={64}
-                      className="object-contain"
-                    />
-                    <p className="text-sm font-medium text-center">{tech.name}</p>
+                  <div 
+                    key={tech.name} 
+                    className="border border-border/50 p-6 hover:border-primary hover:bg-card transition-all duration-300 flex flex-col items-center justify-center gap-3 group hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
+                  >
+                    <div className="relative w-16 h-16">
+                      <Image
+                        src={tech.logo}
+                        alt={tech.name}
+                        width={64}
+                        height={64}
+                        className="object-contain group-hover:scale-110 transition-transform"
+                      />
+                    </div>
+                    <p className="text-sm font-medium text-center group-hover:text-primary transition-colors">{tech.name}</p>
                   </div>
                 ))}
               </div>
@@ -217,141 +292,185 @@ export default function HomePage() {
           <div className="container mx-auto px-4 py-24">
             <div className="mx-auto max-w-6xl">
               <div className="text-center mb-16">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/50 bg-primary/10 mb-6">
+                  <SparklesIcon className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium text-primary">Comprehensive Features</span>
+                </div>
                 <h2 className="text-3xl md:text-5xl font-bold mb-4">Our Services</h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                   Everything you need to build, collaborate, and ship amazing projects
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Project Management */}
-                <div className="border border-border p-6 hover:border-primary transition-all duration-300 group">
-                  <div className="mb-4 text-primary">
-                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
+                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
+                  <div className="mb-6 text-primary">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                      <ClipboardDocumentListIcon className="h-7 w-7" />
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Jira-like Project Management</h3>
-                  <p className="text-muted-foreground">
-                    Full-featured project management with Kanban boards, sprint planning, backlog management, epic hierarchy, advanced filters, and real-time collaboration. Complete Jira-like experience with role-based access control.
+                  <p className="text-muted-foreground leading-relaxed">
+                    Full-featured project management with Kanban boards, sprint planning, backlog management, epic hierarchy, advanced filters, and real-time collaboration.
                   </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Learn more</span>
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </div>
                 </div>
 
                 {/* AI-Powered Tools */}
-                <div className="border border-border p-6 hover:border-primary transition-all duration-300 group">
-                  <div className="mb-4 text-primary">
-                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
+                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
+                  <div className="mb-6 text-primary">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                      <LightBulbIcon className="h-7 w-7" />
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">AI-Powered Assistant</h3>
-                  <p className="text-muted-foreground">
-                    Integrated AI assistant for code generation, smart suggestions, task automation, and intelligent workflows. Boost productivity with cutting-edge artificial intelligence.
+                  <p className="text-muted-foreground leading-relaxed">
+                    Integrated AI assistant for code generation, smart suggestions, task automation, and intelligent workflows. Boost productivity with cutting-edge AI.
                   </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Learn more</span>
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </div>
                 </div>
 
                 {/* Real-Time Collaboration */}
-                <div className="border border-border p-6 hover:border-primary transition-all duration-300 group">
-                  <div className="mb-4 text-primary">
-                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
+                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
+                  <div className="mb-6 text-primary">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                      <UserGroupIcon className="h-7 w-7" />
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Real-Time Collaboration</h3>
-                  <p className="text-muted-foreground">
-                    Live chat with typing indicators, threaded comments with @mentions, collaborative whiteboard with drawing tools, and real-time updates. Work together seamlessly from anywhere in the world.
+                  <p className="text-muted-foreground leading-relaxed">
+                    Live chat with typing indicators, threaded comments with @mentions, collaborative whiteboard, and real-time updates. Work together seamlessly.
                   </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Learn more</span>
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </div>
                 </div>
 
                 {/* File Management */}
-                <div className="border border-border p-6 hover:border-primary transition-all duration-300 group">
-                  <div className="mb-4 text-primary">
-                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
+                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
+                  <div className="mb-6 text-primary">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                      <FolderIcon className="h-7 w-7" />
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">File Management</h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground leading-relaxed">
                     Upload, organize, and share files effortlessly. Support for multiple file types with easy categorization and search.
                   </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Learn more</span>
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </div>
                 </div>
 
                 {/* Diagram & Visualization */}
-                <div className="border border-border p-6 hover:border-primary transition-all duration-300 group">
-                  <div className="mb-4 text-primary">
-                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
+                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
+                  <div className="mb-6 text-primary">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                      <PresentationChartLineIcon className="h-7 w-7" />
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Diagram & Visualization</h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground leading-relaxed">
                     Create flowcharts, mind maps, and technical diagrams. Visualize your ideas with powerful drawing tools.
                   </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Learn more</span>
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </div>
                 </div>
 
                 {/* Resume Editor */}
-                <div className="border border-border p-6 hover:border-primary transition-all duration-300 group">
-                  <div className="mb-4 text-primary">
-                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
+                  <div className="mb-6 text-primary">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                      <DocumentTextIcon className="h-7 w-7" />
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Live Resume Editor</h3>
-                  <p className="text-muted-foreground">
-                    Professional WYSIWYG resume builder with 5 templates, live A4 preview, drag-and-drop sections, color picker, font customization, and photo support. Export-ready for PDF.
+                  <p className="text-muted-foreground leading-relaxed">
+                    Professional WYSIWYG resume builder with 5 templates, live A4 preview, drag-and-drop sections, and color customization. Export-ready for PDF.
                   </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Learn more</span>
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </div>
                 </div>
 
                 {/* Games Hub */}
-                <div className="border border-border p-6 hover:border-primary transition-all duration-300 group">
-                  <div className="mb-4 text-primary">
-                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
+                  <div className="mb-6 text-primary">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                      <FaceSmileIcon className="h-7 w-7" />
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Games Hub</h3>
-                  <p className="text-muted-foreground">
-                    Take a break with puzzle games, arcade classics, and brain training. Sudoku, Tetris, Snake, typing tests, and more to refresh your mind.
+                  <p className="text-muted-foreground leading-relaxed">
+                    Take a break with puzzle games, arcade classics, and brain training. Sudoku, Tetris, Snake, typing tests, and more.
                   </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Learn more</span>
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </div>
                 </div>
 
                 {/* Wiki & Documentation */}
-                <div className="border border-border p-6 hover:border-primary transition-all duration-300 group">
-                  <div className="mb-4 text-primary">
-                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
+                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
+                  <div className="mb-6 text-primary">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                      <BookOpenIcon className="h-7 w-7" />
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Wiki & Documentation</h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground leading-relaxed">
                     Build comprehensive knowledge bases and documentation. Organize information with categories and powerful search.
                   </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Learn more</span>
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </div>
                 </div>
 
                 {/* Meeting & Planning */}
-                <div className="border border-border p-6 hover:border-primary transition-all duration-300 group">
-                  <div className="mb-4 text-primary">
-                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
+                  <div className="mb-6 text-primary">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                      <CalendarIcon className="h-7 w-7" />
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Meeting & Planning</h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground leading-relaxed">
                     Schedule meetings, set milestones, and track progress. Keep your team aligned with clear timelines.
                   </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Learn more</span>
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </div>
                 </div>
 
                 {/* Live Support */}
-                <div className="border border-border p-6 hover:border-primary transition-all duration-300 group">
-                  <div className="mb-4 text-primary">
-                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
+                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
+                  <div className="mb-6 text-primary">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                      <ChatBubbleLeftRightIcon className="h-7 w-7" />
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Live Support</h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground leading-relaxed">
                     Get help when you need it with our integrated live chat support system. Fast, friendly, and always available.
                   </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Learn more</span>
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -359,13 +478,13 @@ export default function HomePage() {
         </section>
 
         {/* Community Section */}
-        <section id="community" className="border-b border-border">
+        <section id="community" className="border-b border-border bg-muted/30">
           <div className="container mx-auto px-4 py-24">
             <div className="mx-auto max-w-4xl space-y-8">
               <h2 className="text-3xl md:text-5xl font-bold text-balance">{t.landing.community.title}</h2>
-              <p className="text-lg md:text-xl leading-relaxed">{t.landing.community.description}</p>
+              <p className="text-lg md:text-xl leading-relaxed text-muted-foreground">{t.landing.community.description}</p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button asChild size="lg" className="w-full sm:w-auto">
+                <Button asChild size="lg" className="w-full sm:w-auto hover:shadow-lg hover:shadow-primary/50 transition-all">
                   <Link href="https://github.com/lab68dev" target="_blank">
                     Visit our GitHub
                   </Link>
@@ -377,7 +496,7 @@ export default function HomePage() {
                   <Input type="email" placeholder="your@email.com" className="max-w-sm bg-card border-border" />
                   <Button
                     variant="outline"
-                    className="border-foreground text-foreground hover:bg-foreground hover:text-background bg-transparent"
+                    className="border-foreground/20 text-foreground hover:bg-foreground hover:text-background bg-transparent"
                   >
                     Subscribe
                   </Button>
@@ -387,8 +506,76 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Why Choose Us Section */}
+        <section className="border-b border-border">
+          <div className="container mx-auto px-4 py-24">
+            <div className="mx-auto max-w-6xl">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-5xl font-bold mb-4">Why Choose Lab68?</h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Built by developers, for developers. Experience the difference.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="text-center group">
+                  <div className="w-16 h-16 mx-auto mb-6 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                    <BoltIcon className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Lightning Fast</h3>
+                  <p className="text-muted-foreground">
+                    Built on Next.js with optimized performance. Real-time updates and instant page loads for seamless workflow.
+                  </p>
+                </div>
+
+                <div className="text-center group">
+                  <div className="w-16 h-16 mx-auto mb-6 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                    <ShieldCheckIcon className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Secure & Reliable</h3>
+                  <p className="text-muted-foreground">
+                    Enterprise-grade security with JWT authentication, bcrypt encryption, and role-based access control.
+                  </p>
+                </div>
+
+                <div className="text-center group">
+                  <div className="w-16 h-16 mx-auto mb-6 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                    <CheckCircleIcon className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">All-in-One Platform</h3>
+                  <p className="text-muted-foreground">
+                    Everything you need in one place. No more switching between multiple tools and losing your flow.
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA Banner */}
+              <div className="mt-20 p-12 border border-primary/30 bg-gradient-to-br from-primary/5 to-purple-500/5 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="relative z-10 text-center">
+                  <h3 className="text-3xl md:text-4xl font-bold mb-4">Ready to Transform Your Workflow?</h3>
+                  <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
+                    Join the Lab68 community and experience the future of collaborative development.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Button asChild size="lg" className="group hover:shadow-xl hover:shadow-primary/50 transition-all">
+                      <Link href="/signup" className="flex items-center gap-2">
+                        <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                        Get Started Free
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="lg" className="border-foreground/20">
+                      <Link href="/#services">Explore Features</Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Founder Section */}
-        <section id="founder" className="border-b border-border">
+        <section id="founder" className="border-b border-border bg-muted/30">
           <div className="container mx-auto px-4 py-24">
             <div className="mx-auto max-w-4xl">
               <div className="text-center mb-12">
@@ -398,10 +585,10 @@ export default function HomePage() {
                 </p>
               </div>
               
-              <div className="border border-border p-8 md:p-12 hover:border-primary transition-all duration-300">
+              <div className="border border-border/50 p-8 md:p-12 hover:border-primary transition-all duration-300 bg-card hover:shadow-xl hover:shadow-primary/10">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-                  <div className="flex-shrink-0">
-                    <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary/20 bg-white">
+                  <div className="flex-shrink-0 group">
+                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20 bg-white group-hover:border-primary/40 transition-all group-hover:scale-105">
                       <Image
                         src="/images/logos/fdag.jpg"
                         alt="F4P1E - Duong Phu Dong"
@@ -421,16 +608,16 @@ export default function HomePage() {
                     </p>
                     
                     <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                      <Button asChild variant="default">
-                        <Link href="https://github.com/DongDuong2001" target="_blank" rel="noopener noreferrer">
-                          <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                      <Button asChild variant="default" className="hover:shadow-lg hover:shadow-primary/50 transition-all">
+                        <Link href="https://github.com/DongDuong2001" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                             <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
                           </svg>
                           GitHub Profile
                         </Link>
                       </Button>
                       
-                      <Button asChild variant="outline">
+                      <Button asChild variant="outline" className="border-foreground/20">
                         <Link href="https://github.com/lab68dev/lab68dev-platform" target="_blank" rel="noopener noreferrer">
                           View Project Repository
                         </Link>
