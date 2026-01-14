@@ -17,6 +17,7 @@ export default function AIToolsPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [provider, setProvider] = useState<string>("AI")
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function AIToolsPage() {
       {
         role: "assistant",
         content:
-          "Hello! I'm your AI development assistant powered by DeepSeek AI. I can help you with code generation, debugging, architecture decisions, and more. What would you like to work on today?",
+          "Hello! I'm your AI development assistant. I can run locally using Ollama or connect to cloud APIs. I can help you with code generation, debugging, architecture decisions, and more. What would you like to work on today?",
         timestamp: new Date().toLocaleTimeString(),
       },
     ])
@@ -66,6 +67,11 @@ export default function AIToolsPage() {
 
       const data = await response.json()
 
+      // Update provider info
+      if (data.provider) {
+        setProvider(data.provider)
+      }
+
       const aiMessage: Message = {
         role: "assistant",
         content: data.response,
@@ -73,7 +79,7 @@ export default function AIToolsPage() {
       }
 
       setMessages((prev) => [...prev, aiMessage])
-    } catch (error) {
+    } catch (error) {install Ollama locally (https://ollama.com) and run 'ollama pull deepseek-r1:7b', or set up DEEPSEEK_API_KEY or GEMINI_API_KEY in .env.local
       console.error("Error calling AI API:", error)
       const errorMessage: Message = {
         role: "assistant",
@@ -90,7 +96,9 @@ export default function AIToolsPage() {
   return (
     <div className="flex h-screen flex-col">
       {/* Header */}
-      <div className="border-b border-border p-8">
+      <div className="border-b border-border p-8"
+              Your intelligent development assistant • {provider === "Ollama (Local)" ? "🟢 Running Locally" : provider}
+            
         <div className="flex items-center gap-3 mb-6">
           <Sparkles className="h-8 w-8 text-primary" />
           <div>
@@ -149,7 +157,10 @@ export default function AIToolsPage() {
               placeholder={t.dashboard.askAnything}
               className="flex-1 bg-card border border-border px-4 py-3 text-sm focus:outline-none focus:border-primary font-mono"
               disabled={isLoading}
-            />
+            {provider === "Ollama (Local)" 
+              ? "🟢 Running on your local machine with Ollama • Privacy-first, no data sent to cloud"
+              : `Powered by ${provider} • Responses are generated in real-time`
+            }
             <Button onClick={handleSend} className="gap-2 px-6" disabled={isLoading}>
               <Send className="h-4 w-4" />
               {t.dashboard.send}
