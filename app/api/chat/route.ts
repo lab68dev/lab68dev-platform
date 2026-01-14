@@ -4,29 +4,73 @@ export async function POST(request: Request) {
   try {
     const { message, history } = await request.json()
 
-    // Get DeepSeek API key from environment
+    // Priority: Ollama (local) > DeepSeek API > Gemini API
+    const ollamaUrl = process.env.OLLAMA_URL || "http://localhost:11434"
+    const ollamaModel = process.env.OLLAMA_MODEL || "deepseek-r1:7b"
     const deepseekKey = process.env.DEEPSEEK_API_KEY?.trim() || ""
-    // Fallback to Gemini if DeepSeek not available
     const geminiKey = (
       process.env.GEMINI_API_KEY ||
       process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
       ""
     ).replace(/^['"`]+|['"`]+$/g, "").trim()
 
-    const useDeepseek = !!deepseekKey
-    const apiKey = useDeepseek ? deepseekKey : geminiKey
+    let aiResponse: string
+    let provider = "unknown"
 
-    if (!apiKey) {
+    // Try Ollama first (local model)
+    try {
+      const messages = history
+        .slice(-10)
+        .map((msg: { role: string; content: string }) => ({
+          role: msg.role === "user" ? "user" : "assistant",
+          content: msg.content,
+        }))
+
+      messages.push({
+        role: "user",
+        content: message,
+      })
+
+      const ollamaResponse = await fetch(`${ollamaUrl}/api/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: ollamaModel,
+          messages,
+          stream: false,
+          options: {
+            temperature: 0.7,
+            top_p: 0.95,
+          },
+        }),
+      })
+
+      if (ollamaResponse.ok) {
+        const data = await ollamaResponse.json()
+        aiResponse = data.message?.content || "Sorry, I couldn't generate a response."
+        provider = "Ollama (Local)"
+        console.log(`✓ Using Ollama local model: ${ollamaModel}`)
+        return NextResponse.json({ response: aiResponse, provider })
+      }
+    } catch (ollamaError) {
+      console.log("Ollama not available, falling back to API providers...")
+    }
+
+    // Fallback to API providers
+    if (!deepseekKey && !geminiKey) {
       return NextResponse.json(
         {
           error:
-            "No AI API key configured. Add DEEPSEEK_API_KEY to .env.local and restart the dev server.",
+            "No AI provider configured. Install Ollama locally, or add DEEPSEEK_API_KEY or GEMINI_API_KEY to .env.local",
         },
         { status: 500 },
       )
     }
 
-    let aiResponse: string
+    const useDeepseek = !!deepseekKey
+    const apiKey = useDeepseek ? deepseekKey : geminiKey
 
     if (useDeepseek) {
       // Use DeepSeek API
@@ -66,6 +110,7 @@ export async function POST(request: Request) {
 
       const data = await response.json()
       aiResponse = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response."
+      provider = "DeepSeek API"
     } else {
       // Use Gemini API (fallback)
       const contents = history
@@ -106,9 +151,10 @@ export async function POST(request: Request) {
       }
 
       const data = await response.json()
-      aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response."
+      provider = "Gemini API"
     }
 
+    return NextResponse.json({ response: aiResponse, provider
     return NextResponse.json({ response: aiResponse })
   } catch (error) {
     console.error("Error in chat API:", error)
