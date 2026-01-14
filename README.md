@@ -225,11 +225,6 @@ This project uses **Supabase** for authentication and **enterprise-grade securit
    OLLAMA_URL=http://localhost:11434
    OLLAMA_MODEL=deepseek-r1:7b
    
-   # Option 2: Use DeepSeek API (recommended for production on Vercel)
-   DEEPSEEK_API_KEY=your-deepseek-api-key
-   
-   # Option 3: Use Gemini API
-   GEMINI_API_KEY=your-gemini-api-key
    SMTP_FROM_EMAIL=your-email@gmail.com
    SMTP_FROM_NAME=Lab68 Dev Platform
    
