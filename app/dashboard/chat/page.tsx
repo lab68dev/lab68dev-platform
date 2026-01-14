@@ -389,19 +389,6 @@ export default function ChatPage() {
     }
   }
 
-  async function handleAddReaction(messageId: string, emoji: string) {
-    if (!selectedRoom) return
-
-    try {
-      await addReaction(messageId, emoji, currentUserId)
-      
-      // Broadcast via Socket.io
-      addSocketReaction(selectedRoom.id, messageId, emoji, currentUserId)
-    } catch (error) {
-      console.error("Failed to add reaction:", error)
-    }
-  }
-
   function handleTyping() {
     if (!selectedRoom) return
     
