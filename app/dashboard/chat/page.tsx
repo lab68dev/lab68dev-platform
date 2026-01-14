@@ -22,12 +22,48 @@ import {
   type Message,
   type UserPresence,
 } from "@/lib/features/chat"
+import {
+  initSocket,
+  joinUserSocket,
+  joinRoom,
+  leaveRoom,
+  sendMessage as sendSocketMessage,
+  editMessage as editSocketMessage,
+  deleteMessage as deleteSocketMessage,
+  addReaction as addSocketReaction,
+  startTyping,
+  stopTyping,
+  onNewMessage,
+  onMessageUpdated,
+  onMessageDeleted,
+  onMessageReaction,
+  onUserTyping,
+  onUserStoppedTyping,
+  onUserStatus,
+  removeAllListeners,
+  disconnectSocket,
+} from "@/lib/features/chat/socket"
 
 export default function ChatPage() {
   const t = getTranslations("en")
   const user = getCurrentUser()
-  const currentUser = user?.email || "guest@example.com"
-  const currentUserId = user?.email || "guest"
+  
+  // Ensure user is authenticated
+  if (!user || !user.email) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-12rem)]">
+        <div className="text-center">
+          <p className="text-lg text-muted-foreground mb-2">Please log in to use chat</p>
+          <a href="/login" className="text-primary hover:underline">
+            Go to login
+          </a>
+        </div>
+      </div>
+    )
+  }
+  
+  const currentUser = user.email
+  const currentUserId = user.email
   
   const [rooms, setRooms] = useState<ChatRoom[]>([])
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null)
@@ -39,16 +75,24 @@ export default function ChatPage() {
   const [editContent, setEditContent] = useState("")
   const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([])
   const [showCollaborators, setShowCollaborators] = useState(false)
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
+  const [isLoadingRooms, setIsLoadingRooms] = useState(true)
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const unsubscribeMessagesRef = useRef<(() => void) | null>(null)
   const unsubscribeUpdatesRef = useRef<(() => void) | null>(null)
   const unsubscribePresenceRef = useRef<(() => void) | null>(null)
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Load user's chat rooms and set up presence
+  // Initialize Socket.io and set up presence
   useEffect(() => {
     loadRooms()
     loadOnlineUsers()
+    
+    // Initialize Socket.io connection
+    initSocket()
+    joinUserSocket(currentUserId, currentUser, user?.name)
     
     // Set user as online
     updateUserPresence(currentUserId, currentUser, user?.name, 'online')
@@ -61,29 +105,57 @@ export default function ChatPage() {
       })
     })
     
+    // Set up Socket.io event listeners
+    onUserStatus((data) => {
+      setOnlineUsers(prev => {
+        const filtered = prev.filter(p => p.user_id !== data.userId)
+        if (data.status === 'online') {
+          return [...filtered, {
+            user_id: data.userId,
+            email: data.email,
+            name: data.name,
+            status: data.status,
+            last_seen: new Date().toISOString(),
+          }]
+        }
+        return filtered
+      })
+    })
+    
     // Set user as offline on unmount
     return () => {
       updateUserPresence(currentUserId, currentUser, user?.name, 'offline')
       unsubscribePresenceRef.current?.()
+      removeAllListeners()
+      disconnectSocket()
     }
   }, [])
 
-  // Load messages and subscribe to real-time updates when room changes
+  // Load messages and set up Socket.io room listeners when room changes
   useEffect(() => {
     if (selectedRoom) {
       loadMessages(selectedRoom.id)
+      
+      // Leave previous room (this is handled by cleanup, comment for clarity)
+      // The cleanup function will handle leaving the previous room
+      
+      // Join new room via Socket.io
+      joinRoom(selectedRoom.id)
       
       // Unsubscribe from previous room
       unsubscribeMessagesRef.current?.()
       unsubscribeUpdatesRef.current?.()
       
-      // Subscribe to new messages
+      // Subscribe to Supabase (backup)
       unsubscribeMessagesRef.current = subscribeToMessages(selectedRoom.id, (newMessage) => {
-        setMessages(prev => [...prev, newMessage])
+        setMessages(prev => {
+          // Avoid duplicates from Socket.io
+          if (prev.some(msg => msg.id === newMessage.id)) return prev
+          return [...prev, newMessage]
+        })
         scrollToBottom()
       })
       
-      // Subscribe to message updates and deletes
       unsubscribeUpdatesRef.current = subscribeToMessageUpdates(
         selectedRoom.id,
         (updatedMessage) => {
@@ -95,11 +167,72 @@ export default function ChatPage() {
           setMessages(prev => prev.filter(msg => msg.id !== deletedId))
         }
       )
+      
+      // Socket.io listeners for this room
+      onNewMessage((data) => {
+        if (selectedRoom && data.roomId === selectedRoom.id) {
+          setMessages(prev => {
+            // Avoid duplicates
+            if (prev.some(msg => msg.id === data.message.id)) return prev
+            return [...prev, data.message]
+          })
+          scrollToBottom()
+        }
+      })
+      
+      onMessageUpdated((data) => {
+        if (selectedRoom && data.roomId === selectedRoom.id) {
+          setMessages(prev => prev.map(msg => 
+            msg.id === data.messageId 
+              ? { ...msg, content: data.content, updated_at: data.updatedAt }
+              : msg
+          ))
+        }
+      })
+      
+      onMessageDeleted((data) => {
+        if (selectedRoom && data.roomId === selectedRoom.id) {
+          setMessages(prev => prev.filter(msg => msg.id !== data.messageId))
+        }
+      })
+      
+      onMessageReaction((data) => {
+        if (selectedRoom && data.roomId === selectedRoom.id) {
+          setMessages(prev => prev.map(msg => {
+            if (msg.id === data.messageId) {
+              const reactions = msg.reactions || {}
+              reactions[data.reaction] = [...(reactions[data.reaction] || []), data.userId]
+              return { ...msg, reactions }
+            }
+            return msg
+          }))
+        }
+      })
+      
+      onUserTyping((data) => {
+        if (selectedRoom && data.roomId === selectedRoom.id && data.userId !== currentUserId) {
+          setTypingUsers(prev => new Set(prev).add(data.userId))
+        }
+      })
+      
+      onUserStoppedTyping((data) => {
+        if (selectedRoom && data.roomId === selectedRoom.id) {
+          setTypingUsers(prev => {
+            const updated = new Set(prev)
+            updated.delete(data.userId)
+            return updated
+          })
+        }
+      })
     }
     
     return () => {
+      if (selectedRoom) {
+        leaveRoom(selectedRoom.id)
+      }
       unsubscribeMessagesRef.current?.()
       unsubscribeUpdatesRef.current?.()
+      setTypingUsers(new Set())
     }
   }, [selectedRoom])
 
@@ -114,28 +247,37 @@ export default function ChatPage() {
 
   async function loadRooms() {
     try {
+      setIsLoadingRooms(true)
       const userRooms = await getChatRooms(currentUserId)
-      setRooms(userRooms)
+      setRooms(userRooms || [])
     } catch (error) {
       console.error("Failed to load rooms:", error)
+      setRooms([]) // Ensure rooms is always an array
+    } finally {
+      setIsLoadingRooms(false)
     }
   }
 
   async function loadMessages(roomId: string) {
     try {
+      setIsLoadingMessages(true)
       const roomMessages = await getMessages(roomId, 100)
-      setMessages(roomMessages)
+      setMessages(roomMessages || [])
     } catch (error) {
       console.error("Failed to load messages:", error)
+      setMessages([]) // Ensure messages is always an array
+    } finally {
+      setIsLoadingMessages(false)
     }
   }
 
   async function loadOnlineUsers() {
     try {
       const users = await getAllUsersPresence()
-      setOnlineUsers(users)
+      setOnlineUsers(users || [])
     } catch (error) {
       console.error("Failed to load online users:", error)
+      setOnlineUsers([]) // Ensure onlineUsers is always an array
     }
   }
 
@@ -143,7 +285,8 @@ export default function ChatPage() {
     if (!selectedRoom || !messageInput.trim()) return
 
     try {
-      await sendSupabaseMessage({
+      // Save to Supabase
+      const newMessage = await sendSupabaseMessage({
         room_id: selectedRoom.id,
         user_id: currentUserId,
         content: messageInput,
@@ -151,7 +294,14 @@ export default function ChatPage() {
         reactions: {}
       })
 
+      // Broadcast via Socket.io for instant delivery
+      sendSocketMessage(selectedRoom.id, newMessage)
+
       setMessageInput("")
+      
+      // Stop typing indicator
+      stopTyping(selectedRoom.id, currentUserId)
+      
       await loadRooms() // Refresh to update last message
     } catch (error) {
       console.error("Failed to send message:", error)
@@ -208,10 +358,14 @@ export default function ChatPage() {
   }
 
   async function handleSaveEdit(messageId: string) {
-    if (!editContent.trim()) return
+    if (!editContent.trim() || !selectedRoom) return
 
     try {
       await updateMessage(messageId, editContent)
+      
+      // Broadcast via Socket.io
+      editSocketMessage(selectedRoom.id, messageId, editContent)
+      
       setEditingMessageId(null)
       setEditContent("")
     } catch (error) {
@@ -222,18 +376,44 @@ export default function ChatPage() {
 
   async function handleDeleteMessage(messageId: string) {
     if (!confirm("Are you sure you want to delete this message?")) return
+    if (!selectedRoom) return
 
     try {
       await deleteMessage(messageId)
+      
+      // Broadcast via Socket.io
+      deleteSocketMessage(selectedRoom.id, messageId)
     } catch (error) {
       console.error("Failed to delete message:", error)
       alert("Failed to delete message")
     }
   }
 
+  function handleTyping() {
+    if (!selectedRoom) return
+    
+    // Start typing indicator
+    startTyping(selectedRoom.id, currentUserId, currentUser, user?.name)
+    
+    // Clear previous timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current)
+    }
+    
+    // Stop typing after 3 seconds of no input
+    typingTimeoutRef.current = setTimeout(() => {
+      stopTyping(selectedRoom.id, currentUserId)
+    }, 3000)
+  }
+
   async function handleReaction(messageId: string, emoji: string) {
+    if (!selectedRoom) return
+    
     try {
       await addReaction(messageId, emoji, currentUserId)
+      
+      // Broadcast via Socket.io
+      addSocketReaction(selectedRoom.id, messageId, emoji, currentUserId)
     } catch (error) {
       console.error("Failed to add reaction:", error)
     }
@@ -274,7 +454,11 @@ export default function ChatPage() {
         </div>
 
         <div className="space-y-2">
-          {rooms.length === 0 ? (
+          {isLoadingRooms ? (
+            <div className="text-sm text-muted-foreground text-center py-8">
+              Loading rooms...
+            </div>
+          ) : rooms.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
               {t.chat.noMessages}
             </p>
@@ -411,7 +595,16 @@ export default function ChatPage() {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((msg) => (
+              {isLoadingMessages ? (
+                <div className="text-sm text-muted-foreground text-center py-8">
+                  Loading messages...
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="text-sm text-muted-foreground text-center py-8">
+                  No messages yet. Start the conversation!
+                </div>
+              ) : (
+                messages.map((msg) => (
                 <div
                   key={msg.id}
                   className={`flex ${msg.user_id === currentUserId ? "justify-end" : "justify-start"}`}
@@ -518,8 +711,17 @@ export default function ChatPage() {
                     )}
                   </div>
                 </div>
-              ))}
+              )))}
               <div ref={messagesEndRef} />
+              
+              {/* Typing indicator */}
+              {typingUsers.size > 0 && (
+                <div className="px-4 py-2 text-sm text-muted-foreground italic">
+                  {typingUsers.size === 1 
+                    ? 'Someone is typing...' 
+                    : `${typingUsers.size} people are typing...`}
+                </div>
+              )}
             </div>
 
             {/* Message Input */}
@@ -528,7 +730,10 @@ export default function ChatPage() {
                 <input
                   type="text"
                   value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
+                  onChange={(e) => {
+                    setMessageInput(e.target.value)
+                    handleTyping()
+                  }}
                   onKeyPress={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault()

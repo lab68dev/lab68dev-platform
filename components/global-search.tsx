@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Search, FileText, FolderKanban, MessageSquare, Calendar, CheckSquare, BookOpen, Palette, Users, Command } from "lucide-react"
+import { Search, FileText, FolderKanban, MessageSquare, Calendar, CheckSquare, BookOpen, Palette, Users, Command, Bot } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export interface SearchResult {
@@ -68,7 +68,7 @@ export function GlobalSearch() {
       { id: "11", title: "Files", category: "pages", href: "/dashboard/files", icon: <FileText className="h-4 w-4" /> },
       { id: "12", title: "Community", category: "pages", href: "/dashboard/community", icon: <Users className="h-4 w-4" /> },
       { id: "13", title: "Resume Editor", category: "pages", href: "/dashboard/resume", icon: <FileText className="h-4 w-4" /> },
-      { id: "14", title: "AI Tools", category: "pages", href: "/dashboard/ai-tools", icon: <FileText className="h-4 w-4" /> },
+      { id: "14", title: "AI Tools", category: "pages", href: "/dashboard/ai-tools", icon: <Bot className="h-4 w-4" /> },
       { id: "15", title: "Settings", category: "pages", href: "/dashboard/settings", icon: <FileText className="h-4 w-4" /> },
     ]
 

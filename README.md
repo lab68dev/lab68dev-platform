@@ -68,6 +68,8 @@ It provides dashboards for planning, documentation, meetings, AI-assisted workfl
 | Language | [TypeScript 5](https://www.typescriptlang.org/) |
 | Database | [Supabase](https://supabase.com/) PostgreSQL with RLS policies |
 | Authentication | JWT sessions, bcrypt password hashing, TOTP-based 2FA |
+| Real-Time | [Socket.io](https://socket.io/) for instant messaging, typing indicators, presence tracking |
+| AI Models | Ollama (local) - Privacy-first, no API costs, unlimited usage |
 | Email | Nodemailer with SMTP (Gmail, SendGrid, Mailgun, SES) |
 | Security | Rate limiting, session management, activity logging |
 | Styling | Tailwind CSS + custom utility components |
@@ -83,12 +85,13 @@ It provides dashboards for planning, documentation, meetings, AI-assisted workfl
 lab68dev-platform/
 ├── app/                      # Route groups and feature areas
 │   ├── api/
-│   │   ├── chat/route.ts     # Edge-friendly chat endpoint
+│   │   ├── chat/route.ts     # AI chat API with Ollama
 │   │   └── staff/            # Staff authentication APIs
 │   │       ├── signup/route.ts    # Staff registration with rate limiting
 │   │       ├── login/route.ts     # JWT authentication with 2FA
 │   │       └── 2fa/route.ts       # Two-Factor Auth management
 │   ├── dashboard/            # Authenticated workspace experience
+│   │   └── ai-tools/         # AI Assistant with local & cloud models
 │   ├── staff/                # Staff portal
 │   │   ├── login/, signup/   # Staff authentication flows
 │   │   └── dashboard/        # Staff management dashboard
@@ -104,11 +107,13 @@ lab68dev-platform/
 │   ├── SECURITY_QUICKSTART.md     # 5-minute security setup
 │   ├── SECURITY_IMPLEMENTATION.md # Technical guide
 │   ├── SECURITY_COMPLETE.md       # Complete summary
-│   ├── STAFF_PORTAL.md            # Staff portal guide
-│   └── SUPABASE_SETUP.md          # Database setup
+│   ├── SUPABASE_SETUP.md          # Database setup
+│   └── OLLAMA_SETUP.md            # Local AI model setup
 ├── public/                   # Static assets
 ├── scripts/                  # Translation repair helpers
 ├── supabase-staff-schema.sql # PostgreSQL database schema
+├── .env.example              # Environment variable template
+├── start-dev.ps1             # Development startup script (with Ollama)
 ├── .env.example              # Environment variable template
 ├── next.config.mjs           # Next.js configuration
 ├── tsconfig.json             # Type checking configuration
@@ -171,10 +176,16 @@ For detailed instructions, see **[docs/SECURITY_IMPLEMENTATION.md](./docs/SECURI
 ### Development
 
 ```bash
+# Start with Socket.io real-time support
 pnpm dev
+
+# Or start without Socket.io (legacy mode)
+pnpm dev:next
 ```
 
 Visit [http://localhost:3000](http://localhost:3000) while the dev server is running.
+
+**Note:** Use `pnpm dev` for full real-time chat features with Socket.io.
 
 ### Authentication Setup
 
@@ -208,8 +219,23 @@ This project uses **Supabase** for authentication and **enterprise-grade securit
    SMTP_PORT=587
    SMTP_USER=your-email@gmail.com
    SMTP_PASSWORD=your-app-password
+   
+   # AI Configuration (Optional - see AI Tools section below)
+   # Option 1: Use local Ollama (privacy-first, no cost)
+   OLLAMA_URL=http://localhost:11434
+   OLLAMA_MODEL=deepseek-r1:7b
+   
+   # Option 2: Use DeepSeek API (recommended for production on Vercel)
+   DEEPSEEK_API_KEY=your-deepseek-api-key
+   
+   # Option 3: Use Gemini API
+   GEMINI_API_KEY=your-gemini-api-key
    SMTP_FROM_EMAIL=your-email@gmail.com
    SMTP_FROM_NAME=Lab68 Dev Platform
+   
+   # AI Configuration
+   OLLAMA_URL=http://localhost:11434
+   OLLAMA_MODEL=deepseek-r1:7b
    ```
 
 4. **Restart your dev server:** `pnpm dev`
@@ -237,20 +263,123 @@ The build step runs Next.js static analysis, type-checking, and route bundling.
 
 | Area | Summary |
 | --- | --- |
-| **Security** | Enterprise-grade security with bcrypt password hashing (12 rounds), JWT sessions (24h expiry), TOTP-based 2FA with QR codes, rate limiting (5 login/15min), professional email notifications (6 templates), and Supabase PostgreSQL with RLS policies. |
-| **Staff Portal** | Dedicated staff authentication system with sign-up approval workflow, staff dashboard, user management, analytics, activity logging, and role-based access control (admin/support/moderator). |
+| **AI Tools** | AI development assistant with local Ollama support. Features include code generation, debugging help, architecture advice, real-time chat with avatars, message history, copy-to-clipboard, and privacy-first local processing with zero API costs. |
+| **Localization** | `getTranslations` deep-merges locale entries with English defaults to prevent missing key errors. |
+
+---
+
+## AI Tools
+
+The **AI Tools** feature (`/dashboard/ai-tools`) provides an intelligent development assistant running 100% locally with Ollama.
+
+### Features
+
+- **🤖 Smart AI Assistant** – Code generation, debugging, architecture decisions, and technical guidance
+- **🔒 Complete Privacy** – All processing happens on your machine, zero data sent to cloud
+- **💰 Zero Cost** – No API fees, unlimited usage
+- **🌐 Offline Capable** – Works without internet connection
+- **💬 Modern Chat UI** – User/AI avatars, message bubbles, copy-to-clipboard, typing indicators
+- **📊 Real-time Status** – Shows Ollama connection status
+- **🧹 Clear Chat** – Reset conversation anytime
+- **📝 Message Counter** – Track conversation length and character count
+
+### Setup
+
+#### 1. Install Ollama
+
+```powershell
+# Windows: Download from https://ollama.com
+# macOS: brew install ollama
+# Linux: curl -fsSL https://ollama.com/install.sh | sh
+```
+
+#### 2. Pull a Model
+
+```powershell
+# Recommended for coding (4.7GB)
+ollama pull deepseek-r1:7b
+
+# Other options:
+ollama pull llama3.2          # Fast, lightweight (2GB)
+ollama pull codellama         # Code-specialized (3.8GB)
+ollama pull qwen2.5-coder:7b  # Excellent for programming
+```
+
+#### 3. Start Using
+
+```powershell
+pnpm dev
+# Navigate to http://localhost:3000/dashboard/ai-tools
+```
+
+See [docs/OLLAMA_SETUP.md](docs/OLLAMA_SETUP.md) for detailed setup instructions.
+
+### Production Deployment
+
+For production, run Ollama on a separate server:
+
+1. **Deploy Next.js** on Vercel (or any platform)
+2. **Setup Ollama server** on VPS (AWS EC2, DigitalOcean, Hetzner)
+3. **Configure environment variable:**
+
+   ```env
+   OLLAMA_URL=https://ai.yourdomain.com
+   ```
+
+**Benefits:**
+
+- ✅ Complete privacy - your data never leaves your infrastructure
+- ✅ Zero API costs - no per-request charges
+- ✅ Unlimited usage - no rate limits or quotas
+- ✅ Fast responses - no network latency (with good hardware)
+- ✅ Full control - choose any model, customize parameters
+
+---   ```bash
+
+# Add to Vercel environment variables
+
+   DEEPSEEK_API_KEY=your-key   # Recommended (cheap)
+
+# OR
+
+   GEMINI_API_KEY=your-key     # Free tier available
+
+   ```
+
+2. **Hybrid Setup (Best for High Usage):**
+   - Deploy Next.js on Vercel
+   - Run Ollama on separate VPS (AWS EC2, DigitalOcean, Hetzner)
+   - Point to your VPS:
+
+     ```env
+     OLLAMA_URL=https://ai.yourdomain.com
+     ```
+
+   - Users get local model speed + privacy without installing anything
+
+### Smart Fallback System
+
+The AI tries providers in this order:
+
+---
+
+## Feature Overview
+
+| Area | Summary |
+| --- | --- |
+| **Staff Portal** | Full admin interface at `/staff/dashboard` with user management, analytics, activity logging, and role-based access control (admin/support/moderator). |
 | **Dashboard Overview** | Snapshot of active projects, AI assistant, system metrics, and notifications. |
 | **Projects & Kanban** | Create projects, assign collaborators, manage roles, and move cards across kanban columns. |
 | **Team Management** | `lib/team.ts` exposes helpers for permissions, activity logging, and "time ago" formatting. |
 | **Authentication** | Secure user authentication powered by [Supabase Auth](https://supabase.com) with email/password, session management, and protected routes. |
-| **Chat & Messaging** | Real-time team communication with chat rooms, direct messages, typing indicators, reactions, and @mentions. |
+| **Chat & Messaging** | **Real-time with Socket.io** - Instant messaging, typing indicators, online presence, message reactions, edit/delete in real-time. Direct messages and group chats with live updates. See [docs/SOCKETIO_CHAT.md](./docs/SOCKETIO_CHAT.md) |
 | **Comments System** | Contextual collaboration on tasks, diagrams, and projects with threaded comments, mentions, and resolution tracking. |
 | **Whiteboard** | Collaborative drawing canvas with freehand pen, shapes (rectangle, circle, line), text, color picker, stroke width, fill options, undo/redo, export to PNG/SVG, and collaborator invitations. |
 | **Files Library** | Upload files from your computer (max 10MB), add external links, categorize by project/task/meeting, search and filter by type and category. |
 | **Resume Editor** | Live WYSIWYG resume builder with drag-and-drop section reordering, real-time color picker, 6 professional fonts, 3 font sizes, 5 customizable templates (Modern, Classic, Minimal, Creative, Professional with photo support), A4 paper preview (210mm × 297mm), section visibility controls, and localStorage persistence. Export-ready for PDF generation. |
 | **Meetings & Planning** | Schedule meetings, capture plans/milestones, and log progress. |
 | **Wiki & Community** | Knowledge base articles, category filtering, and community discussion threads. |
-| **AI Tools** | Scaffolding for AI-assisted workflows via the `/dashboard/ai-tools` route. |
+| **AI Tools** | Local AI assistant with Ollama - code generation, debugging, architecture advice, privacy-first with zero API costs. |
 | **Localization** | `getTranslations` deep-merges locale entries with English defaults to prevent missing key errors. |
 
 ---
