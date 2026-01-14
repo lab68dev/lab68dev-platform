@@ -7,6 +7,7 @@ Run AI models locally on your machine with complete privacy and no API costs!
 ### 1. Install Ollama
 
 **Windows:**
+
 - Download from [ollama.com](https://ollama.com/download/windows)
 - Run the installer
 - Ollama runs automatically as a service
@@ -61,6 +62,7 @@ OLLAMA_MODEL=deepseek-r1:7b
 ### 5. Start Using!
 
 That's it! Your AI Tools section will now:
+
 1. ✅ Try Ollama local model first (privacy-first, no cost)
 2. ⚡ Fallback to DeepSeek API if you set `DEEPSEEK_API_KEY`
 3. 🌐 Fallback to Gemini if you set `GEMINI_API_KEY`
@@ -68,15 +70,18 @@ That's it! Your AI Tools section will now:
 ## Model Recommendations
 
 ### For Development/Coding
+
 - **deepseek-r1:7b** - Best for code (7GB)
 - **codellama** - Code-specialized (3.8GB)
 - **qwen2.5-coder:7b** - Excellent for programming
 
 ### For General Chat
+
 - **llama3.2** - Fast, lightweight (2GB)
 - **mistral** - Good balance (4.1GB)
 
 ### For Advanced Tasks
+
 - **deepseek-r1:32b** - More powerful (19GB, needs good GPU)
 - **llama3.1:70b** - Highest quality (40GB, needs excellent GPU)
 
@@ -89,6 +94,7 @@ That's it! Your AI Tools section will now:
 ## Troubleshooting
 
 ### "Ollama not available" message
+
 1. Check if Ollama is running:
    ```bash
    ollama list
@@ -100,6 +106,7 @@ That's it! Your AI Tools section will now:
    ```
 
 ### Slow responses
+
 - Use smaller models (3B-7B)
 - Close other applications
 - Consider upgrading RAM or adding GPU
@@ -127,6 +134,7 @@ OLLAMA_URL=http://localhost:11435
 ## API Fallback
 
 Your app automatically falls back to cloud APIs if Ollama isn't available:
+
 1. Ollama (local) → 2. DeepSeek API → 3. Gemini API
 
 This ensures your AI features always work!
