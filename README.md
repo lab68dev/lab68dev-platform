@@ -329,35 +329,7 @@ For production, run Ollama on a separate server:
 - ✅ Fast responses - no network latency (with good hardware)
 - ✅ Full control - choose any model, customize parameters
 
----   ```bash
-
-# Add to Vercel environment variables
-
-   DEEPSEEK_API_KEY=your-key   # Recommended (cheap)
-
-# OR
-
-   GEMINI_API_KEY=your-key     # Free tier available
-
-   ```
-
-2. **Hybrid Setup (Best for High Usage):**
-   - Deploy Next.js on Vercel
-   - Run Ollama on separate VPS (AWS EC2, DigitalOcean, Hetzner)
-   - Point to your VPS:
-
-     ```env
-     OLLAMA_URL=https://ai.yourdomain.com
-     ```
-
-   - Users get local model speed + privacy without installing anything
-
-### Smart Fallback System
-
-The AI tries providers in this order:
-
----
-
+---   
 ## Feature Overview
 
 | Area | Summary |
