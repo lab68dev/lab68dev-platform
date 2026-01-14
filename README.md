@@ -68,6 +68,7 @@ It provides dashboards for planning, documentation, meetings, AI-assisted workfl
 | Language | [TypeScript 5](https://www.typescriptlang.org/) |
 | Database | [Supabase](https://supabase.com/) PostgreSQL with RLS policies |
 | Authentication | JWT sessions, bcrypt password hashing, TOTP-based 2FA |
+| Real-Time | [Socket.io](https://socket.io/) for instant messaging, typing indicators, presence tracking |
 | AI Models | Ollama (local) - Privacy-first, no API costs, unlimited usage |
 | Email | Nodemailer with SMTP (Gmail, SendGrid, Mailgun, SES) |
 | Security | Rate limiting, session management, activity logging |
@@ -175,10 +176,16 @@ For detailed instructions, see **[docs/SECURITY_IMPLEMENTATION.md](./docs/SECURI
 ### Development
 
 ```bash
+# Start with Socket.io real-time support
 pnpm dev
+
+# Or start without Socket.io (legacy mode)
+pnpm dev:next
 ```
 
 Visit [http://localhost:3000](http://localhost:3000) while the dev server is running.
+
+**Note:** Use `pnpm dev` for full real-time chat features with Socket.io.
 
 ### Authentication Setup
 
@@ -314,11 +321,13 @@ For production, run Ollama on a separate server:
 1. **Deploy Next.js** on Vercel (or any platform)
 2. **Setup Ollama server** on VPS (AWS EC2, DigitalOcean, Hetzner)
 3. **Configure environment variable:**
+
    ```env
    OLLAMA_URL=https://ai.yourdomain.com
    ```
 
 **Benefits:**
+
 - ✅ Complete privacy - your data never leaves your infrastructure
 - ✅ Zero API costs - no per-request charges
 - ✅ Unlimited usage - no rate limits or quotas
@@ -326,10 +335,15 @@ For production, run Ollama on a separate server:
 - ✅ Full control - choose any model, customize parameters
 
 ---   ```bash
-   # Add to Vercel environment variables:
+
+# Add to Vercel environment variables
+
    DEEPSEEK_API_KEY=your-key   # Recommended (cheap)
-   # OR
+
+# OR
+
    GEMINI_API_KEY=your-key     # Free tier available
+
    ```
 
 2. **Hybrid Setup (Best for High Usage):**
@@ -358,7 +372,7 @@ The AI tries providers in this order:
 | **Projects & Kanban** | Create projects, assign collaborators, manage roles, and move cards across kanban columns. |
 | **Team Management** | `lib/team.ts` exposes helpers for permissions, activity logging, and "time ago" formatting. |
 | **Authentication** | Secure user authentication powered by [Supabase Auth](https://supabase.com) with email/password, session management, and protected routes. |
-| **Chat & Messaging** | Real-time team communication with chat rooms, direct messages, typing indicators, reactions, and @mentions. |
+| **Chat & Messaging** | **Real-time with Socket.io** - Instant messaging, typing indicators, online presence, message reactions, edit/delete in real-time. Direct messages and group chats with live updates. See [docs/SOCKETIO_CHAT.md](./docs/SOCKETIO_CHAT.md) |
 | **Comments System** | Contextual collaboration on tasks, diagrams, and projects with threaded comments, mentions, and resolution tracking. |
 | **Whiteboard** | Collaborative drawing canvas with freehand pen, shapes (rectangle, circle, line), text, color picker, stroke width, fill options, undo/redo, export to PNG/SVG, and collaborator invitations. |
 | **Files Library** | Upload files from your computer (max 10MB), add external links, categorize by project/task/meeting, search and filter by type and category. |
