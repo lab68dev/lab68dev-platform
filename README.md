@@ -225,11 +225,6 @@ This project uses **Supabase** for authentication and **enterprise-grade securit
    OLLAMA_URL=http://localhost:11434
    OLLAMA_MODEL=deepseek-r1:7b
    
-   # Option 2: Use DeepSeek API (recommended for production on Vercel)
-   DEEPSEEK_API_KEY=your-deepseek-api-key
-   
-   # Option 3: Use Gemini API
-   GEMINI_API_KEY=your-gemini-api-key
    SMTP_FROM_EMAIL=your-email@gmail.com
    SMTP_FROM_NAME=Lab68 Dev Platform
    
@@ -374,40 +369,6 @@ For production, run Ollama on a separate server:
 - ✅ Full control - choose any model, customize parameters
 - ✅ Platform-specific knowledge - AI trained on YOUR docs
 
----
-
-<<<<<<< Updated upstream
----   ```bash
-
-# Add to Vercel environment variables
-
-   DEEPSEEK_API_KEY=your-key   # Recommended (cheap)
-
-# OR
-
-   GEMINI_API_KEY=your-key     # Free tier available
-
-   ```
-
-2. **Hybrid Setup (Best for High Usage):**
-   - Deploy Next.js on Vercel
-   - Run Ollama on separate VPS (AWS EC2, DigitalOcean, Hetzner)
-   - Point to your VPS:
-
-     ```env
-     OLLAMA_URL=https://ai.yourdomain.com
-     ```
-
-   - Users get local model speed + privacy without installing anything
-
-### Smart Fallback System
-
-The AI tries providers in this order:
-
----
-
-=======
->>>>>>> Stashed changes
 ## Feature Overview
 
 | Area | Summary |
