@@ -1,14 +1,35 @@
 import { NextResponse } from "next/server"
+import { ragService } from "@/lib/services/rag-service"
 
 export async function POST(request: Request) {
   try {
-    const { message, history } = await request.json()
+    const { message, history, useRAG = true } = await request.json()
 
     const ollamaUrl = process.env.OLLAMA_URL || "http://localhost:11434"
     const ollamaModel = process.env.OLLAMA_MODEL || "deepseek-r1:7b"
 
     let aiResponse: string
-    const provider = "Ollama (Local)"
+    let provider = "Ollama (Local)"
+
+    // Get RAG context if enabled
+    let ragContext = ""
+    if (useRAG) {
+      try {
+        console.log("🔍 Retrieving RAG context...")
+        ragContext = await ragService.getContextForQuery(message, {
+          limit: 3,
+          threshold: 0.7,
+        })
+        
+        if (ragContext) {
+          console.log("✅ RAG context retrieved successfully")
+          provider = "Ollama + RAG"
+        }
+      } catch (error) {
+        console.warn("⚠️ RAG retrieval failed, continuing without context:", error)
+        // Continue without RAG if it fails
+      }
+    }
 
     const messages = history
       .slice(-10)
@@ -17,9 +38,14 @@ export async function POST(request: Request) {
         content: msg.content,
       }))
 
+    // Add RAG context to the user message if available
+    const userMessage = ragContext 
+      ? `${ragContext}User question: ${message}`
+      : message
+
     messages.push({
       role: "user",
-      content: message,
+      content: userMessage,
     })
 
     const ollamaResponse = await fetch(`${ollamaUrl}/api/chat`, {
