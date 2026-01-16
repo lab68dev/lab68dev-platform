@@ -8,7 +8,9 @@
     "dev:next": "next dev",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "start": "NODE_ENV=production node server.js",
-    "start:next": "next start"
+    "start:next": "next start",
+    "index-knowledge": "node scripts/index-knowledge.js",
+    "index-knowledge:clear": "node scripts/index-knowledge.js --clear"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -46,8 +48,10 @@
     "@types/html2canvas": "^1.0.0",
     "@vercel/analytics": "latest",
     "@xenova/transformers": "^2.17.2",
+    "ai": "^6.0.38",
     "autoprefixer": "^10.4.20",
     "bcryptjs": "^3.0.3",
+    "chromadb": "^3.2.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
