@@ -265,20 +265,32 @@ The build step runs Next.js static analysis, type-checking, and route bundling.
 
 ## AI Tools
 
-The **AI Tools** feature (`/dashboard/ai-tools`) provides an intelligent development assistant running 100% locally with Ollama.
+The **AI Tools** feature (`/dashboard/ai-tools`) provides an intelligent development assistant with **RAG (Retrieval-Augmented Generation)** - AI that knows your platform inside-out!
 
 ### Features
 
+- **🧠 RAG-Enhanced AI** – AI powered by your documentation, features, and codebase
 - **🤖 Smart AI Assistant** – Code generation, debugging, architecture decisions, and technical guidance
-- **🔒 Complete Privacy** – All processing happens on your machine, zero data sent to cloud
-- **💰 Zero Cost** – No API fees, unlimited usage
+- **📚 Context-Aware** – Answers based on your actual platform documentation
+- **🔒 Complete Privacy** – All processing and data stays on your infrastructure
+- **💰 Zero Cost** – No API fees, unlimited usage with local Ollama
 - **🌐 Offline Capable** – Works without internet connection
 - **💬 Modern Chat UI** – User/AI avatars, message bubbles, copy-to-clipboard, typing indicators
-- **📊 Real-time Status** – Shows Ollama connection status
+- **📊 Real-time Status** – Shows Ollama connection status and RAG usage
 - **🧹 Clear Chat** – Reset conversation anytime
 - **📝 Message Counter** – Track conversation length and character count
 
-### Setup
+### What is RAG?
+
+**RAG (Retrieval-Augmented Generation)** combines semantic search with AI generation:
+
+1. **Your Question** → Converted to embedding vector
+2. **Vector Search** → Finds relevant docs from your knowledge base
+3. **AI Generation** → Ollama uses the context to answer accurately
+
+**Result:** AI that actually knows your platform, features, and documentation!
+
+### Quick Start
 
 #### 1. Install Ollama
 
@@ -300,14 +312,37 @@ ollama pull codellama         # Code-specialized (3.8GB)
 ollama pull qwen2.5-coder:7b  # Excellent for programming
 ```
 
-#### 3. Start Using
+#### 3. Enable RAG System
+
+See **[docs/RAG_QUICKSTART.md](docs/RAG_QUICKSTART.md)** for setup:
+
+```powershell
+# 1. Run SQL schema in Supabase
+# 2. Index your knowledge base
+pnpm run index-knowledge
+
+# 3. Test it!
+# Visit http://localhost:3000/dashboard/ai-tools
+```
+
+#### 4. Start Using
 
 ```powershell
 pnpm dev
 # Navigate to http://localhost:3000/dashboard/ai-tools
 ```
 
-See [docs/OLLAMA_SETUP.md](docs/OLLAMA_SETUP.md) for detailed setup instructions.
+See [docs/OLLAMA_SETUP.md](docs/OLLAMA_SETUP.md) for detailed Ollama setup.  
+See [docs/RAG_SYSTEM.md](docs/RAG_SYSTEM.md) for complete RAG documentation.
+
+### RAG Features
+
+- **📄 Document Embeddings** – All docs indexed with semantic vectors
+- **🔍 Smart Search** – Finds relevant content via cosine similarity
+- **⚡ Fast Retrieval** – < 10ms search with pgvector indexes
+- **🎯 Category Filtering** – Search by documentation, features, code, etc.
+- **🔄 Easy Updates** – Re-index when docs change
+- **📊 Similarity Scores** – See how relevant each context is
 
 ### Production Deployment
 
@@ -315,10 +350,14 @@ For production, run Ollama on a separate server:
 
 1. **Deploy Next.js** on Vercel (or any platform)
 2. **Setup Ollama server** on VPS (AWS EC2, DigitalOcean, Hetzner)
-3. **Configure environment variable:**
+3. **Configure Supabase** with pgvector extension
+4. **Run indexer** to populate knowledge base
+5. **Set environment variables:**
 
    ```env
    OLLAMA_URL=https://ai.yourdomain.com
+   NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    ```
 
 **Benefits:**
@@ -328,8 +367,8 @@ For production, run Ollama on a separate server:
 - ✅ Unlimited usage - no rate limits or quotas
 - ✅ Fast responses - no network latency (with good hardware)
 - ✅ Full control - choose any model, customize parameters
+- ✅ Platform-specific knowledge - AI trained on YOUR docs
 
----   
 ## Feature Overview
 
 | Area | Summary |
