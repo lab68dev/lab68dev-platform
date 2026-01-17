@@ -63,6 +63,15 @@ export async function GET(request: NextRequest) {
       .eq('email', user.email)
       .single()
 
+    if (userError) {
+      console.error('❌ Error checking if user exists:', userError)
+      return NextResponse.redirect(
+        `${origin}/login?error=user_lookup_failed&message=${encodeURIComponent(
+          userError.message,
+        )}`,
+      )
+    }
+
     // If user doesn't exist in our users table, redirect to signup to complete profile
     if (!existingUser) {
       console.log('👤 New user detected, redirecting to signup...')
