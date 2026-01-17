@@ -219,16 +219,10 @@ This project uses **Supabase** for authentication and **enterprise-grade securit
    SMTP_PORT=587
    SMTP_USER=your-email@gmail.com
    SMTP_PASSWORD=your-app-password
-   
-   # AI Configuration (Optional - see AI Tools section below)
-   # Option 1: Use local Ollama (privacy-first, no cost)
-   OLLAMA_URL=http://localhost:11434
-   OLLAMA_MODEL=deepseek-r1:7b
-   
    SMTP_FROM_EMAIL=your-email@gmail.com
    SMTP_FROM_NAME=Lab68 Dev Platform
    
-   # AI Configuration
+   # AI Configuration (RAG + Ollama)
    OLLAMA_URL=http://localhost:11434
    OLLAMA_MODEL=deepseek-r1:7b
    ```
@@ -269,16 +263,17 @@ The **AI Tools** feature (`/dashboard/ai-tools`) provides an intelligent develop
 
 ### Features
 
-- **🧠 RAG-Enhanced AI** – AI powered by your documentation, features, and codebase
+- **🧠 RAG-Enhanced AI** – AI powered by your documentation, features, and codebase using vector embeddings
 - **🤖 Smart AI Assistant** – Code generation, debugging, architecture decisions, and technical guidance
-- **📚 Context-Aware** – Answers based on your actual platform documentation
-- **🔒 Complete Privacy** – All processing and data stays on your infrastructure
+- **📚 Context-Aware** – Answers based on your actual platform documentation via RAG retrieval
+- **🔒 Complete Privacy** – All processing and data stays on your infrastructure (Ollama + Supabase pgvector)
 - **💰 Zero Cost** – No API fees, unlimited usage with local Ollama
 - **🌐 Offline Capable** – Works without internet connection
 - **💬 Modern Chat UI** – User/AI avatars, message bubbles, copy-to-clipboard, typing indicators
-- **📊 Real-time Status** – Shows Ollama connection status and RAG usage
+- **📊 Real-time Status** – Shows Ollama + RAG status
 - **🧹 Clear Chat** – Reset conversation anytime
 - **📝 Message Counter** – Track conversation length and character count
+- **⚡ Fast Retrieval** – Cosine similarity search with Supabase pgvector (sub-100ms)
 
 ### What is RAG?
 
@@ -368,6 +363,8 @@ For production, run Ollama on a separate server:
 - ✅ Fast responses - no network latency (with good hardware)
 - ✅ Full control - choose any model, customize parameters
 - ✅ Platform-specific knowledge - AI trained on YOUR docs
+
+---
 
 ## Feature Overview
 
@@ -483,6 +480,7 @@ This project is licensed under the [Apache License 2.0](./LICENSE).
 ## Support & Feedback
 
 - GitHub Issues: [lab68dev-platform/issues](https://github.com/lab68dev/lab68dev-platform/issues)
-- Maintainer: [@F4P1E](https://github.com/F4P1E)
+- Founder / Maintainer: [@F4P1E](https://github.com/F4P1E)
+- Co-founder / Assistant: [@mthutt](https://github.com/mthutt)
 
 Let us know how you are using Lab68 Dev Platform or what you would like to see next!

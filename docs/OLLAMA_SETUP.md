@@ -13,11 +13,13 @@ Run AI models locally on your machine with complete privacy and no API costs!
 - Ollama runs automatically as a service
 
 **macOS:**
+
 ```bash
 brew install ollama
 ```
 
 **Linux:**
+
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
@@ -59,13 +61,13 @@ OLLAMA_URL=http://localhost:11434
 OLLAMA_MODEL=deepseek-r1:7b
 ```
 
-### 5. Start Using!
+### 5. Start Using
 
 That's it! Your AI Tools section will now:
 
-1. ✅ Try Ollama local model first (privacy-first, no cost)
-2. ⚡ Fallback to DeepSeek API if you set `DEEPSEEK_API_KEY`
-3. 🌐 Fallback to Gemini if you set `GEMINI_API_KEY`
+1. ✅ Use Ollama local model (privacy-first, no cost)
+2. 🧠 Enhanced with RAG (Retrieval-Augmented Generation) for context-aware responses
+3. 📚 Answers based on your platform documentation and codebase
 
 ## Model Recommendations
 
@@ -96,11 +98,14 @@ That's it! Your AI Tools section will now:
 ### "Ollama not available" message
 
 1. Check if Ollama is running:
+
    ```bash
    ollama list
    ```
+
 2. Restart Ollama service (Windows: Check system tray)
 3. Verify model is downloaded:
+
    ```bash
    ollama pull deepseek-r1:7b
    ```
@@ -112,29 +117,26 @@ That's it! Your AI Tools section will now:
 - Consider upgrading RAM or adding GPU
 
 ### Port conflicts
+
 If port 11434 is taken:
+
 ```bash
 # Change Ollama port (Linux/Mac)
 OLLAMA_HOST=0.0.0.0:11435 ollama serve
 ```
 
 Then update `.env.local`:
+
 ```env
 OLLAMA_URL=http://localhost:11435
 ```
 
-## Benefits of Local AI
+## Benefits of Local AI + RAG
 
 ✅ **Privacy** - Your data never leaves your machine  
 ✅ **Cost** - No API fees  
 ✅ **Offline** - Works without internet  
 ✅ **Speed** - No network latency (with good hardware)  
-✅ **Unlimited** - No rate limits or quotas
-
-## API Fallback
-
-Your app automatically falls back to cloud APIs if Ollama isn't available:
-
-1. Ollama (local) → 2. DeepSeek API → 3. Gemini API
-
-This ensures your AI features always work!
+✅ **Unlimited** - No rate limits or quotas  
+✅ **Context-Aware** - RAG provides relevant documentation and code context  
+✅ **Accurate** - Answers based on your actual platform, not generic knowledge
