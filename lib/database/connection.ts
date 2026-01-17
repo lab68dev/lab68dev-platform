@@ -334,11 +334,14 @@ export async function searchUsers(query: string, limit = 10) {
     
     if (!trimmedQuery) return []
 
+    // Sanitize query to avoid injecting special characters into filter expression
+    const safeQuery = trimmedQuery.replace(/[,%()]/g, '')
+
     // Search by email or name (case-insensitive)
     const { data, error } = await supabase
       .from('profiles')
       .select('id, email, name, avatar')
-      .or(`email.ilike.%${trimmedQuery}%,name.ilike.%${trimmedQuery}%`)
+      .or(`email.ilike.%${safeQuery}%,name.ilike.%${safeQuery}%`)
       .limit(limit)
     
     if (error) {

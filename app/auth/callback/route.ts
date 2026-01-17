@@ -63,6 +63,27 @@ export async function GET(request: NextRequest) {
       .eq('email', user.email)
       .single()
 
+    // Handle potential errors from the user lookup
+    if (userError) {
+      // Supabase returns code 'PGRST116' when .single() finds no rows (i.e., user not found)
+      if (userError.code === 'PGRST116') {
+        console.log('ℹ️ User not found in database (expected for new user):', userError.message)
+      } else {
+        console.error('❌ Error checking if user exists in database:', userError)
+        return NextResponse.redirect(
+          `${origin}/login?error=user_lookup_failed&message=${encodeURIComponent(userError.message)}`
+        )
+      }
+    }
+    if (userError) {
+      console.error('❌ Error checking if user exists:', userError)
+      return NextResponse.redirect(
+        `${origin}/login?error=user_lookup_failed&message=${encodeURIComponent(
+          userError.message,
+        )}`,
+      )
+    }
+
     // If user doesn't exist in our users table, redirect to signup to complete profile
     if (!existingUser) {
       console.log('👤 New user detected, redirecting to signup...')
