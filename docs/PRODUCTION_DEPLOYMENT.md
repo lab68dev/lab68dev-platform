@@ -5,6 +5,7 @@ This guide ensures a smooth, error-free deployment to Vercel for the Lab68 Dev P
 ## ✅ Pre-Deployment Checklist
 
 ### 1. Code Quality
+
 - [ ] Run `pnpm lint` – No linting errors
 - [ ] Run `pnpm build` – Successful build with no TypeScript errors
 - [ ] Test all routes locally – No 404s or broken pages
@@ -12,7 +13,8 @@ This guide ensures a smooth, error-free deployment to Vercel for the Lab68 Dev P
 
 ### 2. Environment Variables
 
-#### Required for All Deployments:
+#### Required for All Deployments
+
 ```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -30,37 +32,40 @@ SMTP_FROM_EMAIL=your-email@gmail.com
 SMTP_FROM_NAME=Lab68 Dev Platform
 ```
 
-#### AI Tools Configuration (Choose One):
+#### AI Tools Configuration (RAG + Ollama)
 
-**Option A: DeepSeek API (Recommended for Vercel)**
+**Ollama Local AI (Recommended)**
+
 ```env
-DEEPSEEK_API_KEY=your-deepseek-api-key
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=deepseek-r1:7b
 ```
-- Cost: ~$0.14 per 1M tokens
-- Get key: https://platform.deepseek.com/api_keys
 
-**Option B: Google Gemini API (Free Tier)**
-```env
-GEMINI_API_KEY=your-gemini-api-key
-```
-- Free: 15 requests/minute
-- Get key: https://aistudio.google.com/app/apikey
+- Cost: **$0** (100% free, runs locally)
+- Privacy: All data stays on your infrastructure
+- Setup: See [docs/OLLAMA_SETUP.md](./OLLAMA_SETUP.md)
 
-**Option C: Hybrid (Ollama on VPS)**
+**For Production (Ollama on VPS)**
+
 ```env
 OLLAMA_URL=https://ai.yourdomain.com
 OLLAMA_MODEL=deepseek-r1:7b
 ```
+
 - Requires separate VPS running Ollama
 - Most cost-effective for high usage
+- Complete privacy and control
+- Setup: See [docs/PRODUCTION_DEPLOYMENT_OLLAMA.md](./PRODUCTION_DEPLOYMENT_OLLAMA.md)
 
 ### 3. Database Setup
+
 - [ ] Supabase project created
 - [ ] `supabase-staff-schema.sql` executed in SQL Editor
 - [ ] Row-Level Security (RLS) policies enabled
 - [ ] Test database connection locally
 
 ### 4. Security Checks
+
 - [ ] Change default admin password (`admin@lab68dev.com`)
 - [ ] JWT_SECRET is unique and strong (32+ characters)
 - [ ] Email SMTP credentials are correct
@@ -83,6 +88,7 @@ vercel link
 ```
 
 Or use GitHub integration:
+
 1. Push code to GitHub
 2. Import project in Vercel Dashboard
 3. Connect repository
@@ -90,16 +96,18 @@ Or use GitHub integration:
 ### Step 2: Configure Environment Variables
 
 **In Vercel Dashboard:**
+
 1. Go to **Settings** → **Environment Variables**
 2. Add all required variables from checklist above
 3. Set for **Production**, **Preview**, and **Development** environments
 
 **Critical Variables:**
+
 - ✅ `NEXT_PUBLIC_SUPABASE_URL`
 - ✅ `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - ✅ `JWT_SECRET`
 - ✅ `SMTP_*` variables
-- ✅ `DEEPSEEK_API_KEY` or `GEMINI_API_KEY` (for AI)
+- ✅ `OLLAMA_URL` and `OLLAMA_MODEL` (for AI)
 
 ### Step 3: Deploy
 
@@ -131,6 +139,7 @@ Visit your production URL and test:
 ### Build Errors
 
 **"Module not found"**
+
 ```bash
 # Clean install dependencies
 rm -rf node_modules .next
@@ -139,12 +148,14 @@ pnpm build
 ```
 
 **TypeScript errors**
+
 ```bash
 # Check for type issues
 pnpm type-check  # or pnpm build
 ```
 
 **ESLint errors**
+
 ```bash
 pnpm lint --fix
 ```
@@ -152,21 +163,27 @@ pnpm lint --fix
 ### Runtime Errors
 
 **"AI not responding"**
+
 - Check environment variables are set in Vercel
-- Verify `DEEPSEEK_API_KEY` or `GEMINI_API_KEY` is valid
+- Verify `OLLAMA_URL` points to running Ollama instance
+- For local dev: Ensure Ollama is running (`ollama list`)
+- For production: Check VPS Ollama server is accessible
 - Check Vercel logs: `vercel logs --prod`
 
 **"Database connection failed"**
+
 - Verify Supabase URL and keys are correct
 - Check Supabase project is not paused
 - Ensure RLS policies allow access
 
 **"Email not sending"**
+
 - Verify SMTP credentials
 - Check Gmail app password (not account password)
 - Test with alternative SMTP provider
 
 **"Session expired immediately"**
+
 - Ensure `JWT_SECRET` is set in production
 - Check secret is same across all deployments
 - Clear browser cookies and try again
@@ -174,22 +191,26 @@ pnpm lint --fix
 ### Vercel-Specific Issues
 
 **"Function exceeded timeout"**
+
 - AI requests may take time on first call
 - Consider using streaming responses
 - Check Vercel function logs
 
 **"Environment variable not found"**
+
 - Redeploy after adding variables
 - Check variable scope (Production/Preview/Development)
 
 ## 📊 Monitoring
 
 ### Vercel Dashboard
+
 - **Analytics** – Page views, performance metrics
 - **Logs** – Real-time function logs
 - **Deployments** – Build history and rollback
 
 ### Recommended Setup
+
 ```bash
 # Add to package.json
 "scripts": {
@@ -209,12 +230,14 @@ pnpm lint --fix
 
 ## 💰 Cost Optimization
 
-### AI Costs (per 1M tokens):
+### AI Costs (per 1M tokens)
+
 - **Ollama (self-hosted)**: VPS cost (~$50-200/month)
 - **DeepSeek API**: ~$0.14
 - **Gemini Free**: $0 (with rate limits)
 
-### Recommendation:
+### Recommendation
+
 - **< 10k messages/month**: Use Gemini free tier
 - **10k - 100k messages/month**: Use DeepSeek API (~$20-50/month)
 - **> 100k messages/month**: Self-host Ollama on VPS
@@ -243,9 +266,10 @@ git push origin your-branch
 # Vercel will auto-deploy from main branch
 ```
 
-## 🎉 Success!
+## 🎉 Success
 
 Your Lab68 Dev Platform is now live on Vercel with:
+
 - ✅ Enterprise-grade security
 - ✅ Staff management portal
 - ✅ AI development assistant
@@ -259,6 +283,7 @@ Visit your production URL and start building! 🚀
 ---
 
 **Need Help?**
-- Vercel Docs: https://vercel.com/docs
-- Supabase Docs: https://supabase.com/docs
-- Project Issues: https://github.com/lab68dev/lab68dev-platform/issues
+
+- Vercel Docs: <https://vercel.com/docs>
+- Supabase Docs: <https://supabase.com/docs>
+- Project Issues: <https://github.com/lab68dev/lab68dev-platform/issues>
