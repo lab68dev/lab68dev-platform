@@ -300,10 +300,14 @@ export async function getProfileByEmail(email: string) {
     }
 
     const supabase = createClient()
+    
+    // Use ilike for case-insensitive search and trim whitespace
+    const trimmedEmail = email.trim().toLowerCase()
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('email', email)
+      .ilike('email', trimmedEmail)
       .single()
     
     if (error) {
@@ -314,6 +318,40 @@ export async function getProfileByEmail(email: string) {
   } catch (err) {
     console.warn('Error getting profile by email:', err)
     return null
+  }
+}
+
+// Search for users by email or name
+export async function searchUsers(query: string, limit = 10) {
+  try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn('Supabase not configured')
+      return []
+    }
+
+    const supabase = createClient()
+    const trimmedQuery = query.trim()
+    
+    if (!trimmedQuery) return []
+
+    // Sanitize query to avoid injecting special characters into filter expression
+    const safeQuery = trimmedQuery.replace(/[,%()]/g, '')
+
+    // Search by email or name (case-insensitive)
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, email, name, avatar')
+      .or(`email.ilike.%${safeQuery}%,name.ilike.%${safeQuery}%`)
+      .limit(limit)
+    
+    if (error) {
+      console.warn('Error searching users:', error)
+      return []
+    }
+    return data || []
+  } catch (err) {
+    console.warn('Error searching users:', err)
+    return []
   }
 }
 

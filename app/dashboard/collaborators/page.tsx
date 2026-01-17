@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Users, Search, Mail, FolderKanban, X, Plus } from "lucide-react"
 import { getCurrentUser, getAllUsers } from "@/lib/features/auth"
 import { Translations, getUserLanguage, getTranslations, type Language } from "@/lib/config"
+import { getProfileByEmail, searchUsers } from "@/lib/database"
 import Link from "next/link"
 
 interface Project {
@@ -34,6 +35,8 @@ export default function CollaboratorsPage() {
   const [language, setLanguage] = useState<Language>("en")
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [inviteEmail, setInviteEmail] = useState("")
+  const [userSearchResults, setUserSearchResults] = useState<any[]>([])
+  const [showUserSearch, setShowUserSearch] = useState(false)
   const t = getTranslations(language)
 
   useEffect(() => {
@@ -134,22 +137,41 @@ export default function CollaboratorsPage() {
     loadCollaborators()
   }
 
-  const handleSendInvite = () => {
-    if (!inviteEmail) return
-
-    const allUsers = getAllUsers()
-    const userExists = allUsers.find((u) => u.email === inviteEmail)
-
-    if (!userExists) {
-      alert("User not found. Please add them to a specific project from the Projects page.")
-      setShowInviteModal(false)
-      setInviteEmail("")
+  const handleSearchInviteUsers = async (query: string) => {
+    setInviteEmail(query)
+    
+    if (query.trim().length < 2) {
+      setUserSearchResults([])
+      setShowUserSearch(false)
       return
     }
 
-    alert(`Invitation feature coming soon! For now, add ${inviteEmail} to a project from the Projects page.`)
+    const results = await searchUsers(query, 5)
+    setUserSearchResults(results)
+    setShowUserSearch(results.length > 0)
+  }
+
+  const handleSelectInviteUser = (user: any) => {
+    setInviteEmail(user.email)
+    setUserSearchResults([])
+    setShowUserSearch(false)
+  }
+
+  const handleSendInvite = async () => {
+    if (!inviteEmail) return
+
+    const userProfile = await getProfileByEmail(inviteEmail)
+
+    if (!userProfile) {
+      alert(`User not found: ${inviteEmail.trim()}\n\nPlease make sure:\n1. The email is correct\n2. The user has signed up on the platform\n3. Try searching by name using the dropdown`)
+      return
+    }
+
+    alert(`✅ User found: ${userProfile.name || userProfile.email}`)
     setShowInviteModal(false)
     setInviteEmail("")
+    setUserSearchResults([])
+    setShowUserSearch(false)
   }
 
   const filteredCollaborators = collaborators.filter(
@@ -328,7 +350,12 @@ export default function CollaboratorsPage() {
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">Invite Collaborator</h2>
               <button
-                onClick={() => setShowInviteModal(false)}
+                onClick={() => {
+                  setShowInviteModal(false)
+                  setInviteEmail("")
+                  setUserSearchResults([])
+                  setShowUserSearch(false)
+                }}
                 className="text-muted-foreground hover:text-foreground"
                 title="Close"
               >
@@ -338,20 +365,57 @@ export default function CollaboratorsPage() {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Email Address</label>
-                <input
-                  type="email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="colleague@example.com"
-                  className="w-full bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
-                />
+                <label className="text-sm font-medium">Search by Email or Name</label>
+                <p className="text-xs text-muted-foreground">Type at least 2 characters to search</p>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={inviteEmail}
+                    onChange={(e) => handleSearchInviteUsers(e.target.value)}
+                    onFocus={() => inviteEmail.length >= 2 && setShowUserSearch(true)}
+                    placeholder="colleague@example.com or John Doe"
+                    className="w-full bg-card border border-border px-4 py-2 text-sm focus:outline-none focus:border-primary"
+                  />
+                  
+                  {/* Search Results Dropdown */}
+                  {showUserSearch && userSearchResults.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-card border border-border shadow-lg max-h-60 overflow-y-auto">
+                      {userSearchResults.map((user) => (
+                        <button
+                          key={user.id}
+                          onClick={() => handleSelectInviteUser(user)}
+                          className="w-full text-left px-4 py-3 hover:bg-primary/10 border-b border-border last:border-b-0 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            {user.avatar ? (
+                              <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                                <Users className="h-4 w-4 text-primary" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{user.name || 'No name'}</p>
+                              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* No results message */}
+                  {showUserSearch && userSearchResults.length === 0 && inviteEmail.length >= 2 && (
+                    <div className="absolute z-10 w-full mt-1 bg-card border border-border shadow-lg p-4 text-xs text-muted-foreground">
+                      No users found matching "{inviteEmail}"
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="bg-card border border-border p-4">
                 <p className="text-xs text-muted-foreground">
-                  Note: To add a collaborator to a specific project, go to the Projects page and use the collaborators
-                  button on the project card.
+                  This will check if the user exists on the platform. To add them to a specific project, go to the Projects page and use the collaborators button on the project card.
                 </p>
               </div>
 
@@ -362,7 +426,12 @@ export default function CollaboratorsPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setShowInviteModal(false)}
+                  onClick={() => {
+                    setShowInviteModal(false)
+                    setInviteEmail("")
+                    setUserSearchResults([])
+                    setShowUserSearch(false)
+                  }}
                   className="flex-1 border-foreground text-foreground hover:bg-foreground hover:text-background bg-transparent"
                 >
                   Cancel

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Plus, CheckCircle2, Clock, X, Pencil, Trash2, Users, LayoutGrid, Search, Filter } from "lucide-react"
 import { getCurrentUser } from "@/lib/features/auth"
 import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
-import { getProjects, createProject, updateProject, deleteProject, type Project as DBProject, addProjectCollaborator, getProjectCollaborators, removeProjectCollaborator, getProfileByEmail } from "@/lib/database"
+import { getProjects, createProject, updateProject, deleteProject, type Project as DBProject, addProjectCollaborator, getProjectCollaborators, removeProjectCollaborator, getProfileByEmail, searchUsers } from "@/lib/database"
 import Link from "next/link"
 
 interface Project {
@@ -30,6 +30,8 @@ export default function ProjectsPage() {
   const [showCollabModal, setShowCollabModal] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [collaboratorEmail, setCollaboratorEmail] = useState("")
+  const [userSearchResults, setUserSearchResults] = useState<any[]>([])
+  const [showUserSearch, setShowUserSearch] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -209,6 +211,29 @@ export default function ProjectsPage() {
   const handleOpenCollabModal = (project: Project) => {
     setSelectedProject(project)
     setShowCollabModal(true)
+    setCollaboratorEmail("")
+    setUserSearchResults([])
+    setShowUserSearch(false)
+  }
+
+  const handleSearchUsers = async (query: string) => {
+    setCollaboratorEmail(query)
+    
+    if (query.trim().length < 2) {
+      setUserSearchResults([])
+      setShowUserSearch(false)
+      return
+    }
+
+    const results = await searchUsers(query, 5)
+    setUserSearchResults(results)
+    setShowUserSearch(results.length > 0)
+  }
+
+  const handleSelectUser = (user: any) => {
+    setCollaboratorEmail(user.email)
+    setUserSearchResults([])
+    setShowUserSearch(false)
   }
 
   const handleAddCollaborator = useCallback(async () => {
@@ -218,16 +243,21 @@ export default function ProjectsPage() {
       setLoading(true)
       setError(null)
 
-      // Find user by email
+      console.log('🔍 Searching for user with email:', collaboratorEmail)
+
+      // Find user by email (case-insensitive, trimmed)
       const userProfile = await getProfileByEmail(collaboratorEmail)
       
+      console.log('👤 User profile found:', userProfile)
+      
       if (!userProfile) {
-        alert("User not found. Please enter a valid email address.")
+        setError(`User not found with email: ${collaboratorEmail.trim()}. Please make sure they have signed up on the platform.`)
+        alert(`User not found: ${collaboratorEmail.trim()}\n\nPlease make sure:\n1. The email is correct\n2. The user has signed up on the platform\n3. Try searching by name using the dropdown`)
         return
       }
 
       const currentUser = getCurrentUser()
-      if (collaboratorEmail === currentUser?.email) {
+      if (collaboratorEmail.toLowerCase().trim() === currentUser?.email.toLowerCase().trim()) {
         alert("You cannot add yourself as a collaborator.")
         return
       }
@@ -239,6 +269,8 @@ export default function ProjectsPage() {
         return
       }
 
+      console.log('✅ Adding collaborator:', userProfile.email)
+
       // Add collaborator
       await addProjectCollaborator(
         selectedProject.id, 
@@ -248,6 +280,10 @@ export default function ProjectsPage() {
       )
 
       setCollaboratorEmail("")
+      setUserSearchResults([])
+      setShowUserSearch(false)
+      alert(`✅ Successfully added ${userProfile.name || userProfile.email} as a collaborator!`)
+      
       await loadProjects()
       
       // Reload selected project to show new collaborator
@@ -644,16 +680,65 @@ export default function ProjectsPage() {
               {selectedProject.userId === getCurrentUser()?.email && (
                 <div className="space-y-2 pt-4 border-t border-border">
                   <label className="text-xs sm:text-sm font-medium">{t.projects.addCollaborator}</label>
+                  <p className="text-xs text-muted-foreground">Search by email or name</p>
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      type="email"
-                      value={collaboratorEmail}
-                      onChange={(e) => setCollaboratorEmail(e.target.value)}
-                      placeholder={t.projects.inviteByEmail}
-                      className="flex-1 bg-card border border-border px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-primary"
-                    />
-                    <Button onClick={handleAddCollaborator} className="w-full sm:w-auto whitespace-nowrap">{t.projects.invite}</Button>
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        value={collaboratorEmail}
+                        onChange={(e) => handleSearchUsers(e.target.value)}
+                        onFocus={() => collaboratorEmail.length >= 2 && setShowUserSearch(true)}
+                        placeholder={t.projects.inviteByEmail}
+                        className="w-full bg-card border border-border px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-primary"
+                      />
+                      
+                      {/* Search Results Dropdown */}
+                      {showUserSearch && userSearchResults.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 bg-card border border-border shadow-lg max-h-60 overflow-y-auto">
+                          {userSearchResults.map((user) => (
+                            <button
+                              key={user.id}
+                              onClick={() => handleSelectUser(user)}
+                              className="w-full text-left px-4 py-3 hover:bg-primary/10 border-b border-border last:border-b-0 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                {user.avatar ? (
+                                  <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
+                                ) : (
+                                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                                    <Users className="h-4 w-4 text-primary" />
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium truncate">{user.name || 'No name'}</p>
+                                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* No results message */}
+                      {showUserSearch && userSearchResults.length === 0 && collaboratorEmail.length >= 2 && (
+                        <div className="absolute z-10 w-full mt-1 bg-card border border-border shadow-lg p-4 text-xs text-muted-foreground">
+                          No users found matching "{collaboratorEmail}"
+                        </div>
+                      )}
+                    </div>
+                    <Button 
+                      onClick={handleAddCollaborator} 
+                      disabled={!collaboratorEmail.trim()}
+                      className="w-full sm:w-auto whitespace-nowrap"
+                    >
+                      {t.projects.invite}
+                    </Button>
                   </div>
+                  {error && (
+                    <div className="text-xs text-red-500 bg-red-500/10 border border-red-500/50 p-2 rounded">
+                      {error}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
