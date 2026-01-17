@@ -26,7 +26,7 @@ export default function AIToolsPage() {
       {
         role: "assistant",
         content:
-          "Hello! I'm your AI development assistant. I can run locally using Ollama or connect to cloud APIs. I can help you with code generation, debugging, architecture decisions, and more. What would you like to work on today?",
+          "Hello! I'm your RAG-enhanced AI development assistant powered by Ollama. I can help you with code generation, debugging, architecture decisions, and more. My responses are based on your platform's documentation and codebase for accurate, context-aware answers. What would you like to work on today?",
         timestamp: new Date().toLocaleTimeString(),
       },
     ])
@@ -84,7 +84,7 @@ export default function AIToolsPage() {
       const errorMessage: Message = {
         role: "assistant",
         content:
-          "Sorry, I encountered an error connecting to Ollama. Please ensure Ollama is running and you have downloaded a model. Visit https://ollama.com for setup instructions or see docs/OLLAMA_SETUP.md",
+          "Sorry, I encountered an error connecting to the RAG-enhanced AI. Please ensure Ollama is running and you have downloaded a model. Visit https://ollama.com for setup instructions or see docs/OLLAMA_SETUP.md",
         timestamp: new Date().toLocaleTimeString(),
       }
       setMessages((prev) => [...prev, errorMessage])
@@ -104,7 +104,7 @@ export default function AIToolsPage() {
       {
         role: "assistant",
         content:
-          "Hello! I'm your AI development assistant. I can run locally using Ollama or connect to cloud APIs. I can help you with code generation, debugging, architecture decisions, and more. What would you like to work on today?",
+          "Hello! I'm your RAG-enhanced AI development assistant powered by Ollama. I can help you with code generation, debugging, architecture decisions, and more. My responses are based on your platform's documentation and codebase for accurate, context-aware answers. What would you like to work on today?",
         timestamp: new Date().toLocaleTimeString(),
       },
     ])
@@ -124,9 +124,9 @@ export default function AIToolsPage() {
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">{t.nav.aiTools}</h1>
                 <div className="flex items-center gap-2 mt-1">
-                  <div className={`h-2 w-2 rounded-full ${provider === "Ollama (Local)" ? "bg-green-500 animate-pulse" : "bg-blue-500"}`} />
+                  <div className={`h-2 w-2 rounded-full ${provider.includes("RAG") ? "bg-purple-500 animate-pulse" : provider.includes("Ollama") ? "bg-green-500 animate-pulse" : "bg-blue-500"}`} />
                   <p className="text-sm text-muted-foreground">
-                    {provider === "Ollama (Local)" ? "Running Locally" : provider}
+                    {provider.includes("RAG") ? "🧠 RAG-Enhanced (Local)" : provider.includes("Ollama") ? "Running Locally" : provider}
                   </p>
                 </div>
               </div>
@@ -261,7 +261,16 @@ export default function AIToolsPage() {
             </div>
             <div className="flex items-center justify-between text-xs">
               <p className="text-muted-foreground flex items-center gap-2">
-                {provider === "Ollama (Local)" ? (
+                {provider.includes("RAG") ? (
+                  <>
+                    <span className="flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 bg-purple-500 rounded-full animate-pulse" />
+                      RAG-Enhanced AI
+                    </span>
+                    <span className="text-muted-foreground/60">•</span>
+                    <span>Context from your docs & code</span>
+                  </>
+                ) : provider.includes("Ollama") ? (
                   <>
                     <span className="flex items-center gap-1">
                       <span className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse" />
