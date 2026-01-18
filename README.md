@@ -229,12 +229,6 @@ This project uses **Supabase** for authentication and **enterprise-grade securit
 
 4. **Restart your dev server:** `pnpm dev`
 
-**Default Admin Account:**
-
-- Email: `admin@lab68dev.com`
-- Password: `Admin@123456`
-- **Change this immediately in production!**
-
 For detailed setup instructions, see **[docs/SECURITY_QUICKSTART.md](./docs/SECURITY_QUICKSTART.md)**.
 
 ### Production Build
