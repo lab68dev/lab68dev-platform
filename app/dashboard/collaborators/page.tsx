@@ -61,12 +61,16 @@ export default function CollaboratorsPage() {
 
       // Build collaborator map using API
       const collabMap = new Map<string, CollaboratorInfo>()
+      const failedProjects: string[] = []
 
       for (const project of userProjects) {
         try {
           // Fetch collaborators from API
           const response = await fetch(`/api/projects/${project.id}/collaborators`)
-          if (!response.ok) continue
+          if (!response.ok) {
+            failedProjects.push(project.name)
+            continue
+          }
 
           const { collaborators: projectCollabs } = await response.json()
 
@@ -93,7 +97,14 @@ export default function CollaboratorsPage() {
           })
         } catch (err) {
           console.warn('Error loading collaborators for project:', project.id, err)
+          failedProjects.push(project.name)
         }
+      }
+
+      // Show warning if some projects failed to load
+      if (failedProjects.length > 0) {
+        console.warn(`Failed to load collaborators for ${failedProjects.length} project(s): ${failedProjects.join(', ')}`)
+        alert(`⚠️ Warning: Could not load collaborators for some projects:\n${failedProjects.join('\n')}\n\nThe displayed data may be incomplete.`)
       }
 
       // Convert map to array and sort by project count
@@ -138,6 +149,7 @@ export default function CollaboratorsPage() {
 
       // Reload collaborators
       loadCollaborators()
+      alert('Collaborator removed from all projects.')
     } catch (err) {
       console.error('Error removing collaborator from all projects:', err)
       alert('Failed to remove collaborator. Please try again.')
@@ -169,6 +181,7 @@ export default function CollaboratorsPage() {
 
       // Reload collaborators
       loadCollaborators()
+      alert('Collaborator removed from project.')
     } catch (err) {
       console.error('Error removing collaborator from project:', err)
       alert('Failed to remove collaborator. Please try again.')

@@ -5,10 +5,10 @@ import { getProfileByEmail, addProjectCollaborator, getProjectCollaborators, rem
 // GET /api/projects/[id]/collaborators - List collaborators for a project
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const projectId = params.id
+    const { id: projectId } = await params
     const supabase = createClient()
 
     // Check if user is authenticated
@@ -68,15 +68,36 @@ export async function GET(
 // POST /api/projects/[id]/collaborators - Add a collaborator to a project
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const projectId = params.id
+    const { id: projectId } = await params
     const { email, role = "viewer" } = await request.json()
 
-    if (!email) {
+    // Validate and trim email
+    if (!email || typeof email !== 'string') {
       return NextResponse.json(
         { error: "Email is required" },
+        { status: 400 }
+      )
+    }
+
+    const trimmedEmail = email.trim()
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(trimmedEmail)) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
+        { status: 400 }
+      )
+    }
+
+    // Validate role
+    const validRoles = ['owner', 'admin', 'editor', 'viewer']
+    if (!validRoles.includes(role)) {
+      return NextResponse.json(
+        { error: "Invalid role. Must be one of: owner, admin, editor, viewer" },
         { status: 400 }
       )
     }
@@ -126,7 +147,7 @@ export async function POST(
     }
 
     // Find the user to add
-    const userProfile = await getProfileByEmail(email)
+    const userProfile = await getProfileByEmail(trimmedEmail)
     
     if (!userProfile) {
       return NextResponse.json(
@@ -179,10 +200,10 @@ export async function POST(
 // DELETE /api/projects/[id]/collaborators - Remove a collaborator from a project
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const projectId = params.id
+    const { id: projectId } = await params
     const { searchParams } = new URL(request.url)
     const userIdToRemove = searchParams.get("userId")
 

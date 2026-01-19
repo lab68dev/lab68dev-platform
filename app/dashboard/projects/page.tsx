@@ -262,6 +262,7 @@ export default function ProjectsPage() {
       if (!response.ok) {
         setError(data.error || "Failed to add collaborator")
         alert(data.error || "Failed to add collaborator. Please try again.")
+        setLoading(false)
         return
       }
 
@@ -277,18 +278,23 @@ export default function ProjectsPage() {
       
       // Update selected project
       const collaboratorsResponse = await fetch(`/api/projects/${selectedProject.id}/collaborators`)
+      
+      if (!collaboratorsResponse.ok) {
+        console.warn('Failed to reload collaborators after adding')
+        setLoading(false)
+        return
+      }
+      
       const collaboratorsData = await collaboratorsResponse.json()
       
-      if (collaboratorsResponse.ok) {
-        const collaboratorEmails = collaboratorsData.collaborators
-          .map((c: any) => c.profiles?.email)
-          .filter((email: string | undefined): email is string => Boolean(email))
-        
-        setSelectedProject({
-          ...selectedProject,
-          collaborators: collaboratorEmails
-        })
-      }
+      const collaboratorEmails = collaboratorsData.collaborators
+        .map((c: any) => c.profiles?.email)
+        .filter((email: string | undefined): email is string => Boolean(email))
+      
+      setSelectedProject({
+        ...selectedProject,
+        collaborators: collaboratorEmails
+      })
     } catch (err) {
       console.error("Error adding collaborator:", err)
       setError("Failed to add collaborator. Please try again.")
@@ -308,6 +314,7 @@ export default function ProjectsPage() {
       const userProfile = await getProfileByEmail(email)
       if (!userProfile) {
         alert("User not found.")
+        setLoading(false)
         return
       }
 
@@ -316,10 +323,10 @@ export default function ProjectsPage() {
         method: 'DELETE'
       })
 
-      const data = await response.json()
-
       if (!response.ok) {
+        const data = await response.json()
         alert(data.error || "Failed to remove collaborator")
+        setLoading(false)
         return
       }
       
@@ -328,18 +335,23 @@ export default function ProjectsPage() {
       
       // Update selected project
       const collaboratorsResponse = await fetch(`/api/projects/${selectedProject.id}/collaborators`)
+      
+      if (!collaboratorsResponse.ok) {
+        console.warn('Failed to reload collaborators after removal')
+        setLoading(false)
+        return
+      }
+      
       const collaboratorsData = await collaboratorsResponse.json()
       
-      if (collaboratorsResponse.ok) {
-        const collaboratorEmails = collaboratorsData.collaborators
-          .map((c: any) => c.profiles?.email)
-          .filter((email: string | undefined): email is string => Boolean(email))
-        
-        setSelectedProject({
-          ...selectedProject,
-          collaborators: collaboratorEmails
-        })
-      }
+      const collaboratorEmails = collaboratorsData.collaborators
+        .map((c: any) => c.profiles?.email)
+        .filter((email: string | undefined): email is string => Boolean(email))
+      
+      setSelectedProject({
+        ...selectedProject,
+        collaborators: collaboratorEmails
+      })
     } catch (err) {
       console.error("Error removing collaborator:", err)
       setError("Failed to remove collaborator. Please try again.")
