@@ -166,21 +166,19 @@ jobs:
     
     steps:
       - name: Check status
-        ruecho "Lint and Type Check: ${{ needs.lint-and-type-check.result }}"
+        run: |
+          echo "Lint and Type Check: ${{ needs.lint-and-type-check.result }}"
           echo "Build: ${{ needs.build.result }}"
           echo "Check Format: ${{ needs.check-format.result }}"
           echo "Security Scan: ${{ needs.security-scan.result }}"
           
-          # Only require build to pass, others are informational
           if [ "${{ needs.build.result }}" != "success" ]; then
-            echo "❌ Build failed! This is required."
+            echo "Build failed! This is required."
             exit 1
           fi
           
-          # Warn about other failures but don't block
           if [ "${{ needs.lint-and-type-check.result }}" != "success" ]; then
-            echo "⚠️  Lint/Type check had issues (non-blocking)"
+            echo "Lint/Type check had issues (non-blocking)"
           fi
           
-          echo "✅ 
           echo "All required checks passed!"
