@@ -1,0 +1,251 @@
+import { NextResponse } from "next/server"
+import { createClient } from "@/lib/database/supabase-client"
+import { getProfileByEmail, addProjectCollaborator, getProjectCollaborators, removeProjectCollaborator } from "@/lib/database"
+
+// GET /api/projects/[id]/collaborators - List collaborators for a project
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const projectId = params.id
+    const supabase = createClient()
+
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
+    }
+
+    // Check if user has access to the project (owner or collaborator)
+    const { data: project } = await supabase
+      .from("projects")
+      .select("user_id")
+      .eq("id", projectId)
+      .single()
+
+    if (!project) {
+      return NextResponse.json(
+        { error: "Project not found" },
+        { status: 404 }
+      )
+    }
+
+    const isOwner = project.user_id === user.id
+
+    const { data: collaborator } = await supabase
+      .from("project_collaborators")
+      .select("role")
+      .eq("project_id", projectId)
+      .eq("user_id", user.id)
+      .single()
+
+    const hasAccess = isOwner || !!collaborator
+
+    if (!hasAccess) {
+      return NextResponse.json(
+        { error: "Access denied" },
+        { status: 403 }
+      )
+    }
+
+    // Get collaborators
+    const collaborators = await getProjectCollaborators(projectId)
+
+    return NextResponse.json({ collaborators })
+  } catch (error) {
+    console.error("Error fetching collaborators:", error)
+    return NextResponse.json(
+      { error: "Failed to fetch collaborators" },
+      { status: 500 }
+    )
+  }
+}
+
+// POST /api/projects/[id]/collaborators - Add a collaborator to a project
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const projectId = params.id
+    const { email, role = "viewer" } = await request.json()
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email is required" },
+        { status: 400 }
+      )
+    }
+
+    const supabase = createClient()
+
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
+    }
+
+    // Check if user is the project owner or admin
+    const { data: project } = await supabase
+      .from("projects")
+      .select("user_id")
+      .eq("id", projectId)
+      .single()
+
+    if (!project) {
+      return NextResponse.json(
+        { error: "Project not found" },
+        { status: 404 }
+      )
+    }
+
+    const isOwner = project.user_id === user.id
+
+    if (!isOwner) {
+      // Check if user is an admin collaborator
+      const { data: userCollab } = await supabase
+        .from("project_collaborators")
+        .select("role")
+        .eq("project_id", projectId)
+        .eq("user_id", user.id)
+        .single()
+
+      if (!userCollab || userCollab.role !== "admin") {
+        return NextResponse.json(
+          { error: "Only project owners and admins can add collaborators" },
+          { status: 403 }
+        )
+      }
+    }
+
+    // Find the user to add
+    const userProfile = await getProfileByEmail(email)
+    
+    if (!userProfile) {
+      return NextResponse.json(
+        { error: "User not found. Please make sure they have signed up on the platform." },
+        { status: 404 }
+      )
+    }
+
+    // Check if user is trying to add themselves
+    if (userProfile.id === user.id) {
+      return NextResponse.json(
+        { error: "You cannot add yourself as a collaborator" },
+        { status: 400 }
+      )
+    }
+
+    // Check if already a collaborator
+    const existingCollaborators = await getProjectCollaborators(projectId)
+    if (existingCollaborators.some((c: any) => c.user_id === userProfile.id)) {
+      return NextResponse.json(
+        { error: "This user is already a collaborator" },
+        { status: 400 }
+      )
+    }
+
+    // Add collaborator
+    const newCollaborator = await addProjectCollaborator(
+      projectId,
+      userProfile.id,
+      role as 'owner' | 'admin' | 'editor' | 'viewer',
+      user.id
+    )
+
+    return NextResponse.json({
+      success: true,
+      collaborator: {
+        ...newCollaborator,
+        profile: userProfile
+      }
+    })
+  } catch (error) {
+    console.error("Error adding collaborator:", error)
+    return NextResponse.json(
+      { error: "Failed to add collaborator" },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE /api/projects/[id]/collaborators - Remove a collaborator from a project
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const projectId = params.id
+    const { searchParams } = new URL(request.url)
+    const userIdToRemove = searchParams.get("userId")
+
+    if (!userIdToRemove) {
+      return NextResponse.json(
+        { error: "userId is required" },
+        { status: 400 }
+      )
+    }
+
+    const supabase = createClient()
+
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
+    }
+
+    // Check if user is the project owner or admin
+    const { data: project } = await supabase
+      .from("projects")
+      .select("user_id")
+      .eq("id", projectId)
+      .single()
+
+    if (!project) {
+      return NextResponse.json(
+        { error: "Project not found" },
+        { status: 404 }
+      )
+    }
+
+    const isOwner = project.user_id === user.id
+
+    if (!isOwner) {
+      // Check if user is an admin collaborator
+      const { data: userCollab } = await supabase
+        .from("project_collaborators")
+        .select("role")
+        .eq("project_id", projectId)
+        .eq("user_id", user.id)
+        .single()
+
+      if (!userCollab || userCollab.role !== "admin") {
+        return NextResponse.json(
+          { error: "Only project owners and admins can remove collaborators" },
+          { status: 403 }
+        )
+      }
+    }
+
+    // Remove collaborator
+    await removeProjectCollaborator(projectId, userIdToRemove)
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error removing collaborator:", error)
+    return NextResponse.json(
+      { error: "Failed to remove collaborator" },
+      { status: 500 }
+    )
+  }
+}

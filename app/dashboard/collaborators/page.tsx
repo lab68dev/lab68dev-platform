@@ -44,97 +44,135 @@ export default function CollaboratorsPage() {
     loadCollaborators()
   }, [])
 
-  const loadCollaborators = () => {
+  const loadCollaborators = async () => {
     const user = getCurrentUser()
     if (!user) return
 
-    const saved = localStorage.getItem("lab68_projects")
-    if (!saved) {
-      setCollaborators([])
-      return
-    }
-
-    const allProjects: Project[] = JSON.parse(saved)
-    // Get projects owned by current user
-    const userProjects = allProjects.filter((p) => p.userId === user.email)
-
-    // Build collaborator map
-    const collabMap = new Map<string, CollaboratorInfo>()
-    const allUsers = getAllUsers()
-
-    userProjects.forEach((project) => {
-      if (project.collaborators && project.collaborators.length > 0) {
-        project.collaborators.forEach((email) => {
-          if (!collabMap.has(email)) {
-            const userInfo = allUsers.find((u) => u.email === email)
-            collabMap.set(email, {
-              email,
-              name: userInfo?.name,
-              projectCount: 0,
-              projects: [],
-              isRegistered: !!userInfo,
-            })
-          }
-
-          const collab = collabMap.get(email)!
-          collab.projectCount++
-          collab.projects.push({
-            id: project.id,
-            name: project.name,
-          })
-        })
+    try {
+      // Get all projects owned by the current user
+      const saved = localStorage.getItem("lab68_projects")
+      if (!saved) {
+        setCollaborators([])
+        return
       }
-    })
 
-    // Convert map to array and sort by project count
-    const collabArray = Array.from(collabMap.values()).sort((a, b) => b.projectCount - a.projectCount)
-    setCollaborators(collabArray)
+      const allProjects: Project[] = JSON.parse(saved)
+      const userProjects = allProjects.filter((p) => p.userId === user.email)
+
+      // Build collaborator map using API
+      const collabMap = new Map<string, CollaboratorInfo>()
+
+      for (const project of userProjects) {
+        try {
+          // Fetch collaborators from API
+          const response = await fetch(`/api/projects/${project.id}/collaborators`)
+          if (!response.ok) continue
+
+          const { collaborators: projectCollabs } = await response.json()
+
+          projectCollabs.forEach((collab: any) => {
+            const email = collab.profiles?.email
+            if (!email) return
+
+            if (!collabMap.has(email)) {
+              collabMap.set(email, {
+                email,
+                name: collab.profiles?.name,
+                projectCount: 0,
+                projects: [],
+                isRegistered: true,
+              })
+            }
+
+            const collabInfo = collabMap.get(email)!
+            collabInfo.projectCount++
+            collabInfo.projects.push({
+              id: project.id,
+              name: project.name,
+            })
+          })
+        } catch (err) {
+          console.warn('Error loading collaborators for project:', project.id, err)
+        }
+      }
+
+      // Convert map to array and sort by project count
+      const collabArray = Array.from(collabMap.values()).sort((a, b) => b.projectCount - a.projectCount)
+      setCollaborators(collabArray)
+    } catch (err) {
+      console.error('Error loading collaborators:', err)
+      setCollaborators([])
+    }
   }
 
-  const handleRemoveCollaboratorFromAll = (email: string) => {
+  const handleRemoveCollaboratorFromAll = async (email: string) => {
     if (!confirm(`Remove ${email} from all projects?`)) return
 
     const user = getCurrentUser()
     if (!user) return
 
-    const saved = localStorage.getItem("lab68_projects")
-    if (!saved) return
+    try {
+      // Find user profile by email
+      const userProfile = await getProfileByEmail(email)
+      if (!userProfile) {
+        alert("User not found.")
+        return
+      }
 
-    const allProjects: Project[] = JSON.parse(saved)
-    const updatedProjects = allProjects.map((project) => {
-      if (project.userId === user.email && project.collaborators) {
-        return {
-          ...project,
-          collaborators: project.collaborators.filter((c) => c !== email),
+      const saved = localStorage.getItem("lab68_projects")
+      if (!saved) return
+
+      const allProjects: Project[] = JSON.parse(saved)
+      const userProjects = allProjects.filter((p) => p.userId === user.email)
+
+      // Remove collaborator from all projects using API
+      for (const project of userProjects) {
+        try {
+          await fetch(`/api/projects/${project.id}/collaborators?userId=${userProfile.id}`, {
+            method: 'DELETE'
+          })
+        } catch (err) {
+          console.warn('Error removing collaborator from project:', project.id, err)
         }
       }
-      return project
-    })
 
-    localStorage.setItem("lab68_projects", JSON.stringify(updatedProjects))
-    loadCollaborators()
+      // Reload collaborators
+      loadCollaborators()
+    } catch (err) {
+      console.error('Error removing collaborator from all projects:', err)
+      alert('Failed to remove collaborator. Please try again.')
+    }
   }
 
-  const handleRemoveFromProject = (email: string, projectId: string) => {
+  const handleRemoveFromProject = async (email: string, projectId: string) => {
     const user = getCurrentUser()
     if (!user) return
 
-    const saved = localStorage.getItem("lab68_projects")
-    if (!saved) return
-
-    const allProjects: Project[] = JSON.parse(saved)
-    const updatedProjects = allProjects.map((project) => {
-      if (project.id === projectId && project.userId === user.email && project.collaborators) {
-        return {
-          ...project,
-          collaborators: project.collaborators.filter((c) => c !== email),
-        }
+    try {
+      // Find user profile by email
+      const userProfile = await getProfileByEmail(email)
+      if (!userProfile) {
+        alert("User not found.")
+        return
       }
-      return project
-    })
 
-    localStorage.setItem("lab68_projects", JSON.stringify(updatedProjects))
-    loadCollaborators()
+      // Remove collaborator using API
+      const response = await fetch(`/api/projects/${projectId}/collaborators?userId=${userProfile.id}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        alert(data.error || "Failed to remove collaborator")
+        return
+      }
+
+      // Reload collaborators
+      loadCollaborators()
+    } catch (err) {
+      console.error('Error removing collaborator from project:', err)
+      alert('Failed to remove collaborator. Please try again.')
+    }
   }
 
   const handleSearchInviteUsers = async (query: string) => {

@@ -243,63 +243,50 @@ export default function ProjectsPage() {
       setLoading(true)
       setError(null)
 
-      console.log('🔍 Searching for user with email:', collaboratorEmail)
+      console.log('🔍 Adding collaborator with email:', collaboratorEmail)
 
-      // Find user by email (case-insensitive, trimmed)
-      const userProfile = await getProfileByEmail(collaboratorEmail)
-      
-      console.log('👤 User profile found:', userProfile)
-      
-      if (!userProfile) {
-        setError(`User not found with email: ${collaboratorEmail.trim()}. Please make sure they have signed up on the platform.`)
-        alert(`User not found: ${collaboratorEmail.trim()}\n\nPlease make sure:\n1. The email is correct\n2. The user has signed up on the platform\n3. Try searching by name using the dropdown`)
+      // Use API endpoint to add collaborator
+      const response = await fetch(`/api/projects/${selectedProject.id}/collaborators`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: collaboratorEmail.trim(),
+          role: 'viewer'
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || "Failed to add collaborator")
+        alert(data.error || "Failed to add collaborator. Please try again.")
         return
       }
 
-      const currentUser = getCurrentUser()
-      if (collaboratorEmail.toLowerCase().trim() === currentUser?.email.toLowerCase().trim()) {
-        alert("You cannot add yourself as a collaborator.")
-        return
-      }
-
-      // Check if already a collaborator
-      const collaborators = await getProjectCollaborators(selectedProject.id)
-      if (collaborators.some(c => c.user_id === userProfile.id)) {
-        alert("This user is already a collaborator.")
-        return
-      }
-
-      console.log('✅ Adding collaborator:', userProfile.email)
-
-      // Add collaborator
-      await addProjectCollaborator(
-        selectedProject.id, 
-        userProfile.id, 
-        'viewer',
-        currentUser?.id
-      )
+      console.log('✅ Collaborator added successfully')
 
       setCollaboratorEmail("")
       setUserSearchResults([])
       setShowUserSearch(false)
-      alert(`✅ Successfully added ${userProfile.name || userProfile.email} as a collaborator!`)
+      alert(`✅ Successfully added ${data.collaborator.profile.name || data.collaborator.profile.email} as a collaborator!`)
       
+      // Reload projects to show new collaborator
       await loadProjects()
       
-      // Reload selected project to show new collaborator
-      const updatedProjects = await getProjects(currentUser!.id)
-      const updated = updatedProjects.find((p: any) => p.id === selectedProject.id)
-      if (updated) {
-        const collaborators = await getProjectCollaborators(updated.id)
-        const collaboratorEmails = await Promise.all(
-          collaborators.map(async (c) => {
-            const profile = await getProfileByEmail(c.user_id)
-            return profile?.email || ''
-          })
-        )
+      // Update selected project
+      const collaboratorsResponse = await fetch(`/api/projects/${selectedProject.id}/collaborators`)
+      const collaboratorsData = await collaboratorsResponse.json()
+      
+      if (collaboratorsResponse.ok) {
+        const collaboratorEmails = collaboratorsData.collaborators
+          .map((c: any) => c.profiles?.email)
+          .filter((email: string | undefined): email is string => Boolean(email))
+        
         setSelectedProject({
           ...selectedProject,
-          collaborators: collaboratorEmails.filter(e => e)
+          collaborators: collaboratorEmails
         })
       }
     } catch (err) {
@@ -324,26 +311,33 @@ export default function ProjectsPage() {
         return
       }
 
-      // Remove collaborator
-      await removeProjectCollaborator(selectedProject.id, userProfile.id)
+      // Use API endpoint to remove collaborator
+      const response = await fetch(`/api/projects/${selectedProject.id}/collaborators?userId=${userProfile.id}`, {
+        method: 'DELETE'
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        alert(data.error || "Failed to remove collaborator")
+        return
+      }
       
+      // Reload projects
       await loadProjects()
       
       // Update selected project
-      const currentUser = getCurrentUser()
-      const updatedProjects = await getProjects(currentUser!.id)
-      const updated = updatedProjects.find((p: any) => p.id === selectedProject.id)
-      if (updated) {
-        const collaborators = await getProjectCollaborators(updated.id)
-        const collaboratorEmails = await Promise.all(
-          collaborators.map(async (c) => {
-            const profile = await getProfileByEmail(c.user_id)
-            return profile?.email || ''
-          })
-        )
+      const collaboratorsResponse = await fetch(`/api/projects/${selectedProject.id}/collaborators`)
+      const collaboratorsData = await collaboratorsResponse.json()
+      
+      if (collaboratorsResponse.ok) {
+        const collaboratorEmails = collaboratorsData.collaborators
+          .map((c: any) => c.profiles?.email)
+          .filter((email: string | undefined): email is string => Boolean(email))
+        
         setSelectedProject({
           ...selectedProject,
-          collaborators: collaboratorEmails.filter(e => e)
+          collaborators: collaboratorEmails
         })
       }
     } catch (err) {
