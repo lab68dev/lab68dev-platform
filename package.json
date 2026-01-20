@@ -8,7 +8,7 @@
     "dev:next": "next dev",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "start": "NODE_ENV=production node server.js",
-    "start:next": "next start",
+    "start:next": "next start"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
