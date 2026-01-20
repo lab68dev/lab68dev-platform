@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@/lib/database/supabase-client"
-import { getProfileByEmail, addProjectCollaborator, getProjectCollaborators, removeProjectCollaborator } from "@/lib/database"
+import { createServerSupabaseClient } from "@/lib/database/supabase-server"
+import { getProjectCollaborators, removeProjectCollaborator } from "@/lib/database"
 
 // GET /api/projects/[id]/collaborators - List collaborators for a project
 export async function GET(
@@ -81,10 +81,10 @@ export async function POST(
       )
     }
 
-    const supabase = createClient()
-
-    // Check if user is authenticated
+    // 1. Authenticate Request
+    const supabase = await createServerSupabaseClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+
     if (authError || !user) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -92,7 +92,7 @@ export async function POST(
       )
     }
 
-    // Check if user is the project owner or admin
+    // 2. Check Permissions (Project Owner/Admin)
     const { data: project } = await supabase
       .from("projects")
       .select("user_id")
@@ -125,10 +125,22 @@ export async function POST(
       }
     }
 
-    // Find the user to add
-    const userProfile = await getProfileByEmail(email)
-    
-    if (!userProfile) {
+    // 3. User Lookup (Bypass RLS using Admin Client)
+    // We need to find the user by email, but normal users might not have permission to list/search profiles
+    const { createAdminClient } = await import("@/lib/database/supabase-admin")
+    const supabaseAdmin = createAdminClient()
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
+    }
+
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .select("*")
+      .ilike("email", email.trim())
+      .single()
+
+    if (profileError || !userProfile) {
       return NextResponse.json(
         { error: "User not found. Please make sure they have signed up on the platform." },
         { status: 404 }
@@ -143,22 +155,40 @@ export async function POST(
       )
     }
 
-    // Check if already a collaborator
-    const existingCollaborators = await getProjectCollaborators(projectId)
-    if (existingCollaborators.some((c: any) => c.user_id === userProfile.id)) {
+    // 4. Add Collaborator (Use Admin Client to ensure insert succeeds regardless of RLS)
+    // First check if already exists
+    const { data: existingCollab } = await supabaseAdmin
+      .from("project_collaborators")
+      .select("user_id")
+      .eq("project_id", projectId)
+      .eq("user_id", userProfile.id)
+      .single()
+
+    if (existingCollab) {
       return NextResponse.json(
         { error: "This user is already a collaborator" },
         { status: 400 }
       )
     }
 
-    // Add collaborator
-    const newCollaborator = await addProjectCollaborator(
-      projectId,
-      userProfile.id,
-      role as 'owner' | 'admin' | 'editor' | 'viewer',
-      user.id
-    )
+    const { data: newCollaborator, error: insertError } = await supabaseAdmin
+      .from("project_collaborators")
+      .insert({
+        project_id: projectId,
+        user_id: userProfile.id,
+        role: role,
+        invited_by: user.id
+      })
+      .select()
+      .single()
+
+    if (insertError) {
+      console.error("Collaborator insert error:", insertError)
+      return NextResponse.json(
+        { error: "Failed to add collaborator record" },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
@@ -193,7 +223,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
 
     // Check if user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser()
