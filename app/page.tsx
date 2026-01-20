@@ -116,7 +116,7 @@ export default function HomePage() {
             <div className="mx-auto max-w-4xl text-center space-y-8">
               <div className="mb-12 animate-fade-in">
                 <Image
-                  src="/images/design-mode/Lab68dev.png"
+                  src="/images/design-mode/lab68dev_logo.png"
                   alt="Lab68dev"
                   width={400}
                   height={200}
