@@ -40,6 +40,9 @@ import {
   onUserTyping,
   onUserStoppedTyping,
   onUserStatus,
+  onConnect,
+  onDisconnect,
+  onConnectError,
   removeAllListeners,
   disconnectSocket,
 } from "@/lib/features/chat/socket"
@@ -78,6 +81,7 @@ export default function ChatPage() {
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const [isLoadingRooms, setIsLoadingRooms] = useState(true)
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+  const [isSocketConnected, setIsSocketConnected] = useState(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const unsubscribeMessagesRef = useRef<(() => void) | null>(null)
@@ -93,6 +97,30 @@ export default function ChatPage() {
     // Initialize Socket.io connection
     initSocket()
     joinUserSocket(currentUserId, currentUser, user?.name)
+    
+    // Set initial connection status
+    setIsSocketConnected(true)
+
+    // Socket connection listeners
+    onConnect(() => {
+      console.log("Socket connected")
+      setIsSocketConnected(true)
+      // Re-join user room on reconnect
+      joinUserSocket(currentUserId, currentUser, user?.name)
+      if (selectedRoom) {
+        joinRoom(selectedRoom.id)
+      }
+    })
+
+    onDisconnect(() => {
+      console.log("Socket disconnected")
+      setIsSocketConnected(false)
+    })
+
+    onConnectError((err) => {
+      console.error("Socket connection error:", err)
+      setIsSocketConnected(false)
+    })
     
     // Set user as online
     updateUserPresence(currentUserId, currentUser, user?.name, 'online')
@@ -129,7 +157,7 @@ export default function ChatPage() {
       removeAllListeners()
       disconnectSocket()
     }
-  }, [])
+  }, [currentUserId, currentUser, selectedRoom, user?.name]) // Added dependencies for reconnect logic
 
   // Load messages and set up Socket.io room listeners when room changes
   useEffect(() => {
@@ -452,6 +480,14 @@ export default function ChatPage() {
             </button>
           </div>
         </div>
+        
+        {/* Connection Status Indicator */}
+        {!isSocketConnected && (
+          <div className="bg-destructive/10 text-destructive text-xs p-2 mb-2 rounded border border-destructive/20 flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+            Disconnected - Reconnecting...
+          </div>
+        )}
 
         <div className="space-y-2">
           {isLoadingRooms ? (
