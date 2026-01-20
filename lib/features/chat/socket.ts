@@ -21,7 +21,7 @@ export const initSocket = () => {
       console.error('Socket.io connection error:', error)
     })
   }
-  
+
   return socket
 }
 
@@ -164,6 +164,28 @@ export const onUserLeftRoom = (callback: (data: { userId: string; email: string;
   const sock = getSocket()
   if (sock) {
     sock.on('user:left-room', callback)
+  }
+}
+
+// Connection status listeners
+export const onConnect = (callback: () => void) => {
+  const sock = getSocket()
+  if (sock) {
+    sock.on('connect', callback)
+  }
+}
+
+export const onDisconnect = (callback: () => void) => {
+  const sock = getSocket()
+  if (sock) {
+    sock.on('disconnect', callback)
+  }
+}
+
+export const onConnectError = (callback: (error: Error) => void) => {
+  const sock = getSocket()
+  if (sock) {
+    sock.on('connect_error', callback)
   }
 }
 
