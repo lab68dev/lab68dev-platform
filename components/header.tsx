@@ -39,7 +39,7 @@ export function Header() {
           >
             <div className="relative w-10 h-10 overflow-hidden rounded-lg border-2 border-primary/30 group-hover:border-primary transition-all group-hover:scale-105">
               <Image
-                src="/images/design-mode/Lab68dev.png"
+                src="/images/design-mode/lab68dev_logo.png"
                 alt="Lab68dev"
                 width={40}
                 height={40}
