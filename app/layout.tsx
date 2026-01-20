@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/images/design-mode/Lab68dev.ico",
+        url: "/images/design-mode/favicon.ico",
         type: "image/x-icon",
       },
     ],
