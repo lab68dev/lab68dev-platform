@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 '''FastAPI Inference Server for Lab68Dev AI Model'''
 import yaml
 import torch
