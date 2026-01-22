@@ -6,7 +6,6 @@ import torch
 import logging
 from pathlib import Path
 from typing import Optional
-from threading import Lock
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -18,7 +17,8 @@ logging.basicConfig(level=logging.INFO)
 app = FastAPI(title='Lab68Dev AI API', version='1.0.0')
 
 # CORS configuration - use environment variable for allowed origins
-allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
+allowed_origins_str = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000')
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(',') if origin.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -27,9 +27,8 @@ app.add_middleware(
     allow_headers=['*']
 )
 
-# Global variables with thread safety
+# Global variables - set once during startup, read-only during inference
 model, tokenizer = None, None
-model_lock = Lock()
 
 class GenerateRequest(BaseModel):
     prompt: str
@@ -50,21 +49,20 @@ def load_config():
 @app.on_event('startup')
 async def startup():
     global model, tokenizer
-    with model_lock:
-        config = load_config()
-        model_path = config.get('training', {}).get('output_dir', './models/lab68dev-assistant')
-        base_model = config.get('model', {}).get('name', 'TinyLlama/TinyLlama-1.1B-Chat-v1.0')
-        logging.info('Loading model...')
-        if Path(model_path).exists():
-            tokenizer = AutoTokenizer.from_pretrained(model_path)
-            model = AutoModelForCausalLM.from_pretrained(base_model, torch_dtype=torch.float16, device_map='auto')
-            model = PeftModel.from_pretrained(model, model_path)
-        else:
-            tokenizer = AutoTokenizer.from_pretrained(base_model)
-            model = AutoModelForCausalLM.from_pretrained(base_model, torch_dtype=torch.float16, device_map='auto')
-        tokenizer.pad_token = tokenizer.eos_token
-        model.eval()
-        logging.info('Model loaded successfully!')
+    config = load_config()
+    model_path = config.get('training', {}).get('output_dir', './models/lab68dev-assistant')
+    base_model = config.get('model', {}).get('name', 'TinyLlama/TinyLlama-1.1B-Chat-v1.0')
+    logging.info('Loading model...')
+    if Path(model_path).exists():
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(base_model, torch_dtype=torch.float16, device_map='auto')
+        model = PeftModel.from_pretrained(model, model_path)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(base_model)
+        model = AutoModelForCausalLM.from_pretrained(base_model, torch_dtype=torch.float16, device_map='auto')
+    tokenizer.pad_token = tokenizer.eos_token
+    model.eval()
+    logging.info('Model loaded successfully!')
 
 @app.get('/health')
 async def health():
