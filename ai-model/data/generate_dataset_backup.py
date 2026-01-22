@@ -340,4 +340,14 @@ def format_for_training(examples: List[Dict]) -> List[Dict]:
     for ex in examples:
         text = (
             f"<|system|>\n{SYSTEM_PROMPT}</s>\n"
-            f"
+            f"<|user|>\n{ex['instruction']}</s>\n"
+            f"<|assistant|>\n{ex['output']}</s>"
+        )
+        formatted.append(
+            {
+                "text": text,
+                "type": ex.get("type", ""),
+            }
+        )
+    
+    return formatted
