@@ -1,4 +1,6 @@
 import { createClient } from './supabase-client'
+import { logActivity } from '../features/activity'
+
 
 /**
  * Database Connection and Core Operations
@@ -47,6 +49,10 @@ export async function createProject(project: Omit<Project, 'id' | 'created_at' |
       const projects = JSON.parse(stored)
       projects.push(newProject)
       localStorage.setItem(`projects_${project.user_id}`, JSON.stringify(projects))
+
+      // Log activity
+      logActivity('project', 'created', `Created project '${newProject.title}'`, newProject.id, newProject.title)
+
       return newProject
     }
 
@@ -56,7 +62,7 @@ export async function createProject(project: Omit<Project, 'id' | 'created_at' |
       .insert(project)
       .select()
       .single()
-    
+
     if (error) {
       console.warn('Supabase error, using localStorage fallback:', error)
       const newProject = {
@@ -69,9 +75,18 @@ export async function createProject(project: Omit<Project, 'id' | 'created_at' |
       const projects = JSON.parse(stored)
       projects.push(newProject)
       localStorage.setItem(`projects_${project.user_id}`, JSON.stringify(projects))
+
+      // Log activity
+      logActivity('project', 'created', `Created project '${newProject.title}'`, newProject.id, newProject.title)
+
       return newProject
     }
+    // Log activity
+    if (data) {
+      logActivity('project', 'created', `Created project '${data.title}'`, data.id, data.title)
+    }
     return data
+
   } catch (err) {
     console.warn('Error creating project, using localStorage fallback:', err)
     const newProject = {
@@ -104,7 +119,7 @@ export async function getProjects(userId: string) {
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-    
+
     if (error) {
       console.warn('Supabase error, using localStorage fallback:', error)
       const stored = localStorage.getItem(`projects_${userId}`)
@@ -132,6 +147,10 @@ export async function updateProject(id: string, updates: Partial<Project>) {
         if (index !== -1) {
           projects[index] = { ...projects[index], ...updates, updated_at: new Date().toISOString() }
           localStorage.setItem(key, JSON.stringify(projects))
+
+          // Log activity
+          logActivity('project', 'updated', `Updated project '${projects[index].title}'`, projects[index].id, projects[index].title)
+
           return projects[index]
         }
       }
@@ -145,7 +164,7 @@ export async function updateProject(id: string, updates: Partial<Project>) {
       .eq('id', id)
       .select()
       .single()
-    
+
     if (error) {
       console.warn('Supabase error, using localStorage fallback:', error)
       const keys = Object.keys(localStorage).filter(k => k.startsWith('projects_'))
@@ -156,12 +175,21 @@ export async function updateProject(id: string, updates: Partial<Project>) {
         if (index !== -1) {
           projects[index] = { ...projects[index], ...updates, updated_at: new Date().toISOString() }
           localStorage.setItem(key, JSON.stringify(projects))
+
+          // Log activity
+          logActivity('project', 'updated', `Updated project '${projects[index].title}'`, projects[index].id, projects[index].title)
+
           return projects[index]
         }
       }
       throw error
     }
+    // Log activity
+    if (data) {
+      logActivity('project', 'updated', `Updated project '${data.title}'`, data.id, data.title)
+    }
     return data
+
   } catch (err) {
     console.warn('Error updating project:', err)
     throw err
@@ -181,6 +209,8 @@ export async function deleteProject(id: string) {
         const filtered = projects.filter((p: Project) => p.id !== id)
         if (filtered.length !== projects.length) {
           localStorage.setItem(key, JSON.stringify(filtered))
+          // Log activity
+          logActivity('project', 'deleted', `Deleted project`, id)
           return
         }
       }
@@ -192,7 +222,11 @@ export async function deleteProject(id: string) {
       .from('projects')
       .delete()
       .eq('id', id)
-    
+
+    if (!error) {
+      logActivity('project', 'deleted', `Deleted project`, id)
+    }
+
     if (error) {
       console.warn('Supabase error, using localStorage fallback:', error)
       const keys = Object.keys(localStorage).filter(k => k.startsWith('projects_'))
@@ -202,6 +236,8 @@ export async function deleteProject(id: string) {
         const filtered = projects.filter((p: Project) => p.id !== id)
         if (filtered.length !== projects.length) {
           localStorage.setItem(key, JSON.stringify(filtered))
+          // Log activity
+          logActivity('project', 'deleted', `Deleted project`, id)
           return
         }
       }
@@ -225,8 +261,8 @@ export interface ProjectCollaborator {
 }
 
 export async function addProjectCollaborator(
-  projectId: string, 
-  userId: string, 
+  projectId: string,
+  userId: string,
   role: 'owner' | 'admin' | 'editor' | 'viewer' = 'viewer',
   invitedBy?: string
 ) {
@@ -241,7 +277,7 @@ export async function addProjectCollaborator(
     })
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -268,7 +304,7 @@ export async function getProjectCollaborators(projectId: string) {
         )
       `)
       .eq('project_id', projectId)
-    
+
     if (error) {
       console.warn('Supabase error getting collaborators:', error)
       return []
@@ -287,7 +323,7 @@ export async function removeProjectCollaborator(projectId: string, userId: strin
     .delete()
     .eq('project_id', projectId)
     .eq('user_id', userId)
-  
+
   if (error) throw error
 }
 
@@ -300,16 +336,16 @@ export async function getProfileByEmail(email: string) {
     }
 
     const supabase = createClient()
-    
+
     // Use ilike for case-insensitive search and trim whitespace
     const trimmedEmail = email.trim().toLowerCase()
-    
+
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .ilike('email', trimmedEmail)
       .single()
-    
+
     if (error) {
       console.warn('Error getting profile by email:', error)
       return null
@@ -322,33 +358,28 @@ export async function getProfileByEmail(email: string) {
 }
 
 // Search for users by email or name
+// Search for users by email or name
 export async function searchUsers(query: string, limit = 10) {
   try {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      console.warn('Supabase not configured')
-      return []
-    }
-
-    const supabase = createClient()
     const trimmedQuery = query.trim()
-    
     if (!trimmedQuery) return []
 
-    // Sanitize query to avoid injecting special characters into filter expression
-    const safeQuery = trimmedQuery.replace(/[,%()]/g, '')
+    // Use our server-side API to bypass RLS
+    const response = await fetch(`/api/users/search?query=${encodeURIComponent(trimmedQuery)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
 
-    // Search by email or name (case-insensitive)
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, email, name, avatar')
-      .or(`email.ilike.%${safeQuery}%,name.ilike.%${safeQuery}%`)
-      .limit(limit)
-    
-    if (error) {
-      console.warn('Error searching users:', error)
+    if (!response.ok) {
+      console.warn('API search failed:', response.statusText)
       return []
     }
-    return data || []
+
+    const data = await response.json()
+    return data.users || []
+
   } catch (err) {
     console.warn('Error searching users:', err)
     return []
@@ -381,8 +412,14 @@ export async function createFile(file: Omit<FileRecord, 'id' | 'created_at' | 'u
     .insert(file)
     .select()
     .single()
-  
+
   if (error) throw error
+
+  // Log activity
+  if (data) {
+    logActivity('file', 'uploaded', `Uploaded file '${data.name}'`, data.id, data.name)
+  }
+
   return data
 }
 
@@ -393,7 +430,7 @@ export async function getFiles(userId: string) {
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
-  
+
   if (error) throw error
   return data || []
 }
@@ -404,7 +441,7 @@ export async function deleteFile(id: string) {
     .from('files')
     .delete()
     .eq('id', id)
-  
+
   if (error) throw error
 }
 
@@ -430,8 +467,14 @@ export async function createTodo(todo: Omit<Todo, 'id' | 'created_at' | 'updated
     .insert(todo)
     .select()
     .single()
-  
+
   if (error) throw error
+
+  // Log activity
+  if (data) {
+    logActivity('todo', 'created', `Created task '${data.title}'`, data.id, data.title)
+  }
+
   return data
 }
 
@@ -442,7 +485,7 @@ export async function getTodos(userId: string) {
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
-  
+
   if (error) throw error
   return data || []
 }
@@ -455,8 +498,18 @@ export async function updateTodo(id: string, updates: Partial<Todo>) {
     .eq('id', id)
     .select()
     .single()
-  
+
   if (error) throw error
+
+  // Log activity
+  if (data) {
+    if (updates.completed === true) {
+      logActivity('todo', 'completed', `Completed task '${data.title}'`, data.id, data.title)
+    } else {
+      logActivity('todo', 'updated', `Updated task '${data.title}'`, data.id, data.title)
+    }
+  }
+
   return data
 }
 
@@ -466,7 +519,7 @@ export async function deleteTodo(id: string) {
     .from('todos')
     .delete()
     .eq('id', id)
-  
+
   if (error) throw error
 }
 
@@ -492,7 +545,7 @@ export async function createWikiArticle(article: Omit<WikiArticle, 'id' | 'creat
     .insert(article)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -503,13 +556,13 @@ export async function getWikiArticles(userId?: string) {
     .from('wiki_articles')
     .select('*')
     .order('created_at', { ascending: false })
-  
+
   if (userId) {
     query = query.eq('user_id', userId)
   }
-  
+
   const { data, error } = await query
-  
+
   if (error) throw error
   return data || []
 }
@@ -522,7 +575,7 @@ export async function updateWikiArticle(id: string, updates: Partial<WikiArticle
     .eq('id', id)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -533,7 +586,7 @@ export async function deleteWikiArticle(id: string) {
     .from('wiki_articles')
     .delete()
     .eq('id', id)
-  
+
   if (error) throw error
 }
 
@@ -561,8 +614,14 @@ export async function createMeeting(meeting: Omit<Meeting, 'id' | 'created_at' |
     .insert(meeting)
     .select()
     .single()
-  
+
   if (error) throw error
+
+  // Log activity
+  if (data) {
+    logActivity('meeting', 'scheduled', `Scheduled meeting '${data.title}'`, data.id, data.title)
+  }
+
   return data
 }
 
@@ -573,7 +632,7 @@ export async function getMeetings(userId: string) {
     .select('*')
     .eq('user_id', userId)
     .order('date', { ascending: true })
-  
+
   if (error) throw error
   return data || []
 }
@@ -586,7 +645,7 @@ export async function updateMeeting(id: string, updates: Partial<Meeting>) {
     .eq('id', id)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -597,7 +656,7 @@ export async function deleteMeeting(id: string) {
     .from('meetings')
     .delete()
     .eq('id', id)
-  
+
   if (error) throw error
 }
 
@@ -623,8 +682,14 @@ export async function createMilestone(milestone: Omit<Milestone, 'id' | 'created
     .insert(milestone)
     .select()
     .single()
-  
+
   if (error) throw error
+
+  // Log activity
+  if (data) {
+    logActivity('project', 'created', `Created milestone '${data.title}'`, data.id, data.title)
+  }
+
   return data
 }
 
@@ -635,7 +700,7 @@ export async function getMilestones(userId: string) {
     .select('*')
     .eq('user_id', userId)
     .order('target_date', { ascending: true })
-  
+
   if (error) throw error
   return data || []
 }
@@ -648,7 +713,7 @@ export async function updateMilestone(id: string, updates: Partial<Milestone>) {
     .eq('id', id)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -659,7 +724,7 @@ export async function deleteMilestone(id: string) {
     .from('milestones')
     .delete()
     .eq('id', id)
-  
+
   if (error) throw error
 }
 
@@ -687,7 +752,7 @@ export async function createDiscussion(discussion: Omit<Discussion, 'id' | 'like
     .insert(discussion)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -698,7 +763,7 @@ export async function getDiscussions() {
     .from('discussions')
     .select('*')
     .order('created_at', { ascending: false })
-  
+
   if (error) throw error
   return data || []
 }
@@ -711,7 +776,7 @@ export async function updateDiscussion(id: string, updates: Partial<Discussion>)
     .eq('id', id)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -722,7 +787,7 @@ export async function deleteDiscussion(id: string) {
     .from('discussions')
     .delete()
     .eq('id', id)
-  
+
   if (error) throw error
 }
 
@@ -748,8 +813,14 @@ export async function createDiagram(diagram: Omit<Diagram, 'id' | 'created_at' |
     .insert(diagram)
     .select()
     .single()
-  
+
   if (error) throw error
+
+  // Log activity
+  if (data) {
+    logActivity('whiteboard', 'created', `Created diagram '${data.title}'`, data.id, data.title)
+  }
+
   return data
 }
 
@@ -760,7 +831,7 @@ export async function getDiagrams(userId: string) {
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
-  
+
   if (error) throw error
   return data || []
 }
@@ -773,7 +844,7 @@ export async function updateDiagram(id: string, updates: Partial<Diagram>) {
     .eq('id', id)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -784,6 +855,6 @@ export async function deleteDiagram(id: string) {
     .from('diagrams')
     .delete()
     .eq('id', id)
-  
+
   if (error) throw error
 }

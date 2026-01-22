@@ -40,7 +40,7 @@ export async function createChatRoom(room: Omit<ChatRoom, 'id' | 'created_at' | 
     .insert(room)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -48,49 +48,49 @@ export async function createChatRoom(room: Omit<ChatRoom, 'id' | 'created_at' | 
 // Create or get direct chat room between two users
 export async function getOrCreateDirectChat(userId1: string, userId2: string) {
   const supabase = createClient()
-  
+
   // Check if direct chat already exists between these users
   const { data: existingRooms, error: searchError } = await supabase
     .from('chat_room_members')
     .select('room_id, chat_rooms!inner(id, type, name)')
     .eq('user_id', userId1)
-  
+
   if (searchError) throw searchError
-  
+
   // Find a direct chat that includes both users
   for (const roomData of existingRooms || []) {
     const { data: members } = await supabase
       .from('chat_room_members')
       .select('user_id')
       .eq('room_id', roomData.room_id)
-    
+
     const memberIds = members?.map(m => m.user_id) || []
-    
+
     // Check if this is a direct chat with exactly these two users
-    if (memberIds.length === 2 && 
-        memberIds.includes(userId1) && 
-        memberIds.includes(userId2) &&
-        (roomData.chat_rooms as any).type === 'direct') {
+    if (memberIds.length === 2 &&
+      memberIds.includes(userId1) &&
+      memberIds.includes(userId2) &&
+      (roomData.chat_rooms as any).type === 'direct') {
       // Fetch full room data
       const { data: room } = await supabase
         .from('chat_rooms')
         .select('*')
         .eq('id', roomData.room_id)
         .single()
-      
+
       return room
     }
   }
-  
+
   // No existing direct chat, create one
   const { data: user2Data } = await supabase
-    .from('users')
+    .from('profiles')
     .select('email, name')
     .eq('id', userId2)
     .single()
-  
+
   const chatName = user2Data?.name || user2Data?.email || 'Direct Chat'
-  
+
   const { data: newRoom, error: createError } = await supabase
     .from('chat_rooms')
     .insert({
@@ -100,31 +100,31 @@ export async function getOrCreateDirectChat(userId1: string, userId2: string) {
     })
     .select()
     .single()
-  
+
   if (createError) throw createError
-  
+
   // Add both users as members
   await addRoomMember(newRoom.id, userId1)
   await addRoomMember(newRoom.id, userId2)
-  
+
   return newRoom
 }
 
 export async function getChatRooms(userId: string) {
   const supabase = createClient()
-  
+
   // Get rooms where user is a member
   const { data, error } = await supabase
     .from('chat_room_members')
     .select('room_id')
     .eq('user_id', userId)
-  
+
   if (error) throw error
-  
+
   const roomIds = data?.map(m => m.room_id) || []
-  
+
   if (roomIds.length === 0) return []
-  
+
   const { data: rooms, error: roomsError } = await supabase
     .from('chat_rooms')
     .select(`
@@ -133,9 +133,9 @@ export async function getChatRooms(userId: string) {
     `)
     .in('id', roomIds)
     .order('updated_at', { ascending: false })
-  
+
   if (roomsError) throw roomsError
-  
+
   // Get last message for each room
   const roomsWithMessages = await Promise.all(
     (rooms || []).map(async (room) => {
@@ -146,14 +146,14 @@ export async function getChatRooms(userId: string) {
         .order('created_at', { ascending: false })
         .limit(1)
         .single()
-      
+
       return {
         ...room,
         last_message: lastMsg || undefined
       }
     })
   )
-  
+
   return roomsWithMessages
 }
 
@@ -164,7 +164,7 @@ export async function addRoomMember(roomId: string, userId: string) {
     .insert({ room_id: roomId, user_id: userId })
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -175,7 +175,7 @@ export async function getRoomMembers(roomId: string) {
     .from('chat_room_members')
     .select('user_id, joined_at')
     .eq('room_id', roomId)
-  
+
   if (error) throw error
   return data || []
 }
@@ -202,7 +202,7 @@ export async function sendMessage(message: Omit<Message, 'id' | 'created_at' | '
     .insert(message)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -215,7 +215,7 @@ export async function getMessages(roomId: string, limit = 100) {
     .eq('room_id', roomId)
     .order('created_at', { ascending: false })
     .limit(limit)
-  
+
   if (error) throw error
   return data?.reverse() || []
 }
@@ -228,7 +228,7 @@ export async function updateMessage(id: string, content: string) {
     .eq('id', id)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -239,54 +239,54 @@ export async function deleteMessage(id: string) {
     .from('messages')
     .delete()
     .eq('id', id)
-  
+
   if (error) throw error
 }
 
 export async function addReaction(messageId: string, emoji: string, userId: string) {
   const supabase = createClient()
-  
+
   // Get current message
   const { data: message, error: fetchError } = await supabase
     .from('messages')
     .select('reactions')
     .eq('id', messageId)
     .single()
-  
+
   if (fetchError) throw fetchError
-  
+
   const reactions = message.reactions || {}
   if (!reactions[emoji]) {
     reactions[emoji] = []
   }
-  
+
   if (!reactions[emoji].includes(userId)) {
     reactions[emoji].push(userId)
   }
-  
+
   const { data, error } = await supabase
     .from('messages')
     .update({ reactions })
     .eq('id', messageId)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
 
 export async function removeReaction(messageId: string, emoji: string, userId: string) {
   const supabase = createClient()
-  
+
   // Get current message
   const { data: message, error: fetchError } = await supabase
     .from('messages')
     .select('reactions')
     .eq('id', messageId)
     .single()
-  
+
   if (fetchError) throw fetchError
-  
+
   const reactions = message.reactions || {}
   if (reactions[emoji]) {
     reactions[emoji] = reactions[emoji].filter((id: string) => id !== userId)
@@ -294,14 +294,14 @@ export async function removeReaction(messageId: string, emoji: string, userId: s
       delete reactions[emoji]
     }
   }
-  
+
   const { data, error } = await supabase
     .from('messages')
     .update({ reactions })
     .eq('id', messageId)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -309,7 +309,7 @@ export async function removeReaction(messageId: string, emoji: string, userId: s
 // Subscribe to new messages in a room
 export function subscribeToMessages(roomId: string, callback: (message: Message) => void) {
   const supabase = createClient()
-  
+
   const subscription = supabase
     .channel(`room:${roomId}`)
     .on(
@@ -325,7 +325,7 @@ export function subscribeToMessages(roomId: string, callback: (message: Message)
       }
     )
     .subscribe()
-  
+
   return () => {
     subscription.unsubscribe()
   }
@@ -334,7 +334,7 @@ export function subscribeToMessages(roomId: string, callback: (message: Message)
 // Subscribe to message updates (edits/deletes)
 export function subscribeToMessageUpdates(roomId: string, onUpdate: (message: Message) => void, onDelete: (messageId: string) => void) {
   const supabase = createClient()
-  
+
   const subscription = supabase
     .channel(`room_updates:${roomId}`)
     .on(
@@ -362,7 +362,7 @@ export function subscribeToMessageUpdates(roomId: string, onUpdate: (message: Me
       }
     )
     .subscribe()
-  
+
   return () => {
     subscription.unsubscribe()
   }
@@ -374,7 +374,7 @@ export function subscribeToMessageUpdates(roomId: string, onUpdate: (message: Me
 
 export async function updateUserPresence(userId: string, email: string, name: string | undefined, status: 'online' | 'offline' | 'away') {
   const supabase = createClient()
-  
+
   const { data, error } = await supabase
     .from('user_presence')
     .upsert({
@@ -386,46 +386,46 @@ export async function updateUserPresence(userId: string, email: string, name: st
     })
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
 
 export async function getUserPresence(userId: string): Promise<UserPresence | null> {
   const supabase = createClient()
-  
+
   const { data, error } = await supabase
     .from('user_presence')
     .select('*')
     .eq('user_id', userId)
     .single()
-  
+
   if (error) return null
   return data
 }
 
 export async function getAllUsersPresence(): Promise<UserPresence[]> {
   const supabase = createClient()
-  
+
   const { data, error } = await supabase
     .from('user_presence')
     .select('*')
     .order('email', { ascending: true })
-  
+
   if (error) return []
   return data || []
 }
 
 export async function getCollaboratorsPresence(userIds: string[]): Promise<UserPresence[]> {
   const supabase = createClient()
-  
+
   if (userIds.length === 0) return []
-  
+
   const { data, error } = await supabase
     .from('user_presence')
     .select('*')
     .in('user_id', userIds)
-  
+
   if (error) return []
   return data || []
 }
@@ -433,7 +433,7 @@ export async function getCollaboratorsPresence(userIds: string[]): Promise<UserP
 // Subscribe to presence changes
 export function subscribeToPresence(callback: (presence: UserPresence) => void) {
   const supabase = createClient()
-  
+
   const subscription = supabase
     .channel('user_presence_changes')
     .on(
@@ -450,7 +450,7 @@ export function subscribeToPresence(callback: (presence: UserPresence) => void) 
       }
     )
     .subscribe()
-  
+
   return () => {
     subscription.unsubscribe()
   }
@@ -491,7 +491,7 @@ export async function addComment(comment: Omit<Comment, 'id' | 'created_at' | 'u
     .insert(comment)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -504,7 +504,7 @@ export async function getComments(contextType: string, contextId: string) {
     .eq('context_type', contextType)
     .eq('context_id', contextId)
     .order('created_at', { ascending: true })
-  
+
   if (error) throw error
   return data || []
 }
@@ -517,7 +517,7 @@ export async function updateComment(id: string, updates: Partial<Comment>) {
     .eq('id', id)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -528,37 +528,37 @@ export async function deleteComment(id: string) {
     .from('comments')
     .delete()
     .eq('id', id)
-  
+
   if (error) throw error
 }
 
 export async function addCommentReaction(commentId: string, emoji: string, userId: string) {
   const supabase = createClient()
-  
+
   const { data: comment, error: fetchError } = await supabase
     .from('comments')
     .select('reactions')
     .eq('id', commentId)
     .single()
-  
+
   if (fetchError) throw fetchError
-  
+
   const reactions = comment.reactions || {}
   if (!reactions[emoji]) {
     reactions[emoji] = []
   }
-  
+
   if (!reactions[emoji].includes(userId)) {
     reactions[emoji].push(userId)
   }
-  
+
   const { data, error } = await supabase
     .from('comments')
     .update({ reactions })
     .eq('id', commentId)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -571,7 +571,7 @@ export async function resolveComment(id: string, resolved: boolean) {
     .eq('id', id)
     .select()
     .single()
-  
+
   if (error) throw error
   return data
 }
@@ -583,7 +583,7 @@ export function subscribeToComments(
   callback: (comment: Comment) => void
 ) {
   const supabase = createClient()
-  
+
   const subscription = supabase
     .channel(`comments:${contextType}:${contextId}`)
     .on(
@@ -601,7 +601,7 @@ export function subscribeToComments(
       }
     )
     .subscribe()
-  
+
   return () => {
     subscription.unsubscribe()
   }

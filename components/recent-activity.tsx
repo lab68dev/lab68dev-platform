@@ -14,18 +14,8 @@ import {
   Palette,
   FolderKanban
 } from "lucide-react"
-
-export interface ActivityItem {
-  id: string
-  type: "project" | "todo" | "meeting" | "file" | "chat" | "user" | "settings" | "whiteboard"
-  action: string
-  description: string
-  timestamp: Date
-  user?: {
-    name: string
-    avatar?: string
-  }
-}
+import { getRecentActivities, type Activity } from "@/lib/features/activity"
+import { getCurrentUser } from "@/lib/features/auth"
 
 export interface RecentActivityProps {
   userId?: string
@@ -34,59 +24,27 @@ export interface RecentActivityProps {
 }
 
 export function RecentActivity({ userId, limit = 10, className = "" }: RecentActivityProps) {
-  const [activities, setActivities] = useState<ActivityItem[]>([])
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [loading, setLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const [filter, setFilter] = useState<string>("all")
 
   useEffect(() => {
+    const user = getCurrentUser()
+    setCurrentUser(user)
     loadActivities()
   }, [userId, limit])
 
   async function loadActivities() {
-    // Simulated activity data - in production, fetch from database
-    const mockActivities: ActivityItem[] = [
-      {
-        id: "1",
-        type: "project",
-        action: "created",
-        description: "Created new project 'E-Commerce Platform'",
-        timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 minutes ago
-        user: { name: "You" },
-      },
-      {
-        id: "2",
-        type: "todo",
-        action: "completed",
-        description: "Completed task 'Setup database schema'",
-        timestamp: new Date(Date.now() - 1000 * 60 * 45), // 45 minutes ago
-        user: { name: "You" },
-      },
-      {
-        id: "3",
-        type: "meeting",
-        action: "scheduled",
-        description: "Scheduled meeting 'Sprint Planning' for tomorrow",
-        timestamp: new Date(Date.now() - 1000 * 60 * 120), // 2 hours ago
-        user: { name: "You" },
-      },
-      {
-        id: "4",
-        type: "file",
-        action: "uploaded",
-        description: "Uploaded file 'design-mockup.fig'",
-        timestamp: new Date(Date.now() - 1000 * 60 * 180), // 3 hours ago
-        user: { name: "You" },
-      },
-      {
-        id: "5",
-        type: "whiteboard",
-        action: "created",
-        description: "Created whiteboard 'System Architecture'",
-        timestamp: new Date(Date.now() - 1000 * 60 * 240), // 4 hours ago
-        user: { name: "You" },
-      },
-    ]
-
-    setActivities(mockActivities.slice(0, limit))
+    setLoading(true)
+    try {
+      const data = await getRecentActivities(limit)
+      setActivities(data)
+    } catch (error) {
+      console.error("Failed to load activities", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const getActivityIcon = (type: string) => {
@@ -136,6 +94,29 @@ export function RecentActivity({ userId, limit = 10, className = "" }: RecentAct
     ? activities
     : activities.filter((a) => a.type === filter)
 
+  if (loading) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-8 w-20 bg-muted/50 rounded animate-pulse" />
+          ))}
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex gap-3">
+              <div className="h-10 w-10 rounded bg-muted/50 animate-pulse" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-3/4 bg-muted/50 rounded animate-pulse" />
+                <div className="h-3 w-1/4 bg-muted/50 rounded animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Filter Tabs */}
@@ -159,7 +140,7 @@ export function RecentActivity({ userId, limit = 10, className = "" }: RecentAct
       <div className="space-y-3">
         {filteredActivities.length === 0 ? (
           <div className="text-center py-8 text-sm text-muted-foreground">
-            No recent activity
+            No recent activity found
           </div>
         ) : (
           filteredActivities.map((activity, index) => (
@@ -184,20 +165,20 @@ export function RecentActivity({ userId, limit = 10, className = "" }: RecentAct
                       {activity.description}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
+                      {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
                     </p>
                   </div>
-                  {activity.user && (
+                  {currentUser && (
                     <div className="flex items-center gap-2">
-                      {activity.user.avatar ? (
+                      {currentUser.avatar ? (
                         <img
-                          src={activity.user.avatar}
-                          alt={activity.user.name}
+                          src={currentUser.avatar}
+                          alt={currentUser.name}
                           className="w-6 h-6 rounded-full border border-border"
                         />
                       ) : (
                         <div className="w-6 h-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-xs font-medium text-primary">
-                          {activity.user.name.charAt(0)}
+                          {currentUser.name.charAt(0)}
                         </div>
                       )}
                     </div>

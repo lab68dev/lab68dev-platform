@@ -32,6 +32,24 @@ app.prepare().then(() => {
     },
   })
 
+  // Initialize Supabase Admin Client for server-side operations
+  const { createClient } = require('@supabase/supabase-js')
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
+  
+  let supabase = null
+  if (supabaseUrl && supabaseServiceKey) {
+    supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+    console.log('✓ Supabase Admin Client initialized for Presence Sync')
+  } else {
+    console.warn('⚠ Missing Supabase Service Key - Presence Sync will be local only')
+  }
+
   // Store active users and their rooms
   const activeUsers = new Map()
 
@@ -39,12 +57,27 @@ app.prepare().then(() => {
     console.log('✓ Client connected:', socket.id)
 
     // User joins with their info
-    socket.on('user:join', (userData) => {
+    socket.on('user:join', async (userData) => {
       activeUsers.set(socket.id, {
         ...userData,
         rooms: new Set(),
       })
       
+      // Update DB Presence if Supabase is available
+      if (supabase && userData.userId) {
+        try {
+          await supabase.from('user_presence').upsert({
+            user_id: userData.userId,
+            email: userData.email,
+            name: userData.name,
+            status: 'online',
+            last_seen: new Date().toISOString()
+          })
+        } catch (err) {
+          console.error('Error updating presence:', err)
+        }
+      }
+
       // Broadcast user online status
       io.emit('user:status', {
         userId: userData.userId,
@@ -94,8 +127,6 @@ app.prepare().then(() => {
 
     // Send message to room
     socket.on('message:send', (data) => {
-      console.log(`📨 Message sent to room ${data.roomId}`)
-      
       // Broadcast to all clients in the room
       io.to(data.roomId).emit('message:new', {
         roomId: data.roomId,
@@ -128,7 +159,7 @@ app.prepare().then(() => {
     })
 
     // Disconnect
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
       const user = activeUsers.get(socket.id)
       if (user) {
         // Notify all rooms user was in
@@ -141,6 +172,21 @@ app.prepare().then(() => {
           })
         })
         
+        // Update DB Presence if Supabase is available
+        if (supabase && user.userId) {
+          try {
+            await supabase.from('user_presence').upsert({
+              user_id: user.userId,
+              email: user.email,
+              name: user.name,
+              status: 'offline',
+              last_seen: new Date().toISOString()
+            })
+          } catch (err) {
+            console.error('Error updating presence override:', err)
+          }
+        }
+
         // Broadcast user offline status
         io.emit('user:status', {
           userId: user.userId,
