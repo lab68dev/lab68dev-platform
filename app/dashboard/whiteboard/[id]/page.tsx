@@ -163,10 +163,10 @@ export default function WhiteboardEditorPage() {
     setIsDrawing(true)
     setStartPoint(point)
 
-    if (state.currentTool === "pen") {
+    if (state.currentTool === "pen" || state.currentTool === "eraser") {
       const element = createDrawingElement(state.currentTool, currentUser, currentUser, {
         points: [point],
-        color: state.currentColor,
+        color: state.currentTool === "eraser" ? "#ffffff" : state.currentColor,
         strokeWidth: state.currentStrokeWidth,
       })
       setCurrentElement(element)
@@ -192,6 +192,7 @@ export default function WhiteboardEditorPage() {
 
     switch (state.currentTool) {
       case "pen":
+      case "eraser":
         if (currentElement) {
           setCurrentElement({
             ...currentElement,
@@ -240,18 +241,9 @@ export default function WhiteboardEditorPage() {
         setCurrentElement(circleElement)
         break
 
-      case "eraser":
-        // Find and remove elements at this point
-        setState((prev) => ({
-          ...prev,
-          elements: prev.elements.filter((el) => {
-            // Simple proximity-based erasing
-            return !el.points.some(
-              (p) => Math.abs(p.x - point.x) < 10 && Math.abs(p.y - point.y) < 10
-            )
-          }),
-        }))
-        break
+      // Eraser handled in pen/eraser case above
+      // case "eraser": 
+      //   break
     }
   }
 
