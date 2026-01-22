@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Training Script for Lab68Dev AI Model
 Fine-tunes TinyLlama using LoRA for task creation and tech Q&A.
