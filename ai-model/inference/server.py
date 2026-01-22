@@ -57,11 +57,11 @@ async def generate(req: GenerateRequest):
     if model is None: raise HTTPException(503, 'Model not loaded')
     sys_prompt = 'You are Lab68Dev Assistant, an AI for software development.'
     # Build chat format
-    sys_tag = chr(60) + '|system|' + chr(62)
-    user_tag = chr(60) + '|user|' + chr(62)  
-    asst_tag = chr(60) + '|assistant|' + chr(62)
-    end_tag = chr(60) + '/s' + chr(62)
-    nl = chr(10)
+    sys_tag = "<|system|>"
+    user_tag = "<|user|>"
+    asst_tag = "<|assistant|>"
+    end_tag = "</s>"
+    nl = "\n"
     full_prompt = sys_tag + nl + sys_prompt + end_tag + nl + user_tag + nl + req.prompt + end_tag + nl + asst_tag + nl
     inputs = tokenizer(full_prompt, return_tensors='pt').to(model.device)
     with torch.no_grad():
