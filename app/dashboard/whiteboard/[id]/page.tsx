@@ -28,7 +28,7 @@ import {
   type DrawingElement,
   type Point,
   type Tool,
-} from "@/lib/features/whiteboard"
+} from "@/lib/features/whiteboard/whiteboard-local"
 
 export default function WhiteboardEditorPage() {
   const params = useParams()
@@ -100,7 +100,7 @@ export default function WhiteboardEditorPage() {
 
       switch (currentElement.type) {
         case "pen":
-          if (currentElement.points.length > 1) {
+          if (currentElement.points && currentElement.points.length > 1) {
             ctx.beginPath()
             ctx.moveTo(currentElement.points[0].x, currentElement.points[0].y)
             currentElement.points.forEach((p) => ctx.lineTo(p.x, p.y))
