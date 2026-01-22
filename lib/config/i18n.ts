@@ -102,6 +102,12 @@ export interface Translations {
       title: string
       subtitle: string
       cta: string
+      badge: string
+    }
+    stats: {
+      features: string
+      openSource: string
+      available: string
     }
     mission: {
       title: string
@@ -109,10 +115,72 @@ export interface Translations {
     }
     techStack: {
       title: string
+      description: string
+      poweredBy: string
+    }
+    services: {
+      title: string
+      subtitle: string
+      badge: string
+      learnMore: string
+      projectManagement: string
+      projectManagementDesc: string
+      aiAssistant: string
+      aiAssistantDesc: string
+      collaboration: string
+      collaborationDesc: string
+      fileManagement: string
+      fileManagementDesc: string
+      diagrams: string
+      diagramsDesc: string
+      resumeEditor: string
+      resumeEditorDesc: string
+      gamesHub: string
+      gamesHubDesc: string
+      wiki: string
+      wikiDesc: string
+      meetingPlanning: string
+      meetingPlanningDesc: string
+      liveSupport: string
+      liveSupportDesc: string
     }
     community: {
       title: string
       description: string
+      stayUpdated: string
+      subscribe: string
+      visitGithub: string
+    }
+    whyChoose: {
+      title: string
+      subtitle: string
+      fast: string
+      fastDesc: string
+      secure: string
+      secureDesc: string
+      allInOne: string
+      allInOneDesc: string
+      ctaTitle: string
+      ctaSubtitle: string
+      getStartedFree: string
+      exploreFeatures: string
+    }
+    team: {
+      title: string
+      subtitle: string
+      founder: string
+      coFounder: string
+      developer: string
+      viewRepo: string
+    }
+    sponsor: {
+      title: string
+      subtitle: string
+      badge: string
+      buyMeCoffee: string
+      buyMeCoffeeDesc: string
+      githubSponsors: string
+      githubSponsorsDesc: string
     }
   }
   // To Do feature
@@ -657,8 +725,8 @@ const translations: Record<Language, any> = {
       deleteAccount: "Delete Account",
       avatar: "Profile Picture",
       uploadAvatar: "Upload Photo",
-  removeAvatar: "Remove",
-  bio: "Bio",
+      removeAvatar: "Remove",
+      bio: "Bio",
     },
     notifications: {
       title: "Notifications",
@@ -670,18 +738,85 @@ const translations: Record<Language, any> = {
         title: "Think. Code. Test. Ship.",
         subtitle: "The ultimate platform for developers who build, learn, and collaborate.",
         cta: "Enter Lab68",
+        badge: "Next-Gen Collaboration Platform",
+      },
+      stats: {
+        features: "Features",
+        openSource: "Open Source",
+        available: "Available",
       },
       mission: {
         title: "Our Mission",
-        description:
-          "Lab68 is a brutalist developer platform designed for those who value function over form. We provide the tools, community, and resources you need to build exceptional software.",
+        description: "Lab68 is a developer platform designed for those who value function over form. We provide the tools, community, and resources you need to build exceptional software.",
       },
       techStack: {
         title: "Tech Stack",
+        description: "Built with modern, production-ready technologies for performance, scalability, and privacy",
+        poweredBy: "Powered By",
+      },
+      services: {
+        title: "Our Services",
+        subtitle: "Everything you need to build, collaborate, and ship amazing projects",
+        badge: "Comprehensive Features",
+        learnMore: "Learn more",
+        projectManagement: "Jira-like Project Management",
+        projectManagementDesc: "Full-featured project management with Kanban boards, sprint planning, backlog management, epic hierarchy, advanced filters, and real-time collaboration.",
+        aiAssistant: "AI-Powered Assistant",
+        aiAssistantDesc: "Integrated AI assistant for code generation, smart suggestions, task automation, and intelligent workflows. Boost productivity with cutting-edge AI.",
+        collaboration: "Real-Time Collaboration",
+        collaborationDesc: "Live chat with typing indicators, threaded comments with @mentions, collaborative whiteboard, and real-time updates. Work together seamlessly.",
+        fileManagement: "File Management",
+        fileManagementDesc: "Upload, organize, and share files effortlessly. Support for multiple file types with easy categorization and search.",
+        diagrams: "Diagram & Visualization",
+        diagramsDesc: "Create flowcharts, mind maps, and technical diagrams. Visualize your ideas with powerful drawing tools.",
+        resumeEditor: "Live Resume Editor",
+        resumeEditorDesc: "Professional WYSIWYG resume builder with 5 templates, live A4 preview, drag-and-drop sections, and color customization. Export-ready for PDF.",
+        gamesHub: "Games Hub",
+        gamesHubDesc: "Take a break with puzzle games, arcade classics, and brain training. Sudoku, Tetris, Snake, typing tests, and more.",
+        wiki: "Wiki & Documentation",
+        wikiDesc: "Build comprehensive knowledge bases and documentation. Organize information with categories and powerful search.",
+        meetingPlanning: "Meeting & Planning",
+        meetingPlanningDesc: "Schedule meetings, set milestones, and track progress. Keep your team aligned with clear timelines.",
+        liveSupport: "Live Support",
+        liveSupportDesc: "Get help when you need it with our integrated live chat support system. Fast, friendly, and always available.",
       },
       community: {
         title: "Join the Community",
         description: "Connect with developers worldwide. Share knowledge. Build together.",
+        stayUpdated: "Stay updated with our latest developments:",
+        subscribe: "Subscribe",
+        visitGithub: "Visit our GitHub",
+      },
+      whyChoose: {
+        title: "Why Choose Lab68?",
+        subtitle: "Built by developers, for developers. Experience the difference.",
+        fast: "Lightning Fast",
+        fastDesc: "Built on Next.js with optimized performance. Real-time updates and instant page loads for seamless workflow.",
+        secure: "Secure & Reliable",
+        secureDesc: "Enterprise-grade security with JWT authentication, bcrypt encryption, and role-based access control.",
+        allInOne: "All-in-One Platform",
+        allInOneDesc: "Everything you need in one place. No more switching between multiple tools and losing your flow.",
+        ctaTitle: "Ready to Transform Your Workflow?",
+        ctaSubtitle: "Join the Lab68 community and experience the future of collaborative development.",
+        getStartedFree: "Get Started Free",
+        exploreFeatures: "Explore Features",
+      },
+      team: {
+        title: "Meet the Team",
+        subtitle: "Dedicated to building powerful tools for developers and teams",
+        founder: "Founder & Lead Developer",
+        coFounder: "Co-Founder & Assistant",
+        developer: "Full-stack Developer",
+        viewRepo: "View Project Repository",
+      },
+      sponsor: {
+        title: "Sponsor the Project",
+        subtitle: "Help us continue building and maintaining this open-source platform. Your support means the world to us!",
+        badge: "Support Our Work",
+        buyMeCoffee: "Buy Me a Coffee",
+        buyMeCoffeeDesc: "Support us with a one-time donation",
+        githubSponsors: "GitHub Sponsors",
+        githubSponsorsDesc: "Become a monthly sponsor and help sustain us",
       },
     },
     todo: {
@@ -1140,8 +1275,8 @@ const translations: Record<Language, any> = {
       deleteAccount: "Eliminar Cuenta",
       avatar: "Foto de Perfil",
       uploadAvatar: "Subir Foto",
-  removeAvatar: "Eliminar",
-  bio: "Biografía",
+      removeAvatar: "Eliminar",
+      bio: "Biografía",
     },
     notifications: {
       title: "Notificaciones",
@@ -1386,7 +1521,7 @@ const translations: Record<Language, any> = {
       planning: "Planificaciión",
       research: "Investigaciión",
       general: "General",
-  architecture: "Arquitectura",
+      architecture: "Arquitectura",
     },
     wiki: {
       title: "Base de Conocimientos",
@@ -1485,8 +1620,8 @@ const translations: Record<Language, any> = {
       meetingNotificationsDesc: "Recevoir des notifications sur les réunions à venir",
       avatar: "Photo de Profil",
       uploadAvatar: "Télécharger une Photo",
-  removeAvatar: "Supprimer",
-  bio: "Biographie",
+      removeAvatar: "Supprimer",
+      bio: "Biographie",
       security: "Sécurité",
       currentPassword: "Mot de Passe Actuel",
       newPassword: "Nouveau Mot de Passe",
@@ -1747,7 +1882,7 @@ const translations: Record<Language, any> = {
       planning: "Planification",
       research: "Recherche",
       general: "Général",
-  architecture: "Architecture",
+      architecture: "Architecture",
     },
     wiki: {
       title: "Base de Connaissances",
@@ -1846,8 +1981,8 @@ const translations: Record<Language, any> = {
       meetingNotificationsDesc: "Erhalten Sie Benachrichtigungen über bevorstehende Besprechungen",
       avatar: "Profilbild",
       uploadAvatar: "Foto Hochladen",
-  removeAvatar: "Entfernen",
-  bio: "Biografie",
+      removeAvatar: "Entfernen",
+      bio: "Biografie",
       security: "Sicherheit",
       currentPassword: "Aktuelles Passwort",
       newPassword: "Neues Passwort",
@@ -1970,7 +2105,7 @@ const translations: Record<Language, any> = {
       addCollaborator: "Mitarbeiter Hinzufügen",
       inviteByEmail: "Per E-Mail einladen",
       invite: "Einladen",
-            removeCollaborator: "Entfernen",
+      removeCollaborator: "Entfernen",
       owner: "Eigentümer",
       noCollaborators: "Noch keine Mitarbeiter",
       role: "Rolle",
@@ -2329,8 +2464,8 @@ const translations: Record<Language, any> = {
       meetingNotificationsDesc: "获取即将召开会议的通知",
       avatar: "头像",
       uploadAvatar: "上传照片",
-  removeAvatar: "删除",
-  bio: "个人简介",
+      removeAvatar: "删除",
+      bio: "个人简介",
       security: "安全",
       currentPassword: "当前密码",
       newPassword: "新密码",
@@ -2806,8 +2941,8 @@ const translations: Record<Language, any> = {
       meetingNotificationsDesc: "近日開催の会議について通知を受け取る",
       avatar: "プロフィール写真",
       uploadAvatar: "写真をアップロード",
-  removeAvatar: "削除",
-  bio: "自己紹介",
+      removeAvatar: "削除",
+      bio: "自己紹介",
       security: "セキュリティ",
       currentPassword: "現在のパスワード",
       newPassword: "新しいパスワード",
@@ -3145,8 +3280,8 @@ const translations: Record<Language, any> = {
       meetingNotificationsDesc: "Get notified about upcoming meetings",
       avatar: "Profile Picture",
       uploadAvatar: "Upload Photo",
-  removeAvatar: "Remove",
-  bio: "Biografia",
+      removeAvatar: "Remove",
+      bio: "Biografia",
       security: "Segurança",
       currentPassword: "Senha Atual",
       newPassword: "Nova Senha",
@@ -4062,38 +4197,146 @@ const translations: Record<Language, any> = {
       cancel: "Hủy",
     },
     landing: {
-      hero: "lab68dev.",
-      title: "Suy nghĩ. Mã hóa. Kiểm tra. Triển khai.",
-      subtitle: "Nền tảng tối ưu cho các nhà phát triển để xây dựng, học tập và cộng tác",
-      getStarted: "Bắt đầu",
-      learnMore: "Tìm hiểu thêm",
+      hero: {
+        title: "Suy nghĩ. Mã hóa. Kiểm tra. Triển khai.",
+        subtitle: "Nền tảng tối ưu cho các nhà phát triển để xây dựng, học tập và cộng tác.",
+        cta: "Vào Lab68",
+        badge: "Nền tảng Cộng tác Thế hệ Mới",
+      },
+      stats: {
+        features: "Tính năng",
+        openSource: "Mã nguồn mở",
+        available: "Khả dụng",
+      },
+      mission: {
+        title: "Sứ mệnh của chúng tôi",
+        description: "Lab68 là nền tảng phát triển được thiết kế cho những ai đề cao tính năng. Chúng tôi cung cấp công cụ, cộng đồng và tài nguyên bạn cần để xây dựng phần mềm xuất sắc.",
+      },
+      techStack: {
+        title: "Công nghệ sử dụng",
+        description: "Được xây dựng với công nghệ hiện đại, sẵn sàng sản xuất cho hiệu suất, khả năng mở rộng và bảo mật",
+        poweredBy: "Được hỗ trợ bởi",
+      },
+      services: {
+        title: "Dịch vụ của chúng tôi",
+        subtitle: "Mọi thứ bạn cần để xây dựng, cộng tác và triển khai các dự án tuyệt vời",
+        badge: "Tính năng toàn diện",
+        learnMore: "Tìm hiểu thêm",
+        projectManagement: "Quản lý dự án kiểu Jira",
+        projectManagementDesc: "Quản lý dự án đầy đủ tính năng với bảng Kanban, lập kế hoạch sprint, quản lý backlog, phân cấp epic, bộ lọc nâng cao và cộng tác thời gian thực.",
+        aiAssistant: "Trợ lý AI",
+        aiAssistantDesc: "Trợ lý AI tích hợp để tạo code, gợi ý thông minh, tự động hóa tác vụ và quy trình làm việc thông minh. Tăng năng suất với AI tiên tiến.",
+        collaboration: "Cộng tác Thời gian Thực",
+        collaborationDesc: "Chat trực tiếp với chỉ báo đang nhập, bình luận theo chuỗi với @mentions, bảng trắng cộng tác và cập nhật thời gian thực. Làm việc cùng nhau liền mạch.",
+        fileManagement: "Quản lý Tệp",
+        fileManagementDesc: "Tải lên, sắp xếp và chia sẻ tệp dễ dàng. Hỗ trợ nhiều loại tệp với phân loại và tìm kiếm dễ dàng.",
+        diagrams: "Sơ đồ & Trực quan hóa",
+        diagramsDesc: "Tạo sơ đồ luồng, bản đồ tư duy và sơ đồ kỹ thuật. Hình dung ý tưởng của bạn với công cụ vẽ mạnh mẽ.",
+        resumeEditor: "Trình soạn CV Trực tiếp",
+        resumeEditorDesc: "Trình tạo CV WYSIWYG chuyên nghiệp với 5 mẫu, xem trước A4 trực tiếp, kéo thả các phần và tùy chỉnh màu sắc. Sẵn sàng xuất PDF.",
+        gamesHub: "Trung tâm Game",
+        gamesHubDesc: "Nghỉ ngơi với các trò chơi giải đố, arcade cổ điển và rèn luyện não bộ. Sudoku, Tetris, Snake, kiểm tra đánh máy và nhiều hơn nữa.",
+        wiki: "Wiki & Tài liệu",
+        wikiDesc: "Xây dựng cơ sở kiến thức và tài liệu toàn diện. Tổ chức thông tin với danh mục và tìm kiếm mạnh mẽ.",
+        meetingPlanning: "Cuộc họp & Lập kế hoạch",
+        meetingPlanningDesc: "Lên lịch cuộc họp, đặt mốc quan trọng và theo dõi tiến độ. Giữ đội của bạn đồng bộ với timeline rõ ràng.",
+        liveSupport: "Hỗ trợ Trực tiếp",
+        liveSupportDesc: "Nhận trợ giúp khi bạn cần với hệ thống hỗ trợ chat trực tiếp tích hợp. Nhanh chóng, thân thiện và luôn sẵn sàng.",
+      },
+      community: {
+        title: "Tham gia cộng đồng",
+        description: "Kết nối với các nhà phát triển trên toàn thế giới. Chia sẻ kiến thức. Cùng nhau xây dựng.",
+        stayUpdated: "Cập nhật những phát triển mới nhất của chúng tôi:",
+        subscribe: "Đăng ký",
+        visitGithub: "Truy cập GitHub của chúng tôi",
+      },
+      whyChoose: {
+        title: "Tại sao chọn Lab68?",
+        subtitle: "Được xây dựng bởi nhà phát triển, cho nhà phát triển. Trải nghiệm sự khác biệt.",
+        fast: "Nhanh như Chớp",
+        fastDesc: "Được xây dựng trên Next.js với hiệu suất tối ưu. Cập nhật thời gian thực và tải trang tức thì cho quy trình làm việc liền mạch.",
+        secure: "An toàn & Đáng tin cậy",
+        secureDesc: "Bảo mật cấp doanh nghiệp với xác thực JWT, mã hóa bcrypt và kiểm soát truy cập dựa trên vai trò.",
+        allInOne: "Nền tảng Tất cả trong Một",
+        allInOneDesc: "Mọi thứ bạn cần ở một nơi. Không còn chuyển đổi giữa nhiều công cụ và mất flow.",
+        ctaTitle: "Sẵn sàng Chuyển đổi Quy trình làm việc?",
+        ctaSubtitle: "Tham gia cộng đồng Lab68 và trải nghiệm tương lai của phát triển cộng tác.",
+        getStartedFree: "Bắt đầu Miễn phí",
+        exploreFeatures: "Khám phá Tính năng",
+      },
+      team: {
+        title: "Gặp gỡ Đội ngũ",
+        subtitle: "Tận tâm xây dựng công cụ mạnh mẽ cho nhà phát triển và đội nhóm",
+        founder: "Nhà sáng lập & Trưởng nhóm Phát triển",
+        coFounder: "Đồng sáng lập & Trợ lý",
+        developer: "Nhà phát triển Full-stack",
+        viewRepo: "Xem Kho mã nguồn",
+      },
+      sponsor: {
+        title: "Tài trợ Dự án",
+        subtitle: "Giúp chúng tôi tiếp tục xây dựng và duy trì nền tảng mã nguồn mở này. Sự hỗ trợ của bạn có ý nghĩa rất lớn!",
+        badge: "Ủng hộ Công việc của chúng tôi",
+        buyMeCoffee: "Mua cho tôi một ly Cà phê",
+        buyMeCoffeeDesc: "Ủng hộ chúng tôi với một lần quyên góp",
+        githubSponsors: "GitHub Sponsors",
+        githubSponsorsDesc: "Trở thành nhà tài trợ hàng tháng và giúp duy trì chúng tôi",
+      },
     },
     todo: {
       title: "Việc cần làm",
       subtitle: "Quản lý công việc và luôn có tổ chức",
-      newTask: "Nhiệm vụ mới",
-      taskTitle: "Tiêu đề nhiệm vụ",
       addTask: "Thêm nhiệm vụ",
-      completed: "Hoàn thành",
-      active: "Hoạt động",
-      clearCompleted: "Xóa đã hoàn thành",
+      taskName: "Tên nhiệm vụ",
+      taskDescription: "Mô tả nhiệm vụ",
+      priority: "Ưu tiên",
+      low: "Thấp",
+      medium: "Trung bình",
+      high: "Cao",
+      create: "Tạo nhiệm vụ",
       noTasks: "Chưa có nhiệm vụ nào",
       startAdding: "Bắt đầu thêm nhiệm vụ để luôn có tổ chức",
+      completed: "Hoàn thành",
+      pending: "Đang chờ",
+      markComplete: "Đánh dấu hoàn thành",
+      markIncomplete: "Đánh dấu chưa hoàn thành",
+      delete: "Xóa",
     },
     meeting: {
       title: "Cuộc họp",
       subtitle: "Lên lịch và quản lý các cuộc họp của bạn",
-      newMeeting: "Cuộc họp mới",
+      scheduleMeeting: "Lên lịch họp",
       meetingTitle: "Tiêu đề cuộc họp",
       meetingDescription: "Mô tả cuộc họp",
       date: "Ngày",
       time: "Thời gian",
-      create: "Tạo cuộc họp",
-      cancel: "Hủy",
+      duration: "Thời lượng",
+      minutes: "phút",
+      schedule: "Lên lịch họp",
       noMeetings: "Chưa có cuộc họp nào",
       startScheduling: "Bắt đầu lên lịch các cuộc họp để luôn có tổ chức",
       upcoming: "Sắp tới",
-      past: "Quá khứ",
+      past: "Đã qua",
+      cancel: "Hủy cuộc họp",
+    },
+    planning: {
+      title: "Lập kế hoạch",
+      subtitle: "Lập kế hoạch và theo dõi dự án của bạn",
+      createPlan: "Tạo kế hoạch",
+      planName: "Tên kế hoạch",
+      planDescription: "Mô tả kế hoạch",
+      startDate: "Ngày bắt đầu",
+      endDate: "Ngày kết thúc",
+      status: "Trạng thái",
+      notStarted: "Chưa bắt đầu",
+      inProgress: "Đang tiến hành",
+      completed: "Hoàn thành",
+      create: "Tạo kế hoạch",
+      noPlans: "Chưa có kế hoạch nào",
+      startPlanning: "Bắt đầu lập kế hoạch cho dự án của bạn",
+      addMilestone: "Thêm mốc quan trọng",
+      milestoneName: "Tên mốc quan trọng",
+      milestoneDate: "Ngày mốc quan trọng",
+      delete: "Xóa",
     },
     notifications: {
       title: "Thông báo",
@@ -4192,18 +4435,43 @@ const translations: Record<Language, any> = {
     },
     diagrams: {
       title: "Sơ đồ và Biểu đồ",
-      subtitle: "Tạo sơ đồ luồng, sơ đồ và hình ảnh trực quan",
-      newDiagram: "Sơ đồ mới",
-      diagramName: "Tên sơ đồ",
-      createDiagram: "Tạo sơ đồ",
-      cancel: "Hủy",
+      createNew: "Tạo Sơ đồ Mới",
       noDiagrams: "Chưa có sơ đồ nào",
-      startCreating: "Bắt đầu tạo sơ đồ để hình dung ý tưởng của bạn",
-      exportImage: "Xuất Hình Ảnh",
-      exportJSON: "Xuất JSON",
+      noDiagramsDesc: "Tạo sơ đồ luồng hoặc biểu đồ đầu tiên để hình dung quy trình của bạn",
+      diagramName: "Tên sơ đồ",
+      description: "Mô tả",
+      create: "Tạo",
+      edit: "Chỉnh sửa",
+      delete: "Xóa",
+      confirmDelete: "Bạn có chắc chắn muốn xóa sơ đồ này không?",
+      cancel: "Hủy",
+      save: "Lưu",
+      addNode: "Thêm Nút",
+      addConnection: "Thêm Kết nối",
+      nodeTypes: {
+        start: "Bắt đầu",
+        process: "Quy trình",
+        decision: "Quyết định",
+        end: "Kết thúc",
+        data: "Dữ liệu",
+        document: "Tài liệu",
+        cloud: "Đám mây",
+        hexagon: "Lục giác",
+        parallelogram: "Hình bình hành",
+        text: "Văn bản",
+      },
+      tools: {
+        select: "Chọn",
+        move: "Di chuyển",
+        delete: "Xóa",
+        connect: "Kết nối",
+      },
+      exportImage: "Xuất dưới dạng Hình ảnh",
+      exportJSON: "Xuất dưới dạng JSON",
       clear: "Xóa Canvas",
-      zoom: "Thu Phóng",
-      editLabel: "",
+      zoom: "Thu phóng",
+      saved: "Sơ đồ đã lưu thành công!",
+      editLabel: "Chỉnh sửa nhãn",
     },
     chat: {
       title: "Trò chuyện và Tin nhắn",
