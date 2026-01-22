@@ -2,6 +2,7 @@ import type React from "react"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { MobileBottomNav } from "@/components/mobile-bottom-nav"
 import { GlobalSearch } from "@/components/global-search"
+import { MeetingNotifier } from "@/components/meeting-notifier"
 
 export default function DashboardLayout({
   children,
@@ -16,6 +17,7 @@ export default function DashboardLayout({
       </main>
       <MobileBottomNav />
       <GlobalSearch />
+      <MeetingNotifier />
     </div>
   )
 }
