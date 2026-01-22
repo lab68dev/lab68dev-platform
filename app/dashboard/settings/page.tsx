@@ -52,7 +52,14 @@ export default function SettingsPage() {
     setUserLanguage(newLang)
     if (user) {
       updateUserProfile(user.id, { language: newLang })
-      window.location.reload()
+    }
+    
+    // Dispatch event for smooth transition
+    try {
+      const evt = new CustomEvent("lab68_language_change", { detail: { lang: newLang } })
+      window.dispatchEvent(evt)
+    } catch (e) {
+      // ignore
     }
   }
 
