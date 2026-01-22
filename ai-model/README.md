@@ -13,6 +13,8 @@ python -m venv venv
 # Activate (Windows)
 .\venv\Scripts\activate
 
+# Activate (Linux/macOS)
+source venv/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 ```
