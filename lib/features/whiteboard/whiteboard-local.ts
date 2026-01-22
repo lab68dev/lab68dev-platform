@@ -299,7 +299,9 @@ export function drawElement(
       drawText(ctx, element.text!, element.startPoint!, element.fontSize!, scale)
       break
     case "eraser":
-      // Eraser is handled by removing elements, not drawing
+      ctx.globalCompositeOperation = "destination-out"
+      drawFreehand(ctx, element.points, scale)
+      ctx.globalCompositeOperation = "source-over"
       break
   }
 
@@ -431,7 +433,7 @@ export function getTouchPos(canvas: HTMLCanvasElement, evt: TouchEvent): Point {
 
 export function clearCanvas(ctx: CanvasRenderingContext2D, width: number, height: number): void {
   ctx.clearRect(0, 0, width, height)
-  
+
   // Set white background
   ctx.fillStyle = "#FFFFFF"
   ctx.fillRect(0, 0, width, height)
@@ -567,7 +569,7 @@ export function undo(state: WhiteboardState): WhiteboardState {
   if (state.undoStack.length === 0) return state
 
   const previousElements = state.undoStack[state.undoStack.length - 1]
-  
+
   return {
     ...state,
     elements: previousElements,
