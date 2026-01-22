@@ -91,12 +91,12 @@ def generate_examples(num_tasks: int = 2000, num_qa: int = 2000) -> List[Dict]:
 
 def format_for_training(examples: List[Dict]) -> List[Dict]:
     """Format examples for TinyLlama chat format."""
-    # Define tags using chr() to avoid parsing issues
-    sys_open = chr(60) + "|system|" + chr(62)
-    user_open = chr(60) + "|user|" + chr(62)
-    asst_open = chr(60) + "|assistant|" + chr(62)
-    end_tag = chr(60) + "/s" + chr(62)
-    newline = chr(10)
+    # Define tags for TinyLlama chat format
+    sys_open = "<|system|>"
+    user_open = "<|user|>"
+    asst_open = "<|assistant|>"
+    end_tag = "</s>"
+    newline = "\n"
     
     formatted = []
     for ex in examples:
