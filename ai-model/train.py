@@ -6,7 +6,6 @@ Fine-tunes TinyLlama using LoRA for task creation and tech Q&A.
 
 import yaml
 import torch
-from pathlib import Path
 from datasets import load_dataset
 from transformers import (
     AutoModelForCausalLM,
