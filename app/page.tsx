@@ -51,6 +51,12 @@ export default function HomePage() {
   ]
   const [currentTechIndex, setCurrentTechIndex] = useState(0)
 
+  // Reset typing animation when language (text) changes
+  useEffect(() => {
+    setTypedText("")
+    setIsTyping(true)
+  }, [fullText])
+
   // Typing animation effect
   useEffect(() => {
     if (!isTyping) return
