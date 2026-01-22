@@ -99,7 +99,7 @@ export default function SettingsPage() {
     )
   }
 
-  const languages: Language[] = ["en", "es", "fr", "de", "zh", "ja", "pt", "ru", "vi"]
+  const languages: Language[] = ["en", "vi"]
 
   return (
     <div className="p-8 space-y-8">
