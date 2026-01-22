@@ -12,7 +12,7 @@ export function LanguageSwitcher() {
     setCurrentLang(getUserLanguage())
   }, [])
 
-  const languages: Language[] = ["en", "es", "fr", "de", "zh", "ja", "pt", "ru", "vi"]
+  const languages: Language[] = ["en", "vi"]
 
   const handleLanguageChange = (lang: Language) => {
     setUserLanguage(lang)
