@@ -148,6 +148,16 @@ export function LiveChatWidget() {
     }
   }
 
+  useEffect(() => {
+    const handleOpenSupport = () => {
+      setIsOpen(true)
+      setIsMinimized(false)
+    }
+
+    window.addEventListener("open-live-support", handleOpenSupport)
+    return () => window.removeEventListener("open-live-support", handleOpenSupport)
+  }, [])
+
   return (
     <>
       {/* Chat Widget */}
@@ -258,10 +268,10 @@ export function LiveChatWidget() {
         </div>
       )}
 
-      {/* Floating Button */}
+      {/* Floating Button - Hidden on mobile/tablet */}
       <button
         onClick={toggleChat}
-        className="fixed bottom-4 right-4 sm:right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform z-50 flex items-center justify-center"
+        className="fixed bottom-4 right-4 sm:right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform z-50 hidden lg:flex items-center justify-center"
         aria-label="Open live chat"
       >
         {isOpen ? (
