@@ -19,8 +19,15 @@ from trl import SFTTrainer
 
 def load_config(config_path: str = "config/training_config.yaml") -> dict:
     """Load training configuration."""
-    with open(config_path, "r") as f:
-        return yaml.safe_load(f)
+    try:
+        with open(config_path, "r") as f:
+            return yaml.safe_load(f)
+    except OSError as e:
+        # Handle file-related errors (missing file, permission issues, etc.)
+        raise RuntimeError(f"Failed to read configuration file '{config_path}': {e}") from e
+    except yaml.YAMLError as e:
+        # Handle malformed or invalid YAML content
+        raise RuntimeError(f"Failed to parse YAML configuration from '{config_path}': {e}") from e
 
 
 def setup_model_and_tokenizer(config: dict):
