@@ -1,0 +1,51 @@
+# Training Configuration for Lab68Dev AI Model
+
+# Model Settings
+model:
+  name: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+  max_length: 512
+  load_in_4bit: true
+
+# LoRA Configuration
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+# Training Hyperparameters
+training:
+  output_dir: "./models/lab68dev-assistant"
+  num_train_epochs: 3
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 8
+  learning_rate: 2.0e-4
+  weight_decay: 0.01
+  warmup_ratio: 0.03
+  lr_scheduler_type: "cosine"
+  logging_steps: 10
+  save_steps: 100
+  eval_steps: 100
+  save_total_limit: 3
+  fp16: true
+  optim: "paged_adamw_8bit"
+
+# Dataset Settings
+dataset:
+  train_file: "./data/dataset/train.jsonl"
+  val_file: "./data/dataset/val.jsonl"
+  train_size: 0.9
+
+# Generation Settings (for inference)
+generation:
+  max_new_tokens: 256
+  temperature: 0.7
+  top_p: 0.9
+  do_sample: true
