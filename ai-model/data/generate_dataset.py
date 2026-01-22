@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """Dataset Generator for Lab68Dev AI Model"""
 import json
 import random
