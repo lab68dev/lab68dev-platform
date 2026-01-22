@@ -44,6 +44,22 @@ export default function TodoPage() {
   const [pomodoroActive, setPomodoroActive] = useState(false)
   const [pomodoroMode, setPomodoroMode] = useState<'work' | 'break'>('work')
   const [pomodoroSessions, setPomodoroSessions] = useState(0)
+  
+  // Custom Settings State
+  const [workDuration, setWorkDuration] = useState(25)
+  const [breakDuration, setBreakDuration] = useState(5)
+  const [showSettings, setShowSettings] = useState(false)
+
+  // Sound Effect
+  const playNotificationSound = useCallback(() => {
+    try {
+      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3')
+      audio.volume = 0.5
+      audio.play().catch(e => console.log('Audio play failed:', e))
+    } catch (e) {
+      console.error('Audio setup failed', e)
+    }
+  }, [])
 
   const loadTasks = useCallback(async () => {
     const user = getCurrentUser()
@@ -99,27 +115,27 @@ export default function TodoPage() {
     } else if (pomodoroTime === 0) {
       // Timer finished
       setPomodoroActive(false)
+      playNotificationSound()
       
       if (pomodoroMode === 'work') {
         // Work session completed
         setPomodoroSessions((s) => s + 1)
-        // Notification sound/alert could be added here
         alert('Work session completed! Time for a break.')
         // Switch to break mode
         setPomodoroMode('break')
-        setPomodoroTime(5 * 60) // 5 minute break
+        setPomodoroTime(breakDuration * 60)
       } else {
         // Break completed
         alert('Break is over! Ready for another session?')
         setPomodoroMode('work')
-        setPomodoroTime(25 * 60) // 25 minute work
+        setPomodoroTime(workDuration * 60)
       }
     }
 
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [pomodoroActive, pomodoroTime, pomodoroMode])
+  }, [pomodoroActive, pomodoroTime, pomodoroMode, workDuration, breakDuration, playNotificationSound])
 
   const startPomodoro = () => {
     setPomodoroActive(true)
@@ -132,9 +148,21 @@ export default function TodoPage() {
   const resetPomodoro = () => {
     setPomodoroActive(false)
     if (pomodoroMode === 'work') {
-      setPomodoroTime(25 * 60)
+      setPomodoroTime(workDuration * 60)
     } else {
-      setPomodoroTime(5 * 60)
+      setPomodoroTime(breakDuration * 60)
+    }
+  }
+
+  const handleSettingsSave = () => {
+    setShowSettings(false)
+    // Update current timer if it matches the current mode
+    if (!pomodoroActive) {
+       if (pomodoroMode === 'work') {
+        setPomodoroTime(workDuration * 60)
+      } else {
+        setPomodoroTime(breakDuration * 60)
+      }
     }
   }
 
@@ -255,14 +283,58 @@ export default function TodoPage() {
           <div className="flex items-center gap-2 mb-6">
             <Timer className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">Pomodoro Timer</h2>
-            <span className={`ml-auto px-3 py-1 rounded-full text-xs font-medium ${
-              pomodoroMode === 'work' 
-                ? 'bg-primary/10 text-primary' 
-                : 'bg-green-500/10 text-green-600'
-            }`}>
-              {pomodoroMode === 'work' ? 'Focus' : 'Break'}
-            </span>
+            <div className="ml-auto flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8" 
+                onClick={() => setShowSettings(!showSettings)}
+                title="Timer Settings"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                pomodoroMode === 'work' 
+                  ? 'bg-primary/10 text-primary' 
+                  : 'bg-green-500/10 text-green-600'
+              }`}>
+                {pomodoroMode === 'work' ? 'Focus' : 'Break'}
+              </span>
+            </div>
           </div>
+
+          {showSettings && (
+            <div className="mb-6 p-4 border border-border bg-secondary/50 rounded-lg animate-fade-in-down">
+              <h3 className="text-sm font-medium mb-3">Timer Settings (minutes)</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Work Duration</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={workDuration}
+                    onChange={(e) => setWorkDuration(parseInt(e.target.value) || 25)}
+                    className="bg-background"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Break Duration</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="30"
+                    value={breakDuration}
+                    onChange={(e) => setBreakDuration(parseInt(e.target.value) || 5)}
+                    className="bg-background"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Button size="sm" onClick={handleSettingsSave}>Save Settings</Button>
+              </div>
+            </div>
+          )}
 
           <div className="grid md:grid-cols-[1fr_auto] gap-8 items-center">
             {/* Timer Display */}
