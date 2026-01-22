@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 '''FastAPI Inference Server for Lab68Dev AI Model'''
+import os
 import yaml
 import torch
+import logging
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, HTTPException
@@ -10,9 +12,22 @@ from pydantic import BaseModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
-app = FastAPI(title='Lab68Dev AI API', version='1.0.0')
-app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_credentials=True, allow_methods=['*'], allow_headers=['*'])
+logging.basicConfig(level=logging.INFO)
 
+app = FastAPI(title='Lab68Dev AI API', version='1.0.0')
+
+# CORS configuration - use environment variable for allowed origins
+allowed_origins_str = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000')
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(',') if origin.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*']
+)
+
+# Global variables - set once during startup, read-only during inference
 model, tokenizer = None, None
 
 class GenerateRequest(BaseModel):
@@ -28,6 +43,7 @@ def load_config():
     config_path = Path(__file__).parent.parent / 'config' / 'training_config.yaml'
     if config_path.exists():
         with open(config_path) as f: return yaml.safe_load(f)
+    logging.warning(f'Configuration file not found at {config_path}, using default values')
     return {}
 
 @app.on_event('startup')
@@ -36,7 +52,7 @@ async def startup():
     config = load_config()
     model_path = config.get('training', {}).get('output_dir', './models/lab68dev-assistant')
     base_model = config.get('model', {}).get('name', 'TinyLlama/TinyLlama-1.1B-Chat-v1.0')
-    print('Loading model...')
+    logging.info('Loading model...')
     if Path(model_path).exists():
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         model = AutoModelForCausalLM.from_pretrained(base_model, torch_dtype=torch.float16, device_map='auto')
@@ -46,7 +62,7 @@ async def startup():
         model = AutoModelForCausalLM.from_pretrained(base_model, torch_dtype=torch.float16, device_map='auto')
     tokenizer.pad_token = tokenizer.eos_token
     model.eval()
-    print('Model loaded!')
+    logging.info('Model loaded successfully!')
 
 @app.get('/health')
 async def health():
