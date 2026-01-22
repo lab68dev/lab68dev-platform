@@ -77,11 +77,25 @@ def setup_model_and_tokenizer(config: dict):
 
 def load_training_data(config: dict):
     """Load training and validation datasets."""
+    train_path = Path(config["dataset"]["train_file"])
+    val_path = Path(config["dataset"]["val_file"])
+
+    # Ensure required dataset files exist before loading
+    missing_files = [str(p) for p in (train_path, val_path) if not p.is_file()]
+    if missing_files:
+        missing_list = "\n  - ".join(missing_files)
+        message = (
+            "Required dataset file(s) not found:\n"
+            f"  - {missing_list}\n\n"
+            "Please generate the dataset before training "
+            "(for example, by running the dataset generation script)."
+        )
+        raise FileNotFoundError(message)
+
     data_files = {
-        "train": config["dataset"]["train_file"],
-        "validation": config["dataset"]["val_file"],
+        "train": str(train_path),
+        "validation": str(val_path),
     }
-    
     dataset = load_dataset("json", data_files=data_files)
     return dataset
 
