@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import Image from "next/image"
-import { getTranslations, getUserLanguage } from "@/lib/config"
+import { useLanguage } from "@/lib/config"
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 import {
@@ -31,10 +31,10 @@ import {
 const LightRays = dynamic(() => import("@/components/light-rays"), { ssr: false })
 
 export default function HomePage() {
-  const [t, setT] = useState(getTranslations("en"))
+  const { t } = useLanguage()
   const [typedText, setTypedText] = useState("")
   const [isTyping, setIsTyping] = useState(true)
-  const fullText = "Think. Code. Test. Ship."
+  const fullText = t.landing.hero.title || "Think. Code. Test. Ship."
 
   // Logo animation state
   const technologies = [
@@ -50,10 +50,6 @@ export default function HomePage() {
     "shadcn/ui"
   ]
   const [currentTechIndex, setCurrentTechIndex] = useState(0)
-
-  useEffect(() => {
-    setT(getTranslations(getUserLanguage()))
-  }, [])
 
   // Typing animation effect
   useEffect(() => {
