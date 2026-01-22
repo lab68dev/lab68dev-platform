@@ -1,56 +1,38 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import {
+  createSupabaseMiddlewareClient,
+  authMiddleware,
+  apiAuthMiddleware,
+  addSecurityHeaders,
+  rateLimitMiddleware,
+  type MiddlewareContext,
+} from '@/lib/middleware'
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
+  // Apply rate limiting for API routes
+  const rateLimitResult = rateLimitMiddleware(request)
+  if (rateLimitResult) return rateLimitResult
+
+  // Create Supabase client and refresh auth token
+  const { supabaseResponse, user } = await createSupabaseMiddlewareClient(request)
+
+  // Create middleware context
+  const context: MiddlewareContext = {
     request,
-  })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
-  // Refreshing the auth token
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // Protected routes - require authentication
-  const protectedPaths = ['/dashboard']
-  const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))
-
-  // Auth routes - redirect to dashboard if already logged in
-  const authPaths = ['/login', '/signup']
-  const isAuthPath = authPaths.some(path => request.nextUrl.pathname.startsWith(path))
-
-  if (isProtectedPath && !user) {
-    // Redirect to login if trying to access protected route without auth
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+    response: supabaseResponse,
+    user,
   }
 
-  if (isAuthPath && user) {
-    // Redirect to dashboard if already logged in
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
-  }
+  // Check API authentication
+  const apiAuthResult = apiAuthMiddleware(context)
+  if (apiAuthResult) return apiAuthResult
+
+  // Check page authentication and redirects
+  const authResult = authMiddleware(context)
+  if (authResult) return authResult
+
+  // Add security headers to response
+  addSecurityHeaders(supabaseResponse)
 
   return supabaseResponse
 }
