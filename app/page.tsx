@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { Header } from "@/components/header"
+
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,89 +27,79 @@ import {
   ShieldCheckIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline'
+import CardNav, { CardNavItem } from "@/components/CardNav"
+import PixelCard from "@/components/PixelCard"
+import PixelBlast from "@/components/PixelBlast"
+import RotatingText from "@/components/RotatingText"
 
-const LightRays = dynamic(() => import("@/components/light-rays"), { ssr: false })
+
+const navItems: CardNavItem[] = [
+  {
+    label: "Platform",
+    bgColor: "oklch(0.08 0 0)", // matches --card
+    textColor: "oklch(1 0 0)", // white
+    links: [
+      { label: "Features", href: "#services", ariaLabel: "Platform Features" },
+      { label: "Tech Stack", href: "#stack", ariaLabel: "Technology Stack" },
+      { label: "Sponsor", href: "#sponsor", ariaLabel: "Sponsor the Project" }
+    ]
+  },
+  {
+    label: "Community",
+    bgColor: "oklch(0.12 0 0)", // slightly lighter than card
+    textColor: "oklch(1 0 0)",
+    links: [
+      { label: "GitHub", href: "https://github.com/lab68dev", ariaLabel: "GitHub Profile" },
+      { label: "Instagram", href: "https://www.instagram.com/lab68dev/", ariaLabel: "Join Discord" },
+      { label: "Youtube", href: "https://www.youtube.com/@lab68dev", ariaLabel: "Community Discussions" }
+    ]
+  },
+  {
+    label: "About",
+    bgColor: "oklch(0.16 0 0)", // even lighter
+    textColor: "oklch(1 0 0)",
+    links: [
+      { label: "Mission", href: "#mission", ariaLabel: "Our Mission" },
+      { label: "Team", href: "#founder", ariaLabel: "Meet the Team" },
+      { label: "Contact", href: "mailto:lab68dev@gmail.com", ariaLabel: "Contact Us" }
+    ]
+  }
+];
 
 export default function HomePage() {
   const { t } = useLanguage()
-  const [typedText, setTypedText] = useState("")
-  const [isTyping, setIsTyping] = useState(true)
-  const fullText = t.landing.hero.title || "Think. Code. Test. Ship."
 
-  // Logo animation state
-  const technologies = [
-    "Next.js 16",
-    "React 19",
-    "TypeScript 5",
-    "Tailwind CSS 4",
-    "Supabase",
-    "PostgreSQL",
-    "Socket.io",
-    "Ollama AI",
-    "RAG System",
-    "shadcn/ui"
-  ]
-  const [currentTechIndex, setCurrentTechIndex] = useState(0)
 
-  // Reset typing animation when language (text) changes
-  useEffect(() => {
-    setTypedText("")
-    setIsTyping(true)
-  }, [fullText])
 
-  // Typing animation effect
-  useEffect(() => {
-    if (!isTyping) return
 
-    let index = 0
-    const typingInterval = setInterval(() => {
-      if (index <= fullText.length) {
-        setTypedText(fullText.slice(0, index))
-        index++
-      } else {
-        clearInterval(typingInterval)
-        setIsTyping(false)
-      }
-    }, 100) // Typing speed: 100ms per character
-
-    return () => clearInterval(typingInterval)
-  }, [isTyping])
-
-  // Logo loop animation effect
-  useEffect(() => {
-    const logoInterval = setInterval(() => {
-      setCurrentTechIndex((prevIndex) => (prevIndex + 1) % technologies.length)
-    }, 2000) // Change technology every 2 seconds
-
-    return () => clearInterval(logoInterval)
-  }, [])
+  // ... existing state ...
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground relative">
-      {/* Light Rays Background */}
-      <div className="fixed inset-0 z-0">
-        <LightRays
-          raysOrigin="top-center"
-          raysColor="#00FF99"
-          raysSpeed={0.5}
-          lightSpread={1.5}
-          rayLength={1.5}
-          pulsating={true}
-          fadeDistance={1.2}
-          saturation={0.8}
-          followMouse={true}
-          mouseInfluence={0.15}
-          noiseAmount={0.05}
-          distortion={0.1}
-        />
-      </div>
-
       {/* Content */}
       <div className="relative z-10">
-        <Header />
+        <CardNav 
+          logo="/images/design-mode/lab68dev_logo.png"
+          logoAlt="Lab68Dev"
+          items={navItems}
+          baseColor="var(--background)" 
+          menuColor="var(--foreground)"
+          buttonBgColor="var(--primary)"
+          buttonTextColor="var(--primary-foreground)"
+        />
 
         {/* Hero Section */}
         <section className="flex-1 border-b border-border relative overflow-hidden">
+          {/* PixelBlast Background Animation - Hero Section Only */}
+          <div className="absolute inset-0 z-0">
+            <PixelBlast
+              color="#4d3b3b"
+              patternDensity={1.2}
+              speed={0.8}
+              rippleIntensityScale={1.2}
+            />
+          </div>
+          
           {/* Animated gradient orbs */}
           <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -131,10 +121,23 @@ export default function HomePage() {
                 <span className="text-sm font-medium text-primary">Next-Gen Collaboration Platform</span>
               </div>
               
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance animate-fade-in-up">
-                {typedText}
-                <span className="animate-pulse">|</span>
-              </h1>
+
+              <div className="flex justify-center items-center w-full mb-4">
+                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance animate-fade-in-up flex items-center justify-center gap-3">
+                  <RotatingText
+                    texts={['Think', 'Code', 'Test', 'Ship']}
+                    mainClassName="px-2 sm:px-2 md:px-3 bg-primary text-primary-foreground overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
+                    staggerFrom="last"
+                    initial={{ y: "100%" }}
+                    animate={{ y: 0 }}
+                    exit={{ y: "-120%" }}
+                    staggerDuration={0.025}
+                    splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
+                    transition={{ type: "spring", damping: 30, stiffness: 400 }}
+                    rotationInterval={2000}
+                  />
+                </h1>
+              </div>
               
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in-up delay-300">
                 {t.landing.hero.subtitle}
@@ -257,9 +260,7 @@ export default function HomePage() {
                     { name: "Supabase", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg" },
                     { name: "PostgreSQL", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
                     { name: "Node.js", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" },
-                    { name: "Ollama", logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300FF99'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/%3E%3C/svg%3E" },
                     { name: "Socket.io", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/socketio/socketio-original.svg" },
-                    { name: "Xenova AI", logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300FF99'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E" },
                     { name: "Gmail SMTP", logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300FF99'%3E%3Cpath d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'/%3E%3C/svg%3E" },
                     { name: "pnpm", logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300FF99'%3E%3Cpath d='M0 0v7.5h7.5V0zm8.25 0v7.5h7.5V0zm8.25 0v7.5H24V0zM0 8.25v7.5h7.5v-7.5zm16.5 0v7.5H24v-7.5zM0 16.5V24h7.5v-7.5zm8.25 0V24h7.5v-7.5z'/%3E%3C/svg%3E" },
                     { name: "GitHub", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" },
@@ -267,7 +268,6 @@ export default function HomePage() {
                     { name: "Supabase", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg" },
                     { name: "PostgreSQL", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
                     { name: "Node.js", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" },
-                    { name: "Ollama", logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300FF99'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/%3E%3C/svg%3E" },
                     { name: "Socket.io", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/socketio/socketio-original.svg" }
                   ].map((tech, index) => (
                     <div
@@ -308,175 +308,195 @@ export default function HomePage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Project Management */}
-                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
-                  <div className="mb-6 text-primary">
-                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
-                      <ClipboardDocumentListIcon className="h-7 w-7" />
+                {/* Project Management - Blue Variant */}
+                <PixelCard variant="blue" className="w-full h-full min-h-[300px] border border-border/50 bg-card p-0">
+                  <div className="p-8 h-full flex flex-col relative z-20 pointer-events-none">
+                    <div className="mb-6 text-sky-400">
+                      <div className="w-14 h-14 rounded-lg bg-sky-400/10 flex items-center justify-center group-hover:bg-sky-400/20 group-hover:scale-110 transition-all">
+                        <ClipboardDocumentListIcon className="h-7 w-7" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-sky-400 transition-colors">Jira-like Project Management</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Full-featured project management with Kanban boards, sprint planning, backlog management, epic hierarchy, advanced filters, and real-time collaboration.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Learn more</span>
+                      <ArrowRightIcon className="h-4 w-4" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Jira-like Project Management</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Full-featured project management with Kanban boards, sprint planning, backlog management, epic hierarchy, advanced filters, and real-time collaboration.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Learn more</span>
-                    <ArrowRightIcon className="h-4 w-4" />
-                  </div>
-                </div>
+                </PixelCard>
 
-                {/* AI-Powered Tools */}
-                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
-                  <div className="mb-6 text-primary">
-                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
-                      <LightBulbIcon className="h-7 w-7" />
+                {/* AI-Powered Tools - Pink Variant */}
+                <PixelCard variant="pink" className="w-full h-full min-h-[300px] border border-border/50 bg-card p-0">
+                  <div className="p-8 h-full flex flex-col relative z-20 pointer-events-none">
+                    <div className="mb-6 text-pink-500">
+                      <div className="w-14 h-14 rounded-lg bg-pink-500/10 flex items-center justify-center group-hover:bg-pink-500/20 group-hover:scale-110 transition-all">
+                        <LightBulbIcon className="h-7 w-7" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-pink-500 transition-colors">AI-Powered Assistant</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Integrated AI assistant for code generation, smart suggestions, task automation, and intelligent workflows. Boost productivity with cutting-edge AI.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Learn more</span>
+                      <ArrowRightIcon className="h-4 w-4" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">AI-Powered Assistant</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Integrated AI assistant for code generation, smart suggestions, task automation, and intelligent workflows. Boost productivity with cutting-edge AI.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Learn more</span>
-                    <ArrowRightIcon className="h-4 w-4" />
-                  </div>
-                </div>
+                </PixelCard>
 
-                {/* Real-Time Collaboration */}
-                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
-                  <div className="mb-6 text-primary">
-                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
-                      <UserGroupIcon className="h-7 w-7" />
+                {/* Real-Time Collaboration - Yellow Variant */}
+                <PixelCard variant="yellow" className="w-full h-full min-h-[300px] border border-border/50 bg-card p-0">
+                  <div className="p-8 h-full flex flex-col relative z-20 pointer-events-none">
+                    <div className="mb-6 text-yellow-400">
+                      <div className="w-14 h-14 rounded-lg bg-yellow-400/10 flex items-center justify-center group-hover:bg-yellow-400/20 group-hover:scale-110 transition-all">
+                        <UserGroupIcon className="h-7 w-7" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-yellow-400 transition-colors">Real-Time Collaboration</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Live chat with typing indicators, threaded comments with @mentions, collaborative whiteboard, and real-time updates. Work together seamlessly.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Learn more</span>
+                      <ArrowRightIcon className="h-4 w-4" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Real-Time Collaboration</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Live chat with typing indicators, threaded comments with @mentions, collaborative whiteboard, and real-time updates. Work together seamlessly.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Learn more</span>
-                    <ArrowRightIcon className="h-4 w-4" />
-                  </div>
-                </div>
+                </PixelCard>
 
-                {/* File Management */}
-                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
-                  <div className="mb-6 text-primary">
-                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
-                      <FolderIcon className="h-7 w-7" />
+                {/* File Management - Default (Green/Primary) */}
+                <PixelCard variant="default" className="w-full h-full min-h-[300px] border border-border/50 bg-card p-0">
+                  <div className="p-8 h-full flex flex-col relative z-20 pointer-events-none">
+                    <div className="mb-6 text-primary">
+                      <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                        <FolderIcon className="h-7 w-7" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">File Management</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Upload, organize, and share files effortlessly. Support for multiple file types with easy categorization and search.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Learn more</span>
+                      <ArrowRightIcon className="h-4 w-4" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">File Management</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Upload, organize, and share files effortlessly. Support for multiple file types with easy categorization and search.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Learn more</span>
-                    <ArrowRightIcon className="h-4 w-4" />
-                  </div>
-                </div>
+                </PixelCard>
 
-                {/* Diagram & Visualization */}
-                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
-                  <div className="mb-6 text-primary">
-                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
-                      <PresentationChartLineIcon className="h-7 w-7" />
+                {/* Diagram & Visualization - Blue Variant */}
+                <PixelCard variant="blue" className="w-full h-full min-h-[300px] border border-border/50 bg-card p-0">
+                  <div className="p-8 h-full flex flex-col relative z-20 pointer-events-none">
+                    <div className="mb-6 text-sky-400">
+                      <div className="w-14 h-14 rounded-lg bg-sky-400/10 flex items-center justify-center group-hover:bg-sky-400/20 group-hover:scale-110 transition-all">
+                        <PresentationChartLineIcon className="h-7 w-7" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-sky-400 transition-colors">Diagram & Visualization</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Create flowcharts, mind maps, and technical diagrams. Visualize your ideas with powerful drawing tools.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Learn more</span>
+                      <ArrowRightIcon className="h-4 w-4" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Diagram & Visualization</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Create flowcharts, mind maps, and technical diagrams. Visualize your ideas with powerful drawing tools.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Learn more</span>
-                    <ArrowRightIcon className="h-4 w-4" />
-                  </div>
-                </div>
+                </PixelCard>
 
-                {/* Resume Editor */}
-                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
-                  <div className="mb-6 text-primary">
-                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
-                      <DocumentTextIcon className="h-7 w-7" />
+                {/* Resume Editor - Pink Variant */}
+                <PixelCard variant="pink" className="w-full h-full min-h-[300px] border border-border/50 bg-card p-0">
+                  <div className="p-8 h-full flex flex-col relative z-20 pointer-events-none">
+                    <div className="mb-6 text-pink-500">
+                      <div className="w-14 h-14 rounded-lg bg-pink-500/10 flex items-center justify-center group-hover:bg-pink-500/20 group-hover:scale-110 transition-all">
+                        <DocumentTextIcon className="h-7 w-7" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-pink-500 transition-colors">Live Resume Editor</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Professional WYSIWYG resume builder with 5 templates, live A4 preview, drag-and-drop sections, and color customization. Export-ready for PDF.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Learn more</span>
+                      <ArrowRightIcon className="h-4 w-4" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Live Resume Editor</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Professional WYSIWYG resume builder with 5 templates, live A4 preview, drag-and-drop sections, and color customization. Export-ready for PDF.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Learn more</span>
-                    <ArrowRightIcon className="h-4 w-4" />
-                  </div>
-                </div>
+                </PixelCard>
 
-                {/* Games Hub */}
-                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
-                  <div className="mb-6 text-primary">
-                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
-                      <FaceSmileIcon className="h-7 w-7" />
+                {/* Games Hub - Yellow Variant */}
+                <PixelCard variant="yellow" className="w-full h-full min-h-[300px] border border-border/50 bg-card p-0">
+                  <div className="p-8 h-full flex flex-col relative z-20 pointer-events-none">
+                    <div className="mb-6 text-yellow-400">
+                      <div className="w-14 h-14 rounded-lg bg-yellow-400/10 flex items-center justify-center group-hover:bg-yellow-400/20 group-hover:scale-110 transition-all">
+                        <FaceSmileIcon className="h-7 w-7" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-yellow-400 transition-colors">Games Hub</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Take a break with puzzle games, arcade classics, and brain training. Sudoku, Tetris, Snake, typing tests, and more.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Learn more</span>
+                      <ArrowRightIcon className="h-4 w-4" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Games Hub</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Take a break with puzzle games, arcade classics, and brain training. Sudoku, Tetris, Snake, typing tests, and more.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Learn more</span>
-                    <ArrowRightIcon className="h-4 w-4" />
-                  </div>
-                </div>
+                </PixelCard>
 
-                {/* Wiki & Documentation */}
-                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
-                  <div className="mb-6 text-primary">
-                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
-                      <BookOpenIcon className="h-7 w-7" />
+                {/* Wiki & Documentation - Default (Green/Primary) */}
+                <PixelCard variant="default" className="w-full h-full min-h-[300px] border border-border/50 bg-card p-0">
+                  <div className="p-8 h-full flex flex-col relative z-20 pointer-events-none">
+                    <div className="mb-6 text-primary">
+                      <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                        <BookOpenIcon className="h-7 w-7" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Wiki & Documentation</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Build comprehensive knowledge bases and documentation. Organize information with categories and powerful search.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Learn more</span>
+                      <ArrowRightIcon className="h-4 w-4" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Wiki & Documentation</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Build comprehensive knowledge bases and documentation. Organize information with categories and powerful search.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Learn more</span>
-                    <ArrowRightIcon className="h-4 w-4" />
-                  </div>
-                </div>
+                </PixelCard>
 
-                {/* Meeting & Planning */}
-                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
-                  <div className="mb-6 text-primary">
-                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
-                      <CalendarIcon className="h-7 w-7" />
+                {/* Meeting & Planning - Blue Variant */}
+                <PixelCard variant="blue" className="w-full h-full min-h-[300px] border border-border/50 bg-card p-0">
+                  <div className="p-8 h-full flex flex-col relative z-20 pointer-events-none">
+                    <div className="mb-6 text-sky-400">
+                      <div className="w-14 h-14 rounded-lg bg-sky-400/10 flex items-center justify-center group-hover:bg-sky-400/20 group-hover:scale-110 transition-all">
+                        <CalendarIcon className="h-7 w-7" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-sky-400 transition-colors">Meeting & Planning</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Schedule meetings, set milestones, and track progress. Keep your team aligned with clear timelines.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Learn more</span>
+                      <ArrowRightIcon className="h-4 w-4" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Meeting & Planning</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Schedule meetings, set milestones, and track progress. Keep your team aligned with clear timelines.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Learn more</span>
-                    <ArrowRightIcon className="h-4 w-4" />
-                  </div>
-                </div>
+                </PixelCard>
 
-                {/* Live Support */}
-                <div className="border border-border/50 p-8 hover:border-primary transition-all duration-300 group hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 bg-card">
-                  <div className="mb-6 text-primary">
-                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
-                      <ChatBubbleLeftRightIcon className="h-7 w-7" />
+                {/* Live Support - Pink Variant */}
+                <PixelCard variant="pink" className="w-full h-full min-h-[300px] border border-border/50 bg-card p-0">
+                  <div className="p-8 h-full flex flex-col relative z-20 pointer-events-none">
+                    <div className="mb-6 text-pink-500">
+                      <div className="w-14 h-14 rounded-lg bg-pink-500/10 flex items-center justify-center group-hover:bg-pink-500/20 group-hover:scale-110 transition-all">
+                        <ChatBubbleLeftRightIcon className="h-7 w-7" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-pink-500 transition-colors">Live Support</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Get help when you need it with our integrated live chat support system. Fast, friendly, and always available.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Learn more</span>
+                      <ArrowRightIcon className="h-4 w-4" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Live Support</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Get help when you need it with our integrated live chat support system. Fast, friendly, and always available.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Learn more</span>
-                    <ArrowRightIcon className="h-4 w-4" />
-                  </div>
-                </div>
+                </PixelCard>
               </div>
             </div>
           </div>
@@ -767,7 +787,7 @@ export default function HomePage() {
         </section>
 
         {/* Sponsor Section */}
-        <section className="border-b border-border bg-muted/30">
+        <section id="sponsor" className="border-b border-border bg-muted/30">
           <div className="container mx-auto px-4 py-24">
             <div className="mx-auto max-w-4xl">
               <div className="text-center mb-12">
