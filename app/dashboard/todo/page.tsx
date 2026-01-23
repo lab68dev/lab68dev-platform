@@ -119,19 +119,19 @@ export default function TodoPage() {
       }, 1000)
     } else if (pomodoroTime === 0) {
       // Timer finished
-      setPomodoroActive(false)
       playNotificationSound()
       
       if (pomodoroMode === 'work') {
         // Work session completed
         setPomodoroSessions((s) => s + 1)
-        setToast({ message: '🎉 Work session completed! Time for a break.', type: 'break' })
-        // Switch to break mode
+        setToast({ message: '🎉 Work session completed! Break starting now...', type: 'break' })
+        // Switch to break mode and keep running (Auto-start break)
         setPomodoroMode('break')
         setPomodoroTime(breakDuration * 60)
       } else {
         // Break completed
-        setToast({ message: '💪 Break is over! Ready for another session?', type: 'work' })
+        setPomodoroActive(false) // Stop after break
+        setToast({ message: '💪 Break is over! Click Start to begin focus.', type: 'work' })
         setPomodoroMode('work')
         setPomodoroTime(workDuration * 60)
       }
