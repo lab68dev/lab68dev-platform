@@ -80,9 +80,7 @@ export function DashboardSidebar() {
       defaultOpen: true,
       items: [
         { href: "/dashboard/collaborators", label: t.projects?.collaborators || "Collaborators", icon: Users },
-        { href: "/dashboard/chat", label: t.chat?.title || "Chat", icon: MessageCircle },
         { href: "/dashboard/whiteboard", label: t.whiteboard?.title || "Whiteboard", icon: Palette },
-        { href: "/dashboard/community", label: t.community?.title || "Community", icon: MessageSquare },
       ],
     },
     {
