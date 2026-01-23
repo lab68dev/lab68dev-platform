@@ -404,8 +404,104 @@ export default function TodoPage() {
           <div className="grid md:grid-cols-[1fr_auto] gap-8 items-center">
             {/* Timer Display */}
             <div className="text-center space-y-6">
-              {/* Large Time Display */}
-              <div className="relative inline-flex">
+              {/* Large Time Display with Coffee Cup */}
+              <div className="relative inline-flex items-center gap-6">
+                {/* Draining Coffee Cup */}
+                <div className="relative w-20 h-24">
+                  <svg viewBox="0 0 80 96" className="w-full h-full">
+                    <defs>
+                      {/* Coffee gradient */}
+                      <linearGradient id="coffeeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor={pomodoroMode === 'work' ? '#d97706' : '#22c55e'} />
+                        <stop offset="100%" stopColor={pomodoroMode === 'work' ? '#92400e' : '#15803d'} />
+                      </linearGradient>
+                      {/* Clip path for coffee inside cup */}
+                      <clipPath id="cupInterior">
+                        <path d="M18 28 L18 68 Q18 78 28 78 L52 78 Q62 78 62 68 L62 28 Z" />
+                      </clipPath>
+                    </defs>
+                    
+                    {/* Cup base/saucer */}
+                    <ellipse cx="40" cy="88" rx="28" ry="4" className="fill-muted-foreground/30" />
+                    
+                    {/* Coffee fill - height changes based on timer */}
+                    <g clipPath="url(#cupInterior)">
+                      <rect
+                        x="18"
+                        y={28 + (50 * (1 - pomodoroTime / (pomodoroMode === 'work' ? workDuration * 60 : breakDuration * 60)))}
+                        width="44"
+                        height={50 * (pomodoroTime / (pomodoroMode === 'work' ? workDuration * 60 : breakDuration * 60))}
+                        fill="url(#coffeeGradient)"
+                        style={{ transition: 'all 1s linear' }}
+                      />
+                      {/* Coffee surface highlight */}
+                      <ellipse 
+                        cx="40" 
+                        cy={28 + (50 * (1 - pomodoroTime / (pomodoroMode === 'work' ? workDuration * 60 : breakDuration * 60)))}
+                        rx="20" 
+                        ry="3"
+                        className={pomodoroMode === 'work' ? 'fill-amber-500/50' : 'fill-green-400/50'}
+                        style={{ transition: 'all 1s linear' }}
+                      />
+                    </g>
+                    
+                    {/* Cup body outline */}
+                    <path 
+                      d="M16 24 L16 70 Q16 82 30 82 L50 82 Q64 82 64 70 L64 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      className="text-foreground/70"
+                    />
+                    
+                    {/* Cup rim */}
+                    <ellipse cx="40" cy="24" rx="24" ry="4" className="fill-foreground/10 stroke-foreground/70" strokeWidth="2" />
+                    
+                    {/* Cup handle */}
+                    <path 
+                      d="M64 34 Q78 34 78 50 Q78 66 64 66" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      className="text-foreground/70"
+                    />
+                    
+                    {/* Steam when timer is running */}
+                    {pomodoroActive && (
+                      <>
+                        <path 
+                          d="M30 18 Q32 12 30 6" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          className="text-muted-foreground/40 animate-pulse"
+                        />
+                        <path 
+                          d="M40 15 Q42 9 40 3" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          className="text-muted-foreground/40 animate-pulse"
+                          style={{ animationDelay: '0.3s' }}
+                        />
+                        <path 
+                          d="M50 18 Q52 12 50 6" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          className="text-muted-foreground/40 animate-pulse"
+                          style={{ animationDelay: '0.6s' }}
+                        />
+                      </>
+                    )}
+                  </svg>
+                </div>
+                
                 <div className="text-7xl font-bold font-mono tabular-nums">
                   {formatPomodoroTime(pomodoroTime)}
                 </div>
