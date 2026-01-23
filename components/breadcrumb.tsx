@@ -25,17 +25,9 @@ export function Breadcrumb({ items, className = "" }: BreadcrumbProps) {
       className={`flex items-center gap-2 text-sm mb-6 ${className}`}
       aria-label="Breadcrumb"
     >
-      <Link
-        href="/dashboard"
-        className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-        aria-label="Home"
-      >
-        <Home className="h-4 w-4" />
-      </Link>
-
       {breadcrumbItems.map((item, index) => (
         <div key={item.href} className="flex items-center gap-2">
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          {index > 0 && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
           {index === breadcrumbItems.length - 1 ? (
             <span className="font-medium text-foreground" aria-current="page">
               {item.label}
