@@ -19,6 +19,7 @@ import { DashboardWeather } from "@/components/dashboard-weather"
 import { DashboardCalendar } from "@/components/dashboard-calendar"
 import { OnboardingFlow } from "@/components/onboarding-flow"
 import { StatCardSkeleton } from "@/components/skeleton"
+import { SplitText } from "@/components/split-text"
 
 
 type Meeting = {
@@ -141,7 +142,13 @@ export default function DashboardPage() {
         <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
-              {t.dashboard.welcomeBack}, {user.name}
+              <SplitText 
+                text={`${t.dashboard.welcomeBack}, ${user.name}`} 
+                delay={0.2}
+                duration={0.5}
+                stagger={0.02}
+                animationType="slide"
+              />
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground">{t.dashboard.happeningToday}</p>
           </div>
