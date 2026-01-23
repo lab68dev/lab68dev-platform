@@ -5,10 +5,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E)](https://supabase.com/)
-[![Sponsor](https://img.shields.io/badge/♥_Sponsor-Support_Us-fe8184)](https://github.com/sponsors/lab68dev)
+[![Sponsor](https://img.shields.io/badge/%E2%99%A5_Sponsor-Support_Us-fe8184)](https://github.com/sponsors/lab68dev)
 
-**Lab68 Dev Platform** is a comprehensive collaborative product development workspace with integrated staff management.
-It provides dashboards for planning, documentation, meetings, AI-assisted workflows, role-aware access controls, live customer support, and a complete staff portal — built with **Next.js App Router**, **TypeScript**, and a modular component system.
+**Lab68 Dev Platform** is a comprehensive collaborative product development workspace with integrated staff management. It provides dashboards for planning, documentation, meetings, AI-assisted workflows, role-aware access controls, live customer support, and a complete staff portal — built with **Next.js App Router**, **TypeScript**, and a modular component system.
 
 ---
 
@@ -19,8 +18,8 @@ It provides dashboards for planning, documentation, meetings, AI-assisted workfl
 - **Staff Management Portal** – dedicated staff authentication, user management, support queue, analytics dashboard, and approval workflows.
 - **Live Customer Support** – real-time chat widget with staff dashboard for 24/7 support management.
 - **Supabase Backend** – PostgreSQL database with Row-Level Security (RLS), indexed queries, and automatic session cleanup.
-- **Multilingual UI** – centralized translation registry covering nine locales with automatic English fallbacks.
-- **Productivity Surface** – dashboards for projects, kanban, meetings, files, wiki, diagrams, community discussions, and AI tools.
+- **Multilingual UI** – centralized translation registry with English and Vietnamese support.
+- **Productivity Suite** – dashboards for projects, kanban, meetings, files, wiki, diagrams, community discussions, and AI tools.
 - **Theme & Layout Framework** – dark/light theme support, sidebar navigation, reusable UI primitives, and responsive Tailwind styling.
 
 ---
@@ -37,45 +36,135 @@ It provides dashboards for planning, documentation, meetings, AI-assisted workfl
 | AI Models | Ollama (local) - Privacy-first, no API costs |
 | Email | Nodemailer with SMTP |
 | Security | Rate limiting, session management, activity logging |
-| Styling | Tailwind CSS + custom utility components |
+| Styling | Tailwind CSS + Radix UI components |
 | Package Manager | pnpm |
 
 ---
 
 ## Features
 
-### AI Tools
+### Dashboard
 
-The AI Tools feature (`/dashboard/ai-tools`) provides an intelligent development assistant with RAG (Retrieval-Augmented Generation).
+The main dashboard (`/dashboard`) provides an overview of your workspace with:
 
-- **RAG-Enhanced AI** – AI powered by your documentation and codebase.
-- **Privacy First** – All processing stays on your infrastructure (Ollama + Supabase pgvector).
-- **Cost Free** – Local Ollama models mean zero API fees.
-- **Modern Chat UI** – Complete chat interface with history and code highlighting.
-
-### Resume Editor
-
-The Live Resume Editor (`/dashboard/resume`) is a WYSIWYG resume builder.
-
-- **Live Preview** – A4 paper format with instant updates.
-- **Customization** – Fonts, colors, and 5 professional templates.
-- **Data Persistence** – Auto-saves to local storage.
-
-### Staff Portal
-
-Full admin interface at `/staff/dashboard` with user management, analytics, activity logging, and role-based access control.
+- **Quick Stats** – Projects, tasks, meetings, and activity metrics
+- **Calendar Widget** – Upcoming meetings with visual indicators
+- **Recent Activity** – Latest actions across your workspace
+- **Weather Widget** – Current weather conditions
+- **Meeting Reminders** – Configurable notifications with browser/sound alerts
 
 ### Projects & Kanban
 
-Create projects, assign collaborators, manage roles, and track work with Kanban boards.
+Create projects, assign collaborators, manage roles, and track work:
+
+- **Issue Tracking** – Create, assign, and manage issues with labels and sprints
+- **Kanban Boards** – Drag-and-drop task management
+- **Collaborators** – Invite team members with role-based permissions
+- **Activity Logging** – Track all project changes
+
+### Meeting Management
+
+Schedule and manage meetings (`/dashboard/meeting`):
+
+- **Meeting Scheduler** – Create meetings with date, time, and duration
+- **Smart Reminders** – Configurable alerts (5, 10, 15, 30, 60 min before)
+- **Browser Notifications** – System-level alerts when permitted
+- **Sound Alerts** – Audio notifications with volume control
+- **Snooze Functionality** – 5-minute snooze on reminders
+
+### Todo & Pomodoro
+
+Task management with productivity tools (`/dashboard/todo`):
+
+- **Task Management** – Create, prioritize, and complete tasks
+- **Pomodoro Timer** – Focus timer with work/break cycles
+- **Visual Coffee Cup** – Animated progress indicator
+- **Lofi Music Integration** – Focus music player
+- **Session Tracking** – Daily goal progress
+
+### AI Tools
+
+Intelligent development assistant (`/dashboard/ai-tools`):
+
+- **RAG-Enhanced AI** – AI powered by your documentation and codebase
+- **Privacy First** – All processing stays on your infrastructure (Ollama)
+- **Cost Free** – Local Ollama models mean zero API fees
+- **Modern Chat UI** – Complete chat interface with history and code highlighting
+
+### Resume Editor
+
+WYSIWYG resume builder (`/dashboard/resume`):
+
+- **Live Preview** – A4 paper format with instant updates
+- **Customization** – Fonts, colors, and professional templates
+- **PDF Export** – Download your resume as PDF
+- **Data Persistence** – Auto-saves to local storage
 
 ### Chat & Messaging
 
-Real-time messaging with Socket.io, supporting direct messages, group chats, online presence, and typing indicators.
+Real-time messaging (`/dashboard/chat`):
 
-### Whiteboard
+- **Direct Messages** – One-on-one conversations
+- **Group Chats** – Team communication
+- **Online Presence** – See who's online
+- **Typing Indicators** – Real-time feedback
+- **Message Reactions** – Emoji reactions on messages
 
-Collaborative drawing canvas with shapes, text, and export capabilities.
+### Wiki & Documentation
+
+Knowledge base (`/dashboard/wiki`):
+
+- **Article Management** – Create and organize documentation
+- **Category Support** – Organize articles by topic
+- **Search** – Find articles quickly
+
+### Files & Storage
+
+File management (`/dashboard/files`):
+
+- **File Upload** – Upload and organize files
+- **Category Filtering** – Filter by file type
+- **Project Association** – Link files to projects
+
+### Diagrams & Whiteboard
+
+Visual collaboration tools:
+
+- **Flowcharts** – Create flow diagrams
+- **Mermaid Support** – Text-to-diagram rendering
+- **Whiteboard** – Freeform drawing canvas
+
+### Entertainment
+
+Brain games and relaxation (`/dashboard/entertainment`):
+
+- **Tetris** – Classic block puzzle game
+- **Snake** – Classic snake game
+- **Sudoku** – Number puzzle
+- **Typing Game** – Speed typing practice
+- **Math Sprint** – Quick math challenges
+- **Word Scramble** – Word puzzle game
+- **Sliding Puzzle** – Tile sliding puzzle
+
+### Staff Portal
+
+Full admin interface (`/staff/dashboard`):
+
+- **User Management** – Manage platform users
+- **Analytics Dashboard** – Usage statistics
+- **Activity Logging** – Track all staff actions
+- **Role-Based Access** – Admin privileges
+- **Support Queue** – Manage customer support tickets
+
+### Settings
+
+User preferences (`/dashboard/settings`):
+
+- **Profile Management** – Update name, bio, avatar
+- **Language Settings** – English/Vietnamese
+- **Notification Preferences** – Configure meeting reminders
+- **Theme Selection** – Dark/light mode
+- **Security Settings** – Password management
 
 ---
 
@@ -96,7 +185,7 @@ pnpm install
 
 ### Quick Setup
 
-1. **Database**: Create a Supabase project and run `supabase-staff-schema.sql`.
+1. **Database**: Create a Supabase project and run the schema migrations.
 2. **Environment**: Copy `.env.example` to `.env.local` and fill in your Supabase credentials and JWT secret.
 
    ```bash
@@ -127,11 +216,29 @@ Visit [http://localhost:3000](http://localhost:3000).
 ```text
 lab68dev-platform/
 ├── app/                      # Route groups and feature areas
-├── components/               # Reusable UI atoms/molecules
-├── lib/                      # Domain logic (auth, email, i18n, team)
-├── docs/                     # Comprehensive documentation
+│   ├── api/                  # API routes
+│   ├── dashboard/            # Main dashboard features
+│   │   ├── ai-tools/         # AI assistant
+│   │   ├── chat/             # Real-time messaging
+│   │   ├── community/        # Discussions
+│   │   ├── diagrams/         # Flow diagrams
+│   │   ├── entertainment/    # Games
+│   │   ├── files/            # File management
+│   │   ├── meeting/          # Meeting scheduler
+│   │   ├── planning/         # Sprint planning
+│   │   ├── projects/         # Project management
+│   │   ├── resume/           # Resume builder
+│   │   ├── settings/         # User settings
+│   │   ├── support/          # Customer support
+│   │   ├── todo/             # Task management
+│   │   ├── whiteboard/       # Drawing canvas
+│   │   └── wiki/             # Documentation
+│   └── staff/                # Staff portal
+├── components/               # Reusable UI components
+├── lib/                      # Domain logic (auth, email, i18n, database)
+├── docs/                     # Documentation
 ├── public/                   # Static assets
-└── scripts/                  # Utilities
+└── scripts/                  # Utility scripts
 ```
 
 ---
@@ -140,10 +247,11 @@ lab68dev-platform/
 
 | Command | Description |
 | --- | --- |
-| `pnpm dev` | Start the development server. |
-| `pnpm build` | Compile the production build. |
-| `pnpm start` | Serve the production build. |
-| `pnpm lint` | Run ESLint. |
+| `pnpm dev` | Start the development server with Socket.io |
+| `pnpm dev:next` | Start Next.js dev server only |
+| `pnpm build` | Compile the production build |
+| `pnpm start` | Serve the production build |
+| `pnpm lint` | Run ESLint |
 
 ---
 
