@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { getCurrentUser } from "@/lib/features/auth"
 import { getTranslations, getUserLanguage } from "@/lib/config"
-import { Plus, Trash2, Check, X, CheckCircle2, Circle, Search, Filter, Play, Pause, RotateCcw, Coffee, Timer } from "lucide-react"
+import { Plus, Trash2, Check, X, CheckCircle2, Circle, Search, Filter, Play, Pause, RotateCcw, Coffee, Timer, HelpCircle, Settings, Music } from "lucide-react"
 import { getTodos, createTodo, updateTodo, deleteTodo, type Todo as DBTodo } from "@/lib/database"
 
 interface Task {
@@ -49,11 +49,16 @@ export default function TodoPage() {
   const [workDuration, setWorkDuration] = useState(25)
   const [breakDuration, setBreakDuration] = useState(5)
   const [showSettings, setShowSettings] = useState(false)
+  const [showPomodoroHelp, setShowPomodoroHelp] = useState(false)
+  const [showMusic, setShowMusic] = useState(false)
+  
+  // Toast notification state
+  const [toast, setToast] = useState<{ message: string; type: 'work' | 'break' } | null>(null)
 
   // Sound Effect
   const playNotificationSound = useCallback(() => {
     try {
-      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3')
+      const audio = new Audio('/sounds/timer-complete.mp3')
       audio.volume = 0.5
       audio.play().catch(e => console.log('Audio play failed:', e))
     } catch (e) {
@@ -120,16 +125,19 @@ export default function TodoPage() {
       if (pomodoroMode === 'work') {
         // Work session completed
         setPomodoroSessions((s) => s + 1)
-        alert('Work session completed! Time for a break.')
+        setToast({ message: '🎉 Work session completed! Time for a break.', type: 'break' })
         // Switch to break mode
         setPomodoroMode('break')
         setPomodoroTime(breakDuration * 60)
       } else {
         // Break completed
-        alert('Break is over! Ready for another session?')
+        setToast({ message: '💪 Break is over! Ready for another session?', type: 'work' })
         setPomodoroMode('work')
         setPomodoroTime(workDuration * 60)
       }
+      
+      // Auto-dismiss toast after 5 seconds
+      setTimeout(() => setToast(null), 5000)
     }
 
     return () => {
@@ -264,6 +272,25 @@ export default function TodoPage() {
 
   return (
     <div className="p-8 space-y-8">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border animate-in slide-in-from-top-2 duration-300 ${
+          toast.type === 'break' 
+            ? 'bg-green-500/10 border-green-500/30 text-green-500' 
+            : 'bg-primary/10 border-primary/30 text-primary'
+        }`}>
+          <div className="flex items-center gap-3">
+            <span className="text-lg">{toast.message}</span>
+            <button 
+              onClick={() => setToast(null)}
+              className="text-current opacity-60 hover:opacity-100"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between border-b border-border pb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">{t.title}</h1>
@@ -291,7 +318,16 @@ export default function TodoPage() {
                 onClick={() => setShowSettings(!showSettings)}
                 title="Timer Settings"
               >
-                <RotateCcw className="h-4 w-4" />
+                <Settings className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className={`h-8 w-8 ${showMusic ? 'text-primary' : ''}`}
+                onClick={() => setShowMusic(!showMusic)}
+                title="Focus Music"
+              >
+                <Music className="h-4 w-4" />
               </Button>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                 pomodoroMode === 'work' 
@@ -302,6 +338,35 @@ export default function TodoPage() {
               </span>
             </div>
           </div>
+
+          {/* Lofi Music Player - Minimal Auto-Play */}
+          {showMusic && (
+            <div className="mb-6 p-3 border border-primary/30 bg-primary/5 rounded-lg flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Music className="h-4 w-4 text-primary animate-pulse" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">🎵 Lofi Girl - beats to study/relax</p>
+                  <p className="text-xs text-muted-foreground">Now playing...</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowMusic(false)}
+                className="text-muted-foreground hover:text-foreground p-2"
+                title="Stop Music"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              {/* Hidden YouTube iframe for audio */}
+              <iframe
+                className="hidden"
+                src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&loop=1"
+                title="Lofi Music"
+                allow="autoplay"
+              />
+            </div>
+          )}
 
           {showSettings && (
             <div className="mb-6 p-4 border border-border bg-secondary/50 rounded-lg animate-fade-in-down">
@@ -339,8 +404,104 @@ export default function TodoPage() {
           <div className="grid md:grid-cols-[1fr_auto] gap-8 items-center">
             {/* Timer Display */}
             <div className="text-center space-y-6">
-              {/* Large Time Display */}
-              <div className="relative inline-flex">
+              {/* Large Time Display with Coffee Cup */}
+              <div className="relative inline-flex items-center gap-6">
+                {/* Draining Coffee Cup */}
+                <div className="relative w-20 h-24">
+                  <svg viewBox="0 0 80 96" className="w-full h-full">
+                    <defs>
+                      {/* Coffee gradient */}
+                      <linearGradient id="coffeeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor={pomodoroMode === 'work' ? '#d97706' : '#22c55e'} />
+                        <stop offset="100%" stopColor={pomodoroMode === 'work' ? '#92400e' : '#15803d'} />
+                      </linearGradient>
+                      {/* Clip path for coffee inside cup */}
+                      <clipPath id="cupInterior">
+                        <path d="M18 28 L18 68 Q18 78 28 78 L52 78 Q62 78 62 68 L62 28 Z" />
+                      </clipPath>
+                    </defs>
+                    
+                    {/* Cup base/saucer */}
+                    <ellipse cx="40" cy="88" rx="28" ry="4" className="fill-muted-foreground/30" />
+                    
+                    {/* Coffee fill - height changes based on timer */}
+                    <g clipPath="url(#cupInterior)">
+                      <rect
+                        x="18"
+                        y={28 + (50 * (1 - pomodoroTime / (pomodoroMode === 'work' ? workDuration * 60 : breakDuration * 60)))}
+                        width="44"
+                        height={50 * (pomodoroTime / (pomodoroMode === 'work' ? workDuration * 60 : breakDuration * 60))}
+                        fill="url(#coffeeGradient)"
+                        style={{ transition: 'all 1s linear' }}
+                      />
+                      {/* Coffee surface highlight */}
+                      <ellipse 
+                        cx="40" 
+                        cy={28 + (50 * (1 - pomodoroTime / (pomodoroMode === 'work' ? workDuration * 60 : breakDuration * 60)))}
+                        rx="20" 
+                        ry="3"
+                        className={pomodoroMode === 'work' ? 'fill-amber-500/50' : 'fill-green-400/50'}
+                        style={{ transition: 'all 1s linear' }}
+                      />
+                    </g>
+                    
+                    {/* Cup body outline */}
+                    <path 
+                      d="M16 24 L16 70 Q16 82 30 82 L50 82 Q64 82 64 70 L64 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      className="text-foreground/70"
+                    />
+                    
+                    {/* Cup rim */}
+                    <ellipse cx="40" cy="24" rx="24" ry="4" className="fill-foreground/10 stroke-foreground/70" strokeWidth="2" />
+                    
+                    {/* Cup handle */}
+                    <path 
+                      d="M64 34 Q78 34 78 50 Q78 66 64 66" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      className="text-foreground/70"
+                    />
+                    
+                    {/* Steam when timer is running */}
+                    {pomodoroActive && (
+                      <>
+                        <path 
+                          d="M30 18 Q32 12 30 6" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          className="text-muted-foreground/40 animate-pulse"
+                        />
+                        <path 
+                          d="M40 15 Q42 9 40 3" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          className="text-muted-foreground/40 animate-pulse"
+                          style={{ animationDelay: '0.3s' }}
+                        />
+                        <path 
+                          d="M50 18 Q52 12 50 6" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          className="text-muted-foreground/40 animate-pulse"
+                          style={{ animationDelay: '0.6s' }}
+                        />
+                      </>
+                    )}
+                  </svg>
+                </div>
+                
                 <div className="text-7xl font-bold font-mono tabular-nums">
                   {formatPomodoroTime(pomodoroTime)}
                 </div>
@@ -354,7 +515,7 @@ export default function TodoPage() {
                       pomodoroMode === 'work' ? 'bg-primary' : 'bg-green-500'
                     }`}
                     style={{ 
-                      width: `${(pomodoroTime / (pomodoroMode === 'work' ? 25 * 60 : 5 * 60)) * 100}%` 
+                      width: `${(pomodoroTime / (pomodoroMode === 'work' ? workDuration * 60 : breakDuration * 60)) * 100}%` 
                     }}
                   />
                 </div>
@@ -383,18 +544,47 @@ export default function TodoPage() {
               </div>
             </div>
 
-            {/* Info Sidebar */}
+            {/* Info Sidebar with Instructions */}
             <div className="md:border-l md:border-border md:pl-8 space-y-4 max-w-xs">
+              {/* Help Toggle */}
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-muted-foreground">How to Use</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowPomodoroHelp(!showPomodoroHelp)}
+                  className="h-6 px-2"
+                >
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* User Instructions */}
+              {showPomodoroHelp && (
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-2 text-sm animate-fade-in-down">
+                  <p className="font-medium text-primary">Getting Started:</p>
+                  <ol className="space-y-1.5 text-muted-foreground text-xs">
+                    <li>1. Click the <span className="text-primary">⚙️ Settings</span> icon to set your preferred work/break durations</li>
+                    <li>2. Press <span className="text-primary">▶ Start</span> to begin your focus session</li>
+                    <li>3. Work until the timer ends (you&apos;ll hear a sound)</li>
+                    <li>4. Take a break when prompted, then repeat!</li>
+                  </ol>
+                  <p className="text-xs text-muted-foreground/80 pt-2 border-t border-border">
+                    💡 Tip: The classic Pomodoro uses 25 min work + 5 min break
+                  </p>
+                </div>
+              )}
+
               <div>
                 <h3 className="text-sm font-medium mb-3 text-muted-foreground">Technique</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span>25 min work</span>
+                    <span>{workDuration} min work</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-green-500" />
-                    <span>5 min break</span>
+                    <span>{breakDuration} min break</span>
                   </div>
                 </div>
               </div>
