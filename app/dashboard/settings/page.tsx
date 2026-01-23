@@ -8,10 +8,19 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
-import { User, Bell, Shield, Palette, Globe, Camera } from "lucide-react"
+import { User, Bell, Shield, Palette, Globe, Camera, Volume2, VolumeX } from "lucide-react"
 import { getCurrentUser, updateUserProfile, type User as UserType } from "@/lib/features/auth"
 import { getUserLanguage, setUserLanguage, getTranslations, getLanguageName, type Language } from "@/lib/config"
 import { getTheme, setTheme, type Theme } from "@/lib/config"
+import {
+  getReminderPreferences,
+  setReminderPreferences,
+  requestNotificationPermission,
+  canShowBrowserNotifications,
+  getAvailableIntervals,
+  playNotificationSound,
+  type ReminderPreferences,
+} from "@/lib/utils/meeting-notifications"
 
 export default function SettingsPage() {
   const [user, setUser] = useState<UserType | null>(null)
@@ -26,6 +35,16 @@ export default function SettingsPage() {
   const [language, setLanguage] = useState<Language>("en")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  
+  // Meeting notification preferences
+  const [meetingPrefs, setMeetingPrefs] = useState<ReminderPreferences>({
+    enabled: true,
+    intervals: [10],
+    browserNotifications: false,
+    soundEnabled: true,
+    soundVolume: 0.5,
+  })
+  const availableIntervals = getAvailableIntervals()
 
   useEffect(() => {
     const currentUser = getCurrentUser()
@@ -42,6 +61,9 @@ export default function SettingsPage() {
       const userLang = (currentUser.language as Language) || getUserLanguage()
       setLanguage(userLang)
       setCurrentTheme(getTheme())
+      
+      // Load meeting notification preferences
+      setMeetingPrefs(getReminderPreferences())
     }
   }, [router])
 
@@ -300,22 +322,153 @@ export default function SettingsPage() {
               <div className="w-4 h-4 bg-background translate-x-7" />
             </button>
           </div>
-          <div className="flex items-center justify-between border border-border p-4">
-            <div>
-              <p className="font-medium">{t.settings.meetingNotifications || "Meeting Notifications"}</p>
-              <p className="text-sm text-muted-foreground">
-                {t.settings.meetingNotificationsDesc || "Get notified about upcoming meetings"}
-              </p>
+          
+          {/* Meeting Notifications - Enhanced */}
+          <div className="border border-border p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">{t.settings.meetingNotifications || "Meeting Notifications"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t.settings.meetingNotificationsDesc || "Get notified about upcoming meetings"}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  const newPrefs = { ...meetingPrefs, enabled: !meetingPrefs.enabled }
+                  setMeetingPrefs(newPrefs)
+                  setReminderPreferences(newPrefs)
+                }}
+                className={`w-12 h-6 border border-border transition-colors ${
+                  meetingPrefs.enabled ? "bg-primary" : "bg-secondary"
+                }`}
+                title="Toggle meeting notifications"
+                aria-label="Toggle meeting notifications"
+              >
+                <div
+                  className={`w-4 h-4 bg-background transition-transform ${
+                    meetingPrefs.enabled ? "translate-x-7" : "translate-x-1"
+                  }`}
+                />
+              </button>
             </div>
-            <button 
-              className="w-12 h-6 border border-border bg-primary"
-              title="Toggle meeting notifications"
-              aria-label="Toggle meeting notifications"
-            >
-              <div className="w-4 h-4 bg-background translate-x-7" />
-            </button>
+            
+            {meetingPrefs.enabled && (
+              <div className="space-y-4 pt-4 border-t border-border">
+                {/* Reminder Intervals */}
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Reminder Times</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {availableIntervals.map((interval) => (
+                      <button
+                        key={interval.value}
+                        onClick={() => {
+                          const newIntervals = meetingPrefs.intervals.includes(interval.value)
+                            ? meetingPrefs.intervals.filter(i => i !== interval.value)
+                            : [...meetingPrefs.intervals, interval.value]
+                          const newPrefs = { ...meetingPrefs, intervals: newIntervals }
+                          setMeetingPrefs(newPrefs)
+                          setReminderPreferences(newPrefs)
+                        }}
+                        className={`px-3 py-1.5 text-sm border transition-colors ${
+                          meetingPrefs.intervals.includes(interval.value)
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border hover:border-primary"
+                        }`}
+                      >
+                        {interval.label}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Select when you want to be reminded before meetings
+                  </p>
+                </div>
+                
+                {/* Browser Notifications */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Browser Notifications</p>
+                    <p className="text-xs text-muted-foreground">
+                      {canShowBrowserNotifications() 
+                        ? "Show system notifications" 
+                        : "Click to enable in browser"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (!meetingPrefs.browserNotifications) {
+                        const granted = await requestNotificationPermission()
+                        if (granted) {
+                          const newPrefs = { ...meetingPrefs, browserNotifications: true }
+                          setMeetingPrefs(newPrefs)
+                          setReminderPreferences(newPrefs)
+                        }
+                      } else {
+                        const newPrefs = { ...meetingPrefs, browserNotifications: false }
+                        setMeetingPrefs(newPrefs)
+                        setReminderPreferences(newPrefs)
+                      }
+                    }}
+                    className={`w-12 h-6 border border-border transition-colors ${
+                      meetingPrefs.browserNotifications ? "bg-primary" : "bg-secondary"
+                    }`}
+                    title="Toggle browser notifications"
+                    aria-label="Toggle browser notifications"
+                  >
+                    <div
+                      className={`w-4 h-4 bg-background transition-transform ${
+                        meetingPrefs.browserNotifications ? "translate-x-7" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+                
+                {/* Sound Notifications */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {meetingPrefs.soundEnabled ? (
+                      <Volume2 className="h-4 w-4 text-primary" />
+                    ) : (
+                      <VolumeX className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <div>
+                      <p className="text-sm font-medium">Sound Alerts</p>
+                      <p className="text-xs text-muted-foreground">Play sound when reminder triggers</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => playNotificationSound(meetingPrefs.soundVolume)}
+                      className="text-xs text-primary hover:underline"
+                      title="Test sound"
+                    >
+                      Test
+                    </button>
+                    <button
+                      onClick={() => {
+                        const newPrefs = { ...meetingPrefs, soundEnabled: !meetingPrefs.soundEnabled }
+                        setMeetingPrefs(newPrefs)
+                        setReminderPreferences(newPrefs)
+                      }}
+                      className={`w-12 h-6 border border-border transition-colors ${
+                        meetingPrefs.soundEnabled ? "bg-primary" : "bg-secondary"
+                      }`}
+                      title="Toggle sound notifications"
+                      aria-label="Toggle sound notifications"
+                    >
+                      <div
+                        className={`w-4 h-4 bg-background transition-transform ${
+                          meetingPrefs.soundEnabled ? "translate-x-7" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
       </Card>
 
       {/* Security Settings */}
