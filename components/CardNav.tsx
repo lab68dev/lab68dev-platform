@@ -34,7 +34,7 @@ const CardNav: React.FC<CardNavProps> = ({
   items,
   className = '',
   ease = 'power3.out',
-  baseColor = '#fff',
+  baseColor = '#00ff80ff',
   menuColor,
   buttonBgColor,
   buttonTextColor
@@ -214,7 +214,7 @@ const CardNav: React.FC<CardNavProps> = ({
             className="card-nav-cta-button hidden md:inline-flex border border-primary/20 hover:border-primary/50 px-6 items-center h-[44px] font-bold cursor-pointer transition-all duration-300 hover:opacity-90 text-sm no-underline uppercase tracking-wider rounded-none"
             style={{ backgroundColor: buttonBgColor, color: buttonTextColor }}
           >
-            Connect
+            Login
           </Link>
          
         </div>
