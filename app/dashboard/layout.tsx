@@ -10,9 +10,9 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <DashboardSidebar />
-      <main className="lg:ml-64 min-h-screen lg:border-l border-border bg-background pb-20 lg:pb-0">
+      <main className="lg:ml-64 min-h-screen lg:border-l border-border dark:border-white/5 bg-background dark:bg-transparent pb-20 lg:pb-0">
         {children}
       </main>
       <MobileBottomNav />
