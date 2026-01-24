@@ -6,7 +6,6 @@ import { HeroSection } from "./HeroSection"
 import { MissionSection } from "./MissionSection"
 import { TechStackSection } from "./TechStackSection"
 import { ServicesSection } from "./ServicesSection"
-import { CommunitySection } from "./CommunitySection"
 import { WhyChooseUsSection } from "./WhyChooseUsSection"
 import { TeamSection } from "./TeamSection"
 import { SponsorSection } from "./SponsorSection"
@@ -65,7 +64,6 @@ export function LandingClient() {
         <MissionSection t={t} />
         <TechStackSection t={t} />
         <ServicesSection t={t} />
-        <CommunitySection t={t} />
         <WhyChooseUsSection t={t} />
         <TeamSection t={t} />
         <SponsorSection t={t} />
