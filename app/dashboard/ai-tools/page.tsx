@@ -2,95 +2,69 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Send, Sparkles, Bot, User, Trash2, Copy, Check } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Send, Sparkles, Bot, User, Trash2, Copy, Check, Settings2 } from "lucide-react"
 import { getTranslations, getUserLanguage } from "@/lib/config"
-
-type Message = {
-  role: "user" | "assistant"
-  content: string
-  timestamp: string
-}
+import { useChat } from "@ai-sdk/react"
 
 export default function AIToolsPage() {
   const [t, setT] = useState(getTranslations("en"))
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [provider, setProvider] = useState<string>("AI")
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  // Manual input state management for @ai-sdk/react v3+
+  const [input, setInput] = useState("")
+  const [selectedModel, setSelectedModel] = useState("google:gemini-1.5-pro")
+
+  const { messages, sendMessage, status, setMessages } = useChat({
+    // Cast to any to bypass strict UIMessage type vs helper type conflicts if necessary
+    messages: [
+      {
+        id: "welcome",
+        role: "assistant",
+        content: "Hello! I'm your AI development assistant. I can help you with code generation, debugging, architecture decisions, and more.",
+      } as any,
+    ],
+    onError: (error) => {
+      console.error("Chat error:", error)
+    }
+  })
+
+  // Derived loading state
+  const isLoading = status === "submitted" || status === "streaming"
 
   useEffect(() => {
     setT(getTranslations(getUserLanguage()))
-    setMessages([
-      {
-        role: "assistant",
-        content:
-          "Hello! I'm your RAG-enhanced AI development assistant powered by Ollama. I can help you with code generation, debugging, architecture decisions, and more. My responses are based on your platform's documentation and codebase for accurate, context-aware answers. What would you like to work on today?",
-        timestamp: new Date().toLocaleTimeString(),
-      },
-    ])
   }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  const handleSend = async () => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     if (!input.trim() || isLoading) return
-
-    const userMessage: Message = {
-      role: "user",
-      content: input,
-      timestamp: new Date().toLocaleTimeString(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-    setIsLoading(true)
-
+    
+    // Send user message
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: input,
-          history: messages,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to get response")
-      }
-
-      const data = await response.json()
-
-      // Update provider info
-      if (data.provider) {
-        setProvider(data.provider)
-      }
-
-      const aiMessage: Message = {
-        role: "assistant",
-        content: data.response,
-        timestamp: new Date().toLocaleTimeString(),
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    } catch (error) {
-      console.error("Error calling AI API:", error)
-      const errorMessage: Message = {
-        role: "assistant",
-        content:
-          "Sorry, I encountered an error connecting to the RAG-enhanced AI. Please ensure Ollama is running and you have downloaded a model. Visit https://ollama.com for setup instructions or see docs/OLLAMA_SETUP.md",
-        timestamp: new Date().toLocaleTimeString(),
-      }
-      setMessages((prev) => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
+        await sendMessage(
+            { role: 'user', content: input } as any,
+            { body: { model: selectedModel } }
+        )
+    } catch (err) {
+        console.error("Failed to send:", err)
     }
+    setInput("")
   }
 
   const copyToClipboard = async (text: string, index: number) => {
@@ -102,11 +76,10 @@ export default function AIToolsPage() {
   const clearChat = () => {
     setMessages([
       {
+        id: "welcome",
         role: "assistant",
-        content:
-          "Hello! I'm your RAG-enhanced AI development assistant powered by Ollama. I can help you with code generation, debugging, architecture decisions, and more. My responses are based on your platform's documentation and codebase for accurate, context-aware answers. What would you like to work on today?",
-        timestamp: new Date().toLocaleTimeString(),
-      },
+        content: "Hello! I'm your AI development assistant. I can help you with code generation, debugging, architecture decisions, and more.",
+      } as any,
     ])
   }
 
@@ -124,23 +97,38 @@ export default function AIToolsPage() {
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">{t.nav.aiTools}</h1>
                 <div className="flex items-center gap-2 mt-1">
-                  <div className={`h-2 w-2 rounded-full ${provider.includes("RAG") ? "bg-purple-500 animate-pulse" : provider.includes("Ollama") ? "bg-green-500 animate-pulse" : "bg-blue-500"}`} />
+                  <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
                   <p className="text-sm text-muted-foreground">
-                    {provider.includes("RAG") ? "🧠 RAG-Enhanced (Local)" : provider.includes("Ollama") ? "Running Locally" : provider}
+                    Powered by Vercel AI Gateway
                   </p>
                 </div>
               </div>
             </div>
-            <Button
-              onClick={clearChat}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              disabled={messages.length <= 1}
-            >
-              <Trash2 className="h-4 w-4" />
-              Clear Chat
-            </Button>
+
+            <div className="flex items-center gap-3">
+              <div className="w-48">
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Select Model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="google:gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
+                    <SelectItem value="anthropic:claude-3-5-sonnet">Claude 3.5 Sonnet</SelectItem>
+                    <SelectItem value="openai:gpt-4o">GPT-4o</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                onClick={clearChat}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                disabled={messages.length <= 1}
+              >
+                <Trash2 className="h-4 w-4" />
+                Clear Chat
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -149,9 +137,9 @@ export default function AIToolsPage() {
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-6 py-6 max-w-5xl">
           <div className="space-y-6">
-            {messages.map((message, index) => (
+            {messages.map((message: any, index: number) => (
               <div 
-                key={index} 
+                key={message.id || index} 
                 className={`flex gap-4 ${message.role === "user" ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-4 duration-500`}
               >
                 <div className={`flex gap-3 max-w-3xl ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
@@ -172,9 +160,8 @@ export default function AIToolsPage() {
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold text-foreground">
-                        {message.role === "user" ? "You" : "AI Assistant"}
+                        {message.role === "user" ? "You" : selectedModel.split(':')[1] || selectedModel}
                       </span>
-                      <span className="text-xs text-muted-foreground">{message.timestamp}</span>
                     </div>
                     <div className={`group relative rounded-2xl p-4 shadow-sm ${
                       message.role === "user" 
@@ -182,9 +169,9 @@ export default function AIToolsPage() {
                         : "bg-card border border-border"
                     }`}>
                       <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                        {message.content}
+                        {message.content ? message.content : (Array.isArray(message.parts) ? message.parts.map((p: any) => p.text).join('') : JSON.stringify(message))}
                       </p>
-                      {message.role === "assistant" && (
+                      {message.role === "assistant" && message.content && (
                         <button
                           onClick={() => copyToClipboard(message.content, index)}
                           className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg bg-background/80 hover:bg-background border border-border"
@@ -203,6 +190,7 @@ export default function AIToolsPage() {
               </div>
             ))}
             
+            {/* Loading Indicator */}
             {isLoading && (
               <div className="flex gap-4 justify-start animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex gap-3 max-w-3xl">
@@ -211,7 +199,7 @@ export default function AIToolsPage() {
                   </div>
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-foreground">AI Assistant</span>
+                      <span className="text-xs font-semibold text-foreground">{selectedModel.split(':')[1] || selectedModel}</span>
                     </div>
                     <div className="rounded-2xl p-4 bg-card border border-border shadow-sm">
                       <div className="flex items-center gap-2">
@@ -234,14 +222,13 @@ export default function AIToolsPage() {
       <div className="border-t border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
         <div className="container mx-auto px-6 py-4 max-w-5xl">
           <div className="space-y-3">
-            <div className="flex gap-3">
+            <form onSubmit={handleSubmit} className="flex gap-3">
               <div className="flex-1 relative">
                 <input
                   type="text"
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-                  placeholder="Ask anything... (Press Enter to send, Shift+Enter for new line)"
+                  onChange={handleInputChange}
+                  placeholder={`Ask ${selectedModel.split(':')[1] || "AI"} anything...`}
                   className="w-full bg-background border border-border rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted-foreground/60"
                   disabled={isLoading}
                 />
@@ -250,7 +237,7 @@ export default function AIToolsPage() {
                 </div>
               </div>
               <Button 
-                onClick={handleSend} 
+                type="submit"
                 className="gap-2 px-6 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all" 
                 disabled={isLoading || !input.trim()}
                 size="lg"
@@ -258,34 +245,15 @@ export default function AIToolsPage() {
                 <Send className="h-4 w-4" />
                 Send
               </Button>
-            </div>
+            </form>
             <div className="flex items-center justify-between text-xs">
               <p className="text-muted-foreground flex items-center gap-2">
-                {provider.includes("RAG") ? (
-                  <>
-                    <span className="flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 bg-purple-500 rounded-full animate-pulse" />
-                      RAG-Enhanced AI
-                    </span>
-                    <span className="text-muted-foreground/60">•</span>
-                    <span>Context from your docs & code</span>
-                  </>
-                ) : provider.includes("Ollama") ? (
-                  <>
-                    <span className="flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse" />
-                      Running locally
-                    </span>
-                    <span className="text-muted-foreground/60">•</span>
-                    <span>Privacy-first, no data sent to cloud</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Powered by {provider}</span>
-                    <span className="text-muted-foreground/60">•</span>
-                    <span>Real-time responses</span>
-                  </>
-                )}
+                <span className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 bg-blue-500 rounded-full" />
+                    {selectedModel}
+                </span>
+                <span className="text-muted-foreground/60">•</span>
+                <span>Production Ready</span>
               </p>
               <p className="text-muted-foreground/60">
                 {messages.length - 1} {messages.length === 2 ? 'message' : 'messages'}
