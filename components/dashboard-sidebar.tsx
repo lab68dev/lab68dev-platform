@@ -150,18 +150,18 @@ export function DashboardSidebar() {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
+          className="lg:hidden fixed inset-0 bg-black/95 z-40"
           onClick={closeMobileMenu}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-background transition-transform duration-300 ${
+      <aside className={`fixed left-0 top-0 z-40 h-screen w-64 border-r border-border dark:border-white/5 bg-background transition-transform duration-300 ${
         isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
         <div className="flex h-full flex-col">
           {/* Logo - Desktop Only */}
-          <div className="hidden lg:flex border-b border-border p-6 items-center justify-between">
+          <div className="hidden lg:flex border-b border-border dark:border-white/5 p-6 items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight">lab68dev.</h1>
               <p className="text-xs text-muted-foreground mt-1">Developer Platform</p>
@@ -170,16 +170,16 @@ export function DashboardSidebar() {
           </div>
 
           {user && (
-            <div className="border-b border-border p-4 mt-16 lg:mt-0">
-              <div className="flex items-center gap-3 p-3 border border-border bg-card hover:border-primary transition-all duration-200 hover:shadow-md">
+            <div className="border-b border-border dark:border-white/5 p-4 mt-16 lg:mt-0">
+              <div className="flex items-center gap-3 p-3 border border-border dark:border-white/5 bg-muted dark:bg-card/40 rounded-lg hover:border-primary/20 dark:hover:bg-card/60 transition-all duration-200">
                 {user.avatar ? (
                   <img
                     src={user.avatar || "/placeholder.svg"}
                     alt={user.name}
-                    className="w-10 h-10 object-cover border border-border"
+                    className="w-10 h-10 object-cover border border-border dark:border-white/10 rounded-full"
                   />
                 ) : (
-                  <div className="w-10 h-10 bg-primary flex items-center justify-center text-background font-bold">
+                  <div className="w-10 h-10 bg-primary/20 flex items-center justify-center text-primary font-bold rounded-full">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -236,23 +236,18 @@ export function DashboardSidebar() {
                             }}
                           >
                             <div
-                              className={`group relative flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 border ${
+                              className={`group relative flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all duration-300 rounded-r-full border-l-2 ${
                                 isActive
-                                  ? "bg-primary/10 border-primary shadow-md text-foreground"
-                                  : "border-border bg-card hover:border-primary hover:shadow-lg hover:translate-x-1 text-muted-foreground hover:text-foreground"
+                                  ? "bg-primary/10 border-l-primary text-primary shadow-[0_0_20px_-10px_var(--primary)]"
+                                  : "border-l-transparent hover:bg-muted dark:hover:bg-white/5 hover:text-foreground text-muted-foreground"
                               }`}
                             >
-                              <div className={`p-1.5 border transition-colors ${
-                                isActive ? 'border-primary bg-primary/20' : 'border-border group-hover:border-primary'
+                              <div className={`p-1 transition-colors ${
+                                isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
                               }`}>
-                                <Icon className={`h-4 w-4 transition-colors ${
-                                  isActive ? 'text-primary' : 'group-hover:text-primary'
-                                }`} />
+                                <Icon className="h-4 w-4" />
                               </div>
                               <span className="transition-colors">{item.label}</span>
-                              {isActive && (
-                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
-                              )}
                             </div>
                           </Link>
                         )
@@ -264,44 +259,39 @@ export function DashboardSidebar() {
             })}
 
             {/* Settings (separate from sections) */}
-            <div className="pt-2 border-t border-border">
+            <div className="pt-2 border-t border-border dark:border-white/5">
               <Link
                 href="/dashboard/settings"
                 className="block"
                 onClick={closeMobileMenu}
               >
                 <div
-                  className={`group relative flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 border ${
+                  className={`group relative flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all duration-300 rounded-r-full border-l-2 ${
                     pathname === "/dashboard/settings"
-                      ? "bg-primary/10 border-primary shadow-md text-foreground"
-                      : "border-border bg-card hover:border-primary hover:shadow-lg hover:translate-x-1 text-muted-foreground hover:text-foreground"
+                      ? "bg-primary/10 border-l-primary text-primary shadow-[0_0_20px_-10px_var(--primary)]"
+                      : "border-l-transparent hover:bg-muted dark:hover:bg-white/5 hover:text-foreground text-muted-foreground"
                   }`}
                 >
-                  <div className={`p-1.5 border transition-colors ${
-                    pathname === "/dashboard/settings" ? 'border-primary bg-primary/20' : 'border-border group-hover:border-primary'
+                  <div className={`p-1 transition-colors ${
+                    pathname === "/dashboard/settings" ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
                   }`}>
-                    <Settings className={`h-4 w-4 transition-colors ${
-                      pathname === "/dashboard/settings" ? 'text-primary' : 'group-hover:text-primary'
-                    }`} />
+                    <Settings className="h-4 w-4" />
                   </div>
                   <span className="transition-colors">{t.nav.settings || "Settings"}</span>
-                  {pathname === "/dashboard/settings" && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
-                  )}
                 </div>
               </Link>
             </div>
           </nav>
 
           {/* Logout */}
-          <div className="border-t border-border p-4">
+          <div className="border-t border-border dark:border-white/5 p-4">
             <button
               onClick={handleLogout}
               className="group w-full"
             >
-              <div className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground transition-all duration-200 border border-border bg-card hover:border-red-500 hover:shadow-lg hover:translate-x-1 hover:text-red-500">
-                <div className="p-1.5 border border-border group-hover:border-red-500 transition-colors">
-                  <LogOut className="h-4 w-4 group-hover:text-red-500 transition-colors" />
+              <div className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all duration-300 rounded-r-full border-l-2 border-l-transparent hover:bg-red-500/10 hover:border-l-red-500 hover:text-red-500 hover:shadow-[0_0_20px_-10px_rgba(239,68,68,0.5)] text-muted-foreground">
+                <div className="p-1 transition-colors text-muted-foreground group-hover:text-red-500">
+                  <LogOut className="h-4 w-4" />
                 </div>
                 <span>{t.nav.signOut || "Log Out"}</span>
               </div>
