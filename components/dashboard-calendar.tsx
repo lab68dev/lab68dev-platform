@@ -60,8 +60,8 @@ export function DashboardCalendar({ upcomingMeetings }: DashboardCalendarProps) 
       <div
         key={day}
         className={`
-          flex items-center justify-center p-0.5 text-[10px] cursor-pointer rounded-sm transition-all h-5 w-5 mx-auto
-          ${isSelected ? 'bg-primary text-primary-foreground font-bold' : ''}
+          flex items-center justify-center text-sm cursor-pointer rounded-md transition-all aspect-square
+          ${isSelected ? 'bg-primary text-primary-foreground font-bold shadow-md shadow-primary/20' : ''}
           ${isToday && !isSelected ? 'border border-primary text-primary font-bold' : ''}
           ${hasMeeting && !isSelected && !isToday ? 'bg-primary/20 text-primary font-medium' : ''}
           ${!isSelected && !isToday && !hasMeeting ? 'hover:bg-muted text-muted-foreground' : ''}
@@ -74,55 +74,78 @@ export function DashboardCalendar({ upcomingMeetings }: DashboardCalendarProps) 
   }
 
   return (
-    <div className="border border-border bg-card p-2 sm:p-3 w-full sm:w-[200px]">
-      <div className="space-y-2">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border pb-1.5">
-           <div className="flex items-center gap-1.5">
-            <div className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse"></div>
-            <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-              {selectedDate.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
-            </div>
-          </div>
-          <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
-        </div>
-
-        {/* Grid */}
-        <div className="grid grid-cols-7 gap-y-1 gap-x-0.5 text-center">
-          {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-            <div key={d} className="text-[8px] text-muted-foreground font-medium">{d}</div>
-          ))}
-          {days}
-        </div>
-
-        {/* Meetings List */}
-        <div className="border-t border-border pt-1.5 mt-1">
-          {todayMeetings.length > 0 ? (
-            <div className="space-y-1">
-              {todayMeetings.slice(0, 2).map((meeting) => (
-                <div key={meeting.id} className="flex items-center gap-1.5 group cursor-default">
-                  <div className="w-1 h-3 bg-primary rounded-full group-hover:h-4 transition-all" />
-                  <div className="min-w-0">
-                    <p className="text-[9px] font-medium truncate max-w-[140px] leading-tight text-foreground">
-                      {meeting.title}
-                    </p>
-                    <p className="text-[8px] text-muted-foreground leading-none">
-                      {meeting.time}
-                    </p>
-                  </div>
+    <div className="w-full h-full flex flex-col md:flex-row gap-6">
+      {/* Left Column: Calendar Grid */}
+      <div className="flex-1 flex flex-col justify-center max-w-[280px] mx-auto md:mx-0">
+        <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-2">
+                <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse"></div>
+                    <div className="text-sm font-semibold uppercase tracking-wider">
+                    {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </div>
                 </div>
-              ))}
-              {todayMeetings.length > 2 && (
-                <p className="text-[8px] text-muted-foreground pl-2.5">+{todayMeetings.length - 2} more</p>
-              )}
+                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
             </div>
-          ) : (
-             <div className="text-[9px] text-muted-foreground/50 italic py-0.5 text-center">
-                Free ({selectedDate.getDate()})
-             </div>
-          )}
+
+            <div className="grid grid-cols-7 gap-1 text-center">
+            {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+                <div key={d} className="text-[10px] text-muted-foreground font-medium uppercase">{d}</div>
+            ))}
+            {days}
+            </div>
         </div>
       </div>
+
+      {/* Vertical Divider (Desktop) */}
+      <div className="hidden md:block w-px bg-border/50 my-2" />
+
+      {/* Right Column: Schedule List */}
+      <div className="flex-1 flex flex-col min-w-0 justify-center">
+          <div className="flex items-center justify-between mb-3">
+             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+             </h4>
+             <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                {todayMeetings.length} Events
+             </span>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[160px] scrollbar-thin scrollbar-thumb-primary/10 hover:scrollbar-thumb-primary/20">
+            {todayMeetings.length > 0 ? (
+                <>
+                {todayMeetings.map((meeting) => (
+                    <div key={meeting.id} className="flex items-start gap-3 group cursor-pointer p-2.5 rounded-lg border border-transparent hover:border-border hover:bg-muted/30 transition-all">
+                    <div className="w-1.5 h-full min-h-[32px] bg-gradient-to-b from-primary to-purple-500 rounded-full opacity-80" />
+                    <div className="min-w-0 flex-1 py-0.5">
+                        <p className="text-sm font-medium leading-none text-foreground group-hover:text-primary transition-colors">
+                            {meeting.title}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                             <p className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                {meeting.time}
+                            </p>
+                            <span className={`text-[10px] capitalize ${
+                                meeting.status === 'confirmed' ? 'text-green-500' : 'text-amber-500'
+                            }`}>
+                                • {meeting.status}
+                            </span>
+                        </div>
+                    </div>
+                    </div>
+                ))}
+                </>
+            ) : (
+                <div className="h-full flex flex-col items-center justify-center text-center opacity-50 p-4 border border-dashed border-border rounded-lg bg-muted/5">
+                    <div className="bg-muted rounded-full p-2 mb-2">
+                        <CalendarIcon className="h-4 w-4" />
+                    </div>
+                    <p className="text-sm font-medium">No meetings</p>
+                    <p className="text-xs text-muted-foreground">Enjoy your free time!</p>
+                </div>
+            )}
+            </div>
+        </div>
     </div>
   )
 }
