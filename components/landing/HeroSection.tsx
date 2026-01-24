@@ -3,7 +3,10 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { SparklesIcon, RocketLaunchIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
+import { RocketLaunchIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
+import { Sparkles } from "lucide-react"
+import { motion } from "framer-motion"
+import { SectionBadge } from "./SectionBadge"
 import PixelBlast from "@/components/PixelBlast"
 import RotatingText from "@/components/RotatingText"
 
@@ -28,7 +31,7 @@ export function HeroSection({ t }: HeroSectionProps) {
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
       
-      <div className="container mx-auto px-4 py-24 md:py-32 relative z-10">
+      <div className="container mx-auto px-4 py-20 md:py-24 relative z-10">
         <div className="mx-auto max-w-4xl text-center space-y-8">
           <div className="mb-12 animate-fade-in">
             <Image
@@ -40,10 +43,7 @@ export function HeroSection({ t }: HeroSectionProps) {
             />
           </div>
           
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/50 bg-primary/10 mb-6 animate-fade-in-up">
-            <SparklesIcon className="h-5 w-5 text-primary animate-spin-slow" />
-            <span className="text-sm font-medium text-primary">Next-Gen Collaboration Platform</span>
-          </div>
+          <SectionBadge title={t.landing.hero.badge} icon={Sparkles} />
           
 
           <div className="flex justify-center items-center w-full mb-4">
