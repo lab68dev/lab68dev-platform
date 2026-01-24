@@ -116,7 +116,7 @@ export function GlobalSearch() {
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/90"
         onClick={() => setIsOpen(false)}
       />
 
