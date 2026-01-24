@@ -100,16 +100,6 @@ WYSIWYG resume builder (`/dashboard/resume`):
 - **PDF Export** – Download your resume as PDF
 - **Data Persistence** – Auto-saves to local storage
 
-### Chat & Messaging
-
-Real-time messaging (`/dashboard/chat`):
-
-- **Direct Messages** – One-on-one conversations
-- **Group Chats** – Team communication
-- **Online Presence** – See who's online
-- **Typing Indicators** – Real-time feedback
-- **Message Reactions** – Emoji reactions on messages
-
 ### Wiki & Documentation
 
 Knowledge base (`/dashboard/wiki`):
@@ -219,7 +209,7 @@ lab68dev-platform/
 │   ├── api/                  # API routes
 │   ├── dashboard/            # Main dashboard features
 │   │   ├── ai-tools/         # AI assistant
-│   │   ├── chat/             # Real-time messaging
+│   │   ├── collaborators/    # Team management
 │   │   ├── community/        # Discussions
 │   │   ├── diagrams/         # Flow diagrams
 │   │   ├── entertainment/    # Games
@@ -252,6 +242,21 @@ lab68dev-platform/
 | `pnpm build` | Compile the production build |
 | `pnpm start` | Serve the production build |
 | `pnpm lint` | Run ESLint |
+
+---
+
+## Contributing
+
+We welcome contributions! Please see our [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+
+### Quick Guide
+
+1. **Fork & Branch**: Create a new branch for your feature (`feat/amazing-feature`) or fix (`fix/bug-name`).
+2. **Code Style**: We use **Next.js App Router**, **TypeScript**, and **Tailwind CSS**. Ensure your code matches the existing style.
+3. **Commit**: Use [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat: add new dashboard widget`).
+4. **Pull Request**: Open a PR against `main`. Describe your changes and link any related issues.
+
+Please adhere to our [Code of Conduct](./CODE_OF_CONDUCT.md) in all interactions.
 
 ---
 
