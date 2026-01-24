@@ -1,7 +1,6 @@
 "use client"
 
 import { 
-  SparklesIcon, 
   ClipboardDocumentListIcon, 
   LightBulbIcon, 
   UserGroupIcon, 
@@ -14,6 +13,8 @@ import {
   ChatBubbleLeftRightIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
+import { Sparkles, Layers } from "lucide-react"
+import { SectionBadge } from "./SectionBadge"
 import PixelCard from "@/components/PixelCard"
 
 interface ServicesSectionProps {
@@ -116,13 +117,10 @@ export function ServicesSection({ t }: ServicesSectionProps) {
 
   return (
     <section id="services" className="border-b border-border">
-      <div className="container mx-auto px-4 py-24">
+      <div className="container mx-auto px-4 py-16">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/50 bg-primary/10 mb-6">
-              <SparklesIcon className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium text-primary">Comprehensive Features</span>
-            </div>
+            <SectionBadge title={t.landing.services.badge} icon={Layers} />
             <h2 className="text-3xl md:text-5xl font-bold mb-4">{t.landing.services.title}</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {t.landing.services.subtitle}
