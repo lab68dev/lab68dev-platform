@@ -87,7 +87,7 @@ export function NotificationsPanel() {
           {/* Notification Panel */}
           <div className="fixed right-2 top-20 sm:absolute sm:right-0 sm:left-auto sm:top-full mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-md bg-card border-2 border-border shadow-2xl z-50 rounded-lg overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b-2 border-border bg-muted/50">
+            <div className="flex items-center justify-between p-4 border-b-2 border-border bg-muted">
               <div className="flex items-center gap-2">
                 <Bell className="h-5 w-5 text-primary" />
                 <h3 className="font-bold text-lg">{t.notifications?.title || "Notifications"}</h3>
@@ -172,7 +172,7 @@ export function NotificationsPanel() {
             
             {/* Footer */}
             {upcomingMeetings.length > 0 && (
-              <div className="p-3 border-t-2 border-border bg-muted/50 text-center">
+              <div className="p-3 border-t-2 border-border bg-muted text-center">
                 <button className="text-sm text-primary hover:underline font-medium transition-colors">
                   View All Meetings →
                 </button>
