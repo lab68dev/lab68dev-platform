@@ -3,6 +3,8 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Users } from "lucide-react"
+import { SectionBadge } from "./SectionBadge"
 
 interface TeamSectionProps {
   t: any
@@ -11,10 +13,11 @@ interface TeamSectionProps {
 export function TeamSection({ t }: TeamSectionProps) {
   return (
     <section id="founder" className="border-b border-border bg-muted/30">
-      <div className="container mx-auto px-4 py-24">
+      <div className="container mx-auto px-4 py-16">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Meet the Team</h2>
+            <SectionBadge title={t.landing.team.title} icon={Users} />
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">{t.landing.team.title}</h2>
             <p className="text-lg text-muted-foreground">
               Dedicated to building powerful tools for developers and teams
             </p>
