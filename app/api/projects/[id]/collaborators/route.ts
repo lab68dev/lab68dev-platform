@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createServerSupabaseClient } from "@/lib/database/supabase-server"
-import { getProjectCollaborators, removeProjectCollaborator } from "@/lib/database"
+import { createClient, getProjectCollaborators, removeProjectCollaborator } from "@/lib/database"
 
 // GET /api/projects/[id]/collaborators - List collaborators for a project
 export async function GET(
