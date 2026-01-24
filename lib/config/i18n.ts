@@ -181,6 +181,8 @@ export interface Translations {
       buyMeCoffeeDesc: string
       githubSponsors: string
       githubSponsorsDesc: string
+      paypal: string
+      paypalDesc: string
     }
   }
   // To Do feature
@@ -817,6 +819,8 @@ const translations: Record<Language, any> = {
         buyMeCoffeeDesc: "Support us with a one-time donation",
         githubSponsors: "GitHub Sponsors",
         githubSponsorsDesc: "Become a monthly sponsor and help sustain us",
+        paypal: "PayPal",
+        paypalDesc: "Fast and secure one-time donations for global contributors",
       },
     },
     todo: {
@@ -1364,6 +1368,8 @@ const translations: Record<Language, any> = {
         buyMeCoffeeDesc: "Ủng hộ chúng tôi với một lần quyên góp",
         githubSponsors: "GitHub Sponsors",
         githubSponsorsDesc: "Trở thành nhà tài trợ hàng tháng và giúp duy trì chúng tôi",
+        paypal: "PayPal",
+        paypalDesc: "Quyên góp một lần nhanh chóng và an toàn cho người đóng góp toàn cầu",
       },
     },
     todo: {
