@@ -3,7 +3,8 @@
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Coffee, Github, Heart } from "lucide-react"
+import { Coffee, Github, Heart, Sparkles } from "lucide-react"
+import { SectionBadge } from "./SectionBadge"
 
 interface SponsorSectionProps {
   t: any
@@ -54,13 +55,10 @@ export function SponsorSection({ t }: SponsorSectionProps) {
 
   return (
     <section id="sponsor" className="border-b border-border bg-muted/30">
-      <div className="container mx-auto px-4 py-24">
+      <div className="container mx-auto px-4 py-16">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/50 bg-primary/10 mb-6">
-              <Heart className="h-5 w-5 text-primary fill-primary animate-pulse" />
-              <span className="text-sm font-medium text-primary">{t.landing.sponsor.badge}</span>
-            </div>
+            <SectionBadge title={t.landing.sponsor.badge} icon={Heart} />
             <h2 className="text-3xl md:text-5xl font-bold mb-4">{t.landing.sponsor.title}</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {t.landing.sponsor.subtitle}
