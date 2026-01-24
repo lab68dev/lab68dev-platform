@@ -5,24 +5,24 @@
 
 /* Brutalist theme with black background, white text, and neon green accent */
 :root {
-  --background: oklch(0.04 0 0); /* #0A0A0A - near black */
+  --background: oklch(0.02 0 0); /* #050505 - deeper black */
   --foreground: oklch(1 0 0); /* white */
-  --card: oklch(0.08 0 0); /* slightly lighter black */
+  --card: oklch(0.05 0 0); /* solid dark card */
   --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.08 0 0);
+  --popover: oklch(0.05 0 0);
   --popover-foreground: oklch(1 0 0);
   --primary: oklch(0.85 0.2 145); /* #00FF99 - neon green accent */
   --primary-foreground: oklch(0.04 0 0);
-  --secondary: oklch(0.18 0 0); /* #2D2D2D - dark gray for borders */
+  --secondary: oklch(0.12 0 0); /* Darker secondary */
   --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.18 0 0);
+  --muted: oklch(0.1 0 0); /* Darker muted */
   --muted-foreground: oklch(0.65 0 0);
   --accent: oklch(0.85 0.2 145); /* neon green */
   --accent-foreground: oklch(0.04 0 0);
   --destructive: oklch(0.6 0.24 27); /* #FF1744 - neon red for errors */
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.18 0 0); /* #2D2D2D */
-  --input: oklch(0.18 0 0);
+  --border: oklch(0.12 0 0); 
+  --input: oklch(0.12 0 0);
   --ring: oklch(0.85 0.2 145);
   
   /* Enhanced Cyberpunk Accent Colors */
@@ -43,13 +43,13 @@
   --chart-4: oklch(0.75 0.2 340); /* pink */
   --chart-5: oklch(0.85 0.2 90); /* yellow */
   --radius: 0rem; /* no rounded corners for brutalist style */
-  --sidebar: oklch(0.04 0 0);
+  --sidebar: oklch(0.02 0 0); /* #050505 */
   --sidebar-foreground: oklch(1 0 0);
   --sidebar-primary: oklch(0.85 0.2 145);
   --sidebar-primary-foreground: oklch(0.04 0 0);
-  --sidebar-accent: oklch(0.18 0 0);
+  --sidebar-accent: oklch(0.12 0 0);
   --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.18 0 0);
+  --sidebar-border: oklch(0.12 0 0);
   --sidebar-ring: oklch(0.85 0.2 145);
 }
 
