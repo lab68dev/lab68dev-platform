@@ -1,58 +1,30 @@
+import { gateway } from "ai"
+import { streamText } from "ai"
 import { NextResponse } from "next/server"
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const { message, history } = await request.json()
+    const { messages, model } = await req.json()
 
-    const ollamaUrl = process.env.OLLAMA_URL || "http://localhost:11434"
-    const ollamaModel = process.env.OLLAMA_MODEL || "deepseek-r1:7b"
-
-    const messages = history
-      .slice(-10)
-      .map((msg: { role: string; content: string }) => ({
-        role: msg.role === "user" ? "user" : "assistant",
-        content: msg.content,
-      }))
-
-    messages.push({
-      role: "user",
-      content: message,
-    })
-
-    const ollamaResponse = await fetch(`${ollamaUrl}/api/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: ollamaModel,
-        messages,
-        stream: false,
-        options: {
-          temperature: 0.7,
-          top_p: 0.95,
-        },
-      }),
-    })
-
-    if (!ollamaResponse.ok) {
-      throw new Error(`Ollama API error: ${ollamaResponse.status}`)
+    // Ensure API key is configured
+    if (!process.env.AI_GATEWAY_API_KEY) {
+      return NextResponse.json(
+        { error: "AI Gateway API Key not found. Please set AI_GATEWAY_API_KEY in your env." },
+        { status: 500 }
+      )
     }
 
-    const data = await ollamaResponse.json()
-    const aiResponse = data.message?.content || "Sorry, I couldn't generate a response."
-    
-    console.log(`✓ Using Ollama local model: ${ollamaModel}`)
+    const result = streamText({
+      model: gateway(model || "google:gemini-1.5-pro"),
+      messages,
+    })
 
-    return NextResponse.json({ response: aiResponse, provider: "Ollama (Local)" })
-  } catch (error) {
-    console.error("Error in chat API:", error)
+    return result.toTextStreamResponse()
+  } catch (error: any) {
+    console.error("Error in AI chat:", error)
     return NextResponse.json(
-      { 
-        error: "Failed to connect to Ollama. Please ensure Ollama is running.",
-        provider: "Error"
-      },
-      { status: 500 },
+      { error: error.message || "Failed to process chat request" },
+      { status: 500 }
     )
   }
 }
