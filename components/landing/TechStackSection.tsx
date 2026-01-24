@@ -33,7 +33,7 @@ export function TechStackSection({ t }: TechStackSectionProps) {
   return (
     <>
       <section id="stack" className="border-b border-border bg-muted/30">
-        <div className="container mx-auto px-4 py-24">
+        <div className="container mx-auto px-4 py-16">
           <div className="mx-auto max-w-4xl">
             <h2 className="text-3xl md:text-5xl font-bold mb-4 text-balance text-center">{t.landing.techStack.title}</h2>
             <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
