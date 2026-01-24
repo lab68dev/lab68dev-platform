@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { MessageSquare } from "lucide-react"
+import { SectionBadge } from "./SectionBadge"
 
 interface CommunitySectionProps {
   t: any
@@ -13,6 +15,7 @@ export function CommunitySection({ t }: CommunitySectionProps) {
     <section id="community" className="border-b border-border bg-muted/30">
       <div className="container mx-auto px-4 py-24">
         <div className="mx-auto max-w-4xl space-y-8">
+          <SectionBadge title={t.landing.community.title} icon={MessageSquare} />
           <h2 className="text-3xl md:text-5xl font-bold text-balance">{t.landing.community.title}</h2>
           <p className="text-lg md:text-xl leading-relaxed text-muted-foreground">{t.landing.community.description}</p>
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
