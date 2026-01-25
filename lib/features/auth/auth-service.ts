@@ -104,7 +104,8 @@ export async function signUp(
         data: {
           name,
           language: language || 'en'
-        }
+        },
+        emailRedirectTo: `${window.location.origin}/auth/callback`
       }
     })
 
