@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Send, Sparkles, Bot, User, Trash2, Copy, Check, Settings2 } from "lucide-react"
+import { Send, Sparkles, Bot, User, Trash2, Copy, Check } from "lucide-react"
 import { getTranslations, getUserLanguage } from "@/lib/config"
 import { useChat } from "@ai-sdk/react"
 
