@@ -11,18 +11,7 @@ export function MobileBottomNav() {
   const navItems = [
     { href: "/dashboard", label: "Home", icon: LayoutDashboard },
     { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
-    { href: "/dashboard/chat", label: "Chat", icon: MessageCircle },
-    // { href: "/dashboard/meeting", label: "Meeting", icon: Calendar }, // Removed to make space (max 5 usually good, replaced least used or added logic)
-    // Actually user has 5 items previously. Adding 6th might crowd it. 
-    // Let's keep existing and replace one or just add it. The user didn't ask to replace. 
-    // But 6 items is tight. Let's see... 
-    // "Projects" "Chat" "Meeting" "Profile"
-    // Maybe collapse "Meeting"? Or just add it. standard is 4-5.
-    // Let's try adding it first. If it's too crowded we can adjust.
-    // Wait, the prompt said "Mobile Support Chat icon maybe put on the tab".
-    // I will swap "Meeting" if needed or just append. 
-    // Let's replace "Meeting" for now as it seems less "daily driver" than support?
-    // Or just make the list longer. The flex container creates space. 6 items might fit.
+    // Chat removed as per request
     { href: "/dashboard/meeting", label: "Meeting", icon: Calendar },
     { href: "/dashboard/settings", label: "Profile", icon: User },
   ]
