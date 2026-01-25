@@ -163,10 +163,6 @@ export function Footer() {
               <Link href="/cookies" className="text-muted-foreground hover:text-primary transition-colors">
                 Cookie Policy
               </Link>
-              <span className="text-muted-foreground">•</span>
-              <Link href="/staff/login" className="text-muted-foreground hover:text-primary transition-colors">
-                Staff Portal
-              </Link>
             </div>
           </div>
         </div>
