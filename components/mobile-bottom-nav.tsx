@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, FolderKanban, MessageCircle, Calendar, User, LifeBuoy } from "lucide-react"
+import { LayoutDashboard, FolderKanban, MessageCircle, Calendar, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function MobileBottomNav() {
@@ -24,7 +24,6 @@ export function MobileBottomNav() {
     // Let's replace "Meeting" for now as it seems less "daily driver" than support?
     // Or just make the list longer. The flex container creates space. 6 items might fit.
     { href: "/dashboard/meeting", label: "Meeting", icon: Calendar },
-    { href: "#support", label: "Support", icon: LifeBuoy },
     { href: "/dashboard/settings", label: "Profile", icon: User },
   ]
 
