@@ -93,7 +93,6 @@ export function DashboardSidebar() {
         { href: "/dashboard/resume", label: "Resume Editor", icon: FileText },
         { href: "/dashboard/ai-tools", label: t.nav.aiTools || "AI Tools", icon: Bot },
         { href: "/dashboard/entertainment", label: "Games", icon: Gamepad2 },
-        { href: "/dashboard/support", label: "Live Support", icon: Headphones },
       ],
     },
   ]
