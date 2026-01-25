@@ -88,7 +88,7 @@ export function HeroSection({ t }: HeroSectionProps) {
           </div>
           
           {/* Stats Section */}
-          <div className="grid grid-cols-3 gap-8 pt-16 max-w-2xl mx-auto animate-fade-in-up delay-700">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-16 max-w-2xl mx-auto animate-fade-in-up delay-700">
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">10+</div>
               <div className="text-sm text-muted-foreground">Features</div>
