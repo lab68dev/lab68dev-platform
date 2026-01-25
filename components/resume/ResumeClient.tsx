@@ -352,7 +352,7 @@ export function ResumeClient({ initialData, initialTitle, initialId }: ResumeCli
         fontOptions={fontOptions}
       />
 
-      <div className="container mx-auto p-4 flex flex-col items-center">
+      <div className="container mx-auto p-2 md:p-4 flex flex-col items-center">
          <div className="flex items-center justify-between w-full max-w-[210mm] mb-4 px-2">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -368,32 +368,37 @@ export function ResumeClient({ initialData, initialTitle, initialId }: ResumeCli
             </div>
           </div>
 
-        <ResumeA4 
-          editorRef={editorRef}
-          resumeData={resumeData}
-          setResumeData={setResumeData}
-          selectedTemplate={selectedTemplate}
-          zoomLevel={zoomLevel / 100}
-          showPhotoUpload={templates.find(t => t.value === selectedTemplate)?.hasPhoto || false}
-          handlePhotoUpload={handlePhotoUpload}
-          toggleSectionVisibility={toggleSectionVisibility}
-          handleDragStart={handleDragStart}
-          handleDragOver={handleDragOver}
-          handleDragEnd={handleDragEnd}
-          updateExperience={updateExperience}
-          removeExperience={removeExperience}
-          addExperience={addExperience}
-          updateEducation={updateEducation}
-          removeEducation={removeEducation}
-          addEducation={addEducation}
-          updateSkill={updateSkill}
-          removeSkill={removeSkill}
-          addSkill={addSkill}
-          updateCertification={updateCertification}
-          removeCertification={removeCertification}
-          addCertification={addCertification}
-          getFontSizeClass={getFontSizeClass}
-        />
+        {/* Scrollable Container for Mobile/Tablet */}
+        <div className="w-full overflow-x-auto pb-8 flex justify-center">
+          <div className="min-w-[210mm]">
+            <ResumeA4 
+              editorRef={editorRef}
+              resumeData={resumeData}
+              setResumeData={setResumeData}
+              selectedTemplate={selectedTemplate}
+              zoomLevel={zoomLevel / 100}
+              showPhotoUpload={templates.find(t => t.value === selectedTemplate)?.hasPhoto || false}
+              handlePhotoUpload={handlePhotoUpload}
+              toggleSectionVisibility={toggleSectionVisibility}
+              handleDragStart={handleDragStart}
+              handleDragOver={handleDragOver}
+              handleDragEnd={handleDragEnd}
+              updateExperience={updateExperience}
+              removeExperience={removeExperience}
+              addExperience={addExperience}
+              updateEducation={updateEducation}
+              removeEducation={removeEducation}
+              addEducation={addEducation}
+              updateSkill={updateSkill}
+              removeSkill={removeSkill}
+              addSkill={addSkill}
+              updateCertification={updateCertification}
+              removeCertification={removeCertification}
+              addCertification={addCertification}
+              getFontSizeClass={getFontSizeClass}
+            />
+          </div>
+        </div>
       </div>
     </div>
   )
