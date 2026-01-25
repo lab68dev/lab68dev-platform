@@ -1,169 +1,181 @@
 import Link from "next/link"
-import { Github, Linkedin, Instagram, Facebook, Mail, Code2, Youtube } from "lucide-react"
+import { Github, Linkedin, Instagram, Facebook, Mail, Code2, Youtube, ArrowRight, Heart } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="w-full border-t border-border bg-card">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Brand Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Code2 className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">lab68dev</span>
+    <footer className="relative w-full bg-black text-gray-300 overflow-hidden font-sans">
+      {/* Decorative Gradients */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-900/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-900/10 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="container mx-auto px-6 py-16 relative z-10">
+        
+        {/* Newsletter Section */}
+        <div className="mb-20">
+          <div className="bg-gray-900/40 border border-white/5 rounded-3xl p-8 md:p-12 backdrop-blur-sm relative overflow-hidden group">
+            {/* Hover Glow */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            
+            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+              <div className="max-w-xl">
+                <h3 className="text-3xl font-bold text-white mb-2 tracking-tight">
+                  Join the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Ecosystem</span>
+                </h3>
+                <p className="text-gray-400">
+                  Get the latest dev tools, tutorials, and community updates delivered straight to your inbox. No spam, just code.
+                </p>
+              </div>
+              
+              <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+                <Input 
+                  type="email" 
+                  placeholder="enter.your@email.com" 
+                  className="bg-black/50 border-white/10 text-white placeholder:text-gray-600 focus:border-blue-500 h-11 w-full sm:w-80 transition-all font-mono text-sm"
+                />
+                <Button className="h-11 bg-white text-black hover:bg-gray-200 font-semibold px-8 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all">
+                  Subscribe
+                </Button>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Building the future of collaborative development platforms.
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider">Platform</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard/projects" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Projects
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard/ai-tools" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  AI Tools
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard/community" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Community
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider">Resources</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="https://github.com/lab68dev" target="_blank" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link href="https://github.com/lab68dev" target="_blank" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  API Reference
-                </Link>
-              </li>
-              <li>
-                <Link href="https://github.com/lab68dev/lab68dev-platform" target="_blank" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  GitHub Repository
-                </Link>
-              </li>
-              <li>
-                <Link href="mailto:lab68dev@gmail.com" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Support
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Connect */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider">Connect</h3>
-            <div className="flex gap-4">
-              <Link
-                href="https://github.com/lab68dev"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 border border-border hover:border-primary hover:text-primary transition-colors"
-                aria-label="GitHub"
-              >
-                <Github className="h-5 w-5" />
-              </Link>
-              <Link
-                href="https://www.linkedin.com/company/lab68dev/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 border border-border hover:border-primary hover:text-primary transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="h-5 w-5" />
-              </Link>
-              <Link
-                href="https://www.instagram.com/lab68dev/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 border border-border hover:border-primary hover:text-primary transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </Link>
-              <Link
-                href="https://www.facebook.com/groups/lab68dev"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 border border-border hover:border-primary hover:text-primary transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5" />
-              </Link>
-              <Link
-                href="https://discord.gg/g5FVt9pjN2"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 border border-border hover:border-primary hover:text-primary transition-colors"
-                aria-label="Discord"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
-                </svg>
-              </Link>
-              <Link
-                href="https://www.youtube.com/@lab68dev"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 border border-border hover:border-primary hover:text-primary transition-colors"
-                aria-label="YouTube"
-              >
-                <Youtube className="h-5 w-5" />
-              </Link>
-              <Link
-                href="mailto:lab68dev@gmail.com"
-                aria-label="Email"
-                className="p-2 border border-border hover:border-primary hover:text-primary transition-colors"
-              >
-                <Mail className="h-5 w-5" />
-              </Link>
-            </div>
-            <p className="text-xs text-muted-foreground mt-4">
-              Subscribe to our newsletter for updates and insights.
-            </p>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-border pt-8 mt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © {currentYear} lab68dev. All rights reserved.
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8 mb-16">
+          
+          {/* Brand Column */}
+          <div className="lg:col-span-2 space-y-6">
+            <Link href="/" className="flex items-center gap-2 group w-fit">
+              <div className="p-2 bg-blue-600/10 rounded-lg group-hover:bg-blue-600/20 transition-colors">
+                <Code2 className="h-6 w-6 text-blue-500" />
+              </div>
+              <span className="text-xl font-bold text-white tracking-tight">lab68dev</span>
+            </Link>
+            <p className="text-gray-500 text-sm leading-relaxed max-w-sm">
+              Empowering developers to build, learn, and collaborate. An open-source initiative crafting the next generation of developer tools.
             </p>
-            <div className="flex gap-6 text-sm">
-              <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
-                Terms of Service
-              </Link>
-              <Link href="/cookies" className="text-muted-foreground hover:text-primary transition-colors">
-                Cookie Policy
-              </Link>
+            <div className="flex items-center gap-3">
+               {[
+                 { icon: Github, href: "https://github.com/lab68dev", label: "Github" },
+                 { icon: Linkedin, href: "https://www.linkedin.com/company/lab68dev/", label: "LinkedIn" },
+                 { icon: Youtube, href: "https://www.youtube.com/@lab68dev", label: "YouTube" },
+                 { icon: Instagram, href: "https://www.instagram.com/lab68dev/", label: "Instagram" },
+               ].map((social) => (
+                 <Link
+                   key={social.label}
+                   href={social.href}
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label={social.label}
+                   className="p-2 border border-white/5 bg-white/5 rounded-full hover:bg-white/10 hover:border-white/20 hover:scale-110 text-gray-400 hover:text-white transition-all duration-300"
+                 >
+                   <social.icon className="h-4 w-4" />
+                 </Link>
+               ))}
             </div>
+          </div>
+
+          {/* Navigation Columns */}
+          <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-8">
+            
+            {/* Column 1 */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-mono font-semibold text-white uppercase tracking-wider">Platform</h4>
+              <ul className="space-y-3">
+                {["Dashboard", "Projects", "Community", "AI Tools"].map((item) => (
+                  <li key={item}>
+                    <Link 
+                      href={`/dashboard/${item.toLowerCase().replace(' ', '-')}`} 
+                      className="text-sm text-gray-500 hover:text-blue-400 transition-colors flex items-center group"
+                    >
+                      <ArrowRight className="h-3 w-3 -ml-4 opacity-0 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300 mr-2 text-blue-500" />
+                      {item}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Column 2 */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-mono font-semibold text-white uppercase tracking-wider">Resources</h4>
+              <ul className="space-y-3">
+                {[
+                  { label: "Documentation", href: "#" },
+                  { label: "API Reference", href: "#" },
+                  { label: "GitHub Repo", href: "https://github.com/lab68dev/lab68dev-platform" },
+                  { label: "Open Source", href: "#" },
+                ].map((item) => (
+                  <li key={item.label}>
+                     <Link 
+                      href={item.href} 
+                      className="text-sm text-gray-500 hover:text-purple-400 transition-colors flex items-center group"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            {/* Column 3 */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-mono font-semibold text-white uppercase tracking-wider">Company</h4>
+              <ul className="space-y-3">
+                {["About", "Careers", "Blog", "Contact"].map((item) => (
+                  <li key={item}>
+                     <Link 
+                      href="#" 
+                      className="text-sm text-gray-500 hover:text-pink-400 transition-colors"
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Column 4 */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-mono font-semibold text-white uppercase tracking-wider">Legal</h4>
+              <ul className="space-y-3">
+                {["Privacy", "Terms", "Cookies", "Licenses"].map((item) => (
+                  <li key={item}>
+                     <Link 
+                      href={`/${item.toLowerCase()}`} 
+                      className="text-sm text-gray-500 hover:text-white transition-colors"
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <Separator className="bg-white/5 mb-8" />
+
+        {/* Bottom Bar */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600 font-mono">
+          <p>
+            © {currentYear} Lab68Dev Platform. All code is open source.
+          </p>
+          <div className="flex items-center gap-6">
+            <Link href="#" className="hover:text-gray-400 transition-colors flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              All Systems Nominal
+            </Link>
+            <p className="flex items-center gap-1">
+              Made with <Heart className="h-3 w-3 text-red-500 fill-red-500" /> by developers
+            </p>
           </div>
         </div>
       </div>
