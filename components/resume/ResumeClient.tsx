@@ -28,11 +28,28 @@ const templates: { value: Template; label: string; description: string; hasPhoto
 ]
 
 const fontOptions = [
-  { value: 'Inter', label: 'Inter (Modern Sans-Serif)' },
-  { value: 'Arial', label: 'Arial (Classic Sans-Serif)' },
-  { value: 'Helvetica', label: 'Helvetica (Professional)' },
-  { value: 'Georgia', label: 'Georgia (Elegant Serif)' },
-  { value: 'Times New Roman', label: 'Times New Roman (Traditional)' },
+  // Sans-Serif (Modern & Clean)
+  { value: 'Inter, sans-serif', label: 'Inter (Modern Sans)' },
+  { value: 'Roboto, "Helvetica Neue", Arial, sans-serif', label: 'Roboto (Clean Sans)' },
+  { value: '"Open Sans", "Segoe UI", Tahoma, sans-serif', label: 'Open Sans (Neutral)' },
+  { value: 'Montserrat, "Avenir Next", sans-serif', label: 'Montserrat (Geometric)' },
+  { value: 'Lato, "Helvetica Neue", Arial, sans-serif', label: 'Lato (Friendly)' },
+  { value: 'Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif', label: 'Calibri (Modern Office)' },
+  { value: 'Arial, sans-serif', label: 'Arial (Classic)' },
+  { value: 'Helvetica, "Arial", sans-serif', label: 'Helvetica (Professional)' },
+  { value: 'Verdana, Geneva, sans-serif', label: 'Verdana (Screen-Optimized)' },
+  { value: '"Trebuchet MS", "Lucida Grande", sans-serif', label: 'Trebuchet MS (Humanist)' },
+
+  // Serif (Traditional & Elegant)
+  { value: 'Garamond, "Times New Roman", serif', label: 'Garamond (Elegant Serif)' },
+  { value: 'Georgia, serif', label: 'Georgia (Screen Serif)' },
+  { value: '"Times New Roman", Times, serif', label: 'Times New Roman (Traditional)' },
+  { value: 'Cambria, "Palatino Linotype", serif', label: 'Cambria (Modern Serif)' },
+  { value: '"Palatino Linotype", "Book Antiqua", Palatino, serif', label: 'Palatino (Classic)' },
+  { value: 'Charter, "Bitstream Charter", serif', label: 'Charter (Professional)' },
+
+  // Monospace (Technical)
+  { value: '"Courier New", Courier, monospace', label: 'Courier New (Code/Technical)' },
 ]
 
 export function ResumeClient({ initialData, initialTitle, initialId }: ResumeClientProps) {
