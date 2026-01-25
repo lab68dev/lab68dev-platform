@@ -109,8 +109,8 @@ The Staff Portal is a comprehensive management system for Lab68 Dev Platform sta
 The system automatically creates a default admin account on first access:
 
 ```text
-Email: admin@lab68dev.com
-Password: Admin@123456
+Username: lab68dev
+Password: lab68dev@2001
 ```
 
 **⚠️ IMPORTANT**: Change this password immediately after first login!
