@@ -2,7 +2,6 @@ import type React from "react"
 import type { Metadata } from "next"
 import { JetBrains_Mono } from "next/font/google"
 import "./globals.css"
-import { LiveChatWidget } from "@/components/live-chat-widget"
 import { Toaster } from "sonner"
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] })
@@ -64,7 +63,6 @@ export default function RootLayout({
           richColors
           closeButton
         />
-        <LiveChatWidget />
       </body>
     </html>
   )
