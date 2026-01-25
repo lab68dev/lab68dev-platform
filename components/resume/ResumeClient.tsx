@@ -37,15 +37,40 @@ const fontOptions = [
 
 export function ResumeClient({ initialData, initialTitle, initialId }: ResumeClientProps) {
   const [resumeData, setResumeData] = useState<ResumeData>(initialData)
-  const [selectedTemplate, setSelectedTemplate] = useState<Template>(initialData.personalInfo.photoUrl ? 'modern' : 'harvard')
+  const [selectedTemplate, setSelectedTemplate] = useState<Template>('harvard')
   const [draggedSection, setDraggedSection] = useState<SectionType | null>(null)
   const [resumeTitle, setResumeTitle] = useState(initialTitle)
   const [resumeId, setResumeId] = useState<string | null>(initialId)
   const [isSaving, setIsSaving] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
-  const [zoomLevel, setZoomLevel] = useState(1)
+  const [zoomLevel, setZoomLevel] = useState(100) // Percentage
   const editorRef = useRef<HTMLDivElement>(null!)
-  const router = useRouter()
+  // Ensure default skills exist if empty
+  useEffect(() => {
+    if (resumeData.skills.length === 0) {
+      setResumeData(prev => ({
+        ...prev,
+        skills: [
+          { id: '1', category: 'Languages', items: 'Java, Python, TypeScript, SQL, HTML/CSS' },
+          { id: '2', category: 'Frameworks & Libraries', items: 'React, Next.js, Node.js, Tailwind CSS, PostgreSQL' },
+          { id: '3', category: 'Tools & Infrastructure', items: 'Git, Docker, AWS, Vercel, Figma' },
+          { id: '4', category: 'Concepts', items: 'REST APIs, Agile/Scrum, CI/CD, System Design' },
+        ]
+      }))
+    }
+  }, [])
+
+  // Removed handleSave and handleDownload unchanged lines but keeping context... 
+
+  // ... (keeping existing handlers)
+
+  // Need to update the handlers or keep them as is?
+  // I will just perform the targeted replacement for the state initialization and the zoom UI.
+  // Wait, I need to be careful with the Replace tool limits.
+  // I'll assume lines 39-48 are the state init.
+  // And lines ~317-324 are the Zoom UI.
+  
+  // Let's do 2 chunks.
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -126,6 +151,11 @@ export function ResumeClient({ initialData, initialTitle, initialId }: ResumeCli
               [style*="transform: scale"] {
                 transform: none !important;
                 margin-bottom: 0 !important;
+              }
+              /* Hide calendar picker indicator for print */
+              input[type="month"]::-webkit-calendar-picker-indicator {
+                display: none !important;
+                -webkit-appearance: none;
               }
             </style>
           </head>
@@ -238,7 +268,7 @@ export function ResumeClient({ initialData, initialTitle, initialId }: ResumeCli
   }
 
   const addSkill = () => {
-    const newSkill: Skill = { id: Date.now().toString(), name: "", level: 'Intermediate' }
+    const newSkill: Skill = { id: Date.now().toString(), category: "New Category", items: "" }
     setResumeData({ ...resumeData, skills: [...resumeData.skills, newSkill] })
   }
 
@@ -300,9 +330,6 @@ export function ResumeClient({ initialData, initialTitle, initialId }: ResumeCli
         handleSave={handleSave}
         isDownloading={isDownloading}
         handleDownload={handleDownload}
-        templates={templates}
-        selectedTemplate={selectedTemplate}
-        setSelectedTemplate={setSelectedTemplate}
         resumeData={resumeData}
         setResumeData={setResumeData}
         fontOptions={fontOptions}
@@ -315,11 +342,11 @@ export function ResumeClient({ initialData, initialTitle, initialId }: ResumeCli
               <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Live Interactive Workspace</span>
             </div>
             <div className="flex items-center gap-3 no-print">
-              <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">Zoom</span>
+              <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">Zoom (%)</span>
               <input 
-                type="range" min="0.5" max="1.5" step="0.1" 
-                value={zoomLevel} onChange={(e) => setZoomLevel(parseFloat(e.target.value))}
-                className="w-24 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                type="number" min="50" max="200" step="10" 
+                value={zoomLevel} onChange={(e) => setZoomLevel(parseInt(e.target.value))}
+                className="w-16 h-6 text-xs bg-muted rounded border-none text-center focus:ring-1 focus:ring-primary"
               />
             </div>
           </div>
@@ -329,7 +356,7 @@ export function ResumeClient({ initialData, initialTitle, initialId }: ResumeCli
           resumeData={resumeData}
           setResumeData={setResumeData}
           selectedTemplate={selectedTemplate}
-          zoomLevel={zoomLevel}
+          zoomLevel={zoomLevel / 100}
           showPhotoUpload={templates.find(t => t.value === selectedTemplate)?.hasPhoto || false}
           handlePhotoUpload={handlePhotoUpload}
           toggleSectionVisibility={toggleSectionVisibility}
