@@ -23,8 +23,8 @@ export interface Education {
 
 export interface Skill {
     id: string
-    name: string
-    level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert'
+    category: string
+    items: string
 }
 
 export interface SectionOrder {
@@ -36,7 +36,7 @@ export interface StyleSettings {
     primaryColor: string
     secondaryColor: string
     fontFamily: string
-    fontSize: 'small' | 'medium' | 'large'
+    fontSize: string
 }
 
 export interface ResumeData {
