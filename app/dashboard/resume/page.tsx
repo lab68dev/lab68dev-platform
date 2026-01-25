@@ -11,9 +11,10 @@ export const metadata: Metadata = {
 export default async function ResumeEditorPage({
   searchParams,
 }: {
-  searchParams: { id?: string }
+  searchParams: Promise<{ id?: string }>
 }) {
-  const resumeId = searchParams.id || null
+  const { id } = await searchParams
+  const resumeId = id || null
   let initialData = DEFAULT_RESUME_DATA
   let initialTitle = "My Resume"
 
