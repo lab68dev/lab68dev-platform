@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const cookieStore = await cookies()
-    
+
     // Create server-side Supabase client
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,10 +38,10 @@ export async function GET(request: NextRequest) {
     )
 
     console.log('🔄 Exchanging code for session...')
-    
+
     // Exchange code for session
     const { data: { session }, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
-    
+
     if (sessionError) {
       console.error('❌ Error exchanging code for session:', sessionError)
       return NextResponse.redirect(`${origin}/login?error=auth_failed&message=${encodeURIComponent(sessionError.message)}`)
@@ -55,54 +55,39 @@ export async function GET(request: NextRequest) {
     const user = session.user
     console.log('✅ Session created for user:', user.email)
 
-    // Check if this is a new user (first time signing in with Google)
-    console.log('🔍 Checking if user exists in database...')
-    const { data: existingUser, error: userError } = await supabase
-      .from('users')
+    // Check if user profile exists (created by trigger on signup)
+    console.log('🔍 Checking if user profile exists...')
+    const { data: existingProfile, error: profileError } = await supabase
+      .from('profiles')
       .select('id, email')
-      .eq('email', user.email)
+      .eq('id', user.id)
       .single()
 
-    // Handle potential errors from the user lookup
-    if (userError) {
-      // Supabase returns code 'PGRST116' when .single() finds no rows (i.e., user not found)
-      if (userError.code === 'PGRST116') {
-        console.log('ℹ️ User not found in database (expected for new user):', userError.message)
-      } else {
-        console.error('❌ Error checking if user exists in database:', userError)
-        return NextResponse.redirect(
-          `${origin}/login?error=user_lookup_failed&message=${encodeURIComponent(userError.message)}`
-        )
-      }
-    }
-    if (userError) {
-      console.error('❌ Error checking if user exists:', userError)
+    // Handle potential errors from the profile lookup
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error('❌ Error checking if profile exists:', profileError)
       return NextResponse.redirect(
-        `${origin}/login?error=user_lookup_failed&message=${encodeURIComponent(
-          userError.message,
-        )}`,
+        `${origin}/login?error=profile_lookup_failed&message=${encodeURIComponent(profileError.message)}`
       )
     }
 
-    // If user doesn't exist in our users table, redirect to signup to complete profile
-    if (!existingUser) {
-      console.log('👤 New user detected, redirecting to signup...')
-      
+    // If profile doesn't exist, it might be a new OAuth user where trigger failed or hasn't run yet,
+    // or a manual signup where we need them to complete a profile. 
+    // However, for standard email signup with trigger, profile should exist.
+    if (!existingProfile) {
+      console.log('👤 New user/No profile detected, redirecting to signup...')
+
       const userData = {
         email: user.email,
         name: user.user_metadata.full_name || user.user_metadata.name || '',
         avatar_url: user.user_metadata.avatar_url || user.user_metadata.picture || '',
-        provider: 'google'
       }
 
-      // Redirect to signup with user data as query params
+      // Redirect to signup to complete profile creation if needed
       const signupUrl = new URL('/signup', origin)
-      signupUrl.searchParams.set('google', 'true')
       signupUrl.searchParams.set('email', userData.email || '')
-      signupUrl.searchParams.set('name', userData.name)
-      if (userData.avatar_url) {
-        signupUrl.searchParams.set('avatar', userData.avatar_url)
-      }
+      if (userData.name) signupUrl.searchParams.set('name', userData.name)
+      if (userData.avatar_url) signupUrl.searchParams.set('avatar', userData.avatar_url)
 
       return NextResponse.redirect(signupUrl.toString())
     }
