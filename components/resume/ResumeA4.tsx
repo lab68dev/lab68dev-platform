@@ -37,6 +37,13 @@ interface ResumeA4Props {
   getFontSizeClass: () => string
 }
 
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return ""
+  const [year, month] = dateStr.split('-')
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  return `${months[parseInt(month) - 1]}, ${year}`
+}
+
 export function ResumeA4({
   editorRef,
   resumeData,
@@ -122,10 +129,20 @@ export function ResumeA4({
                     />
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <div className="px-3 py-1 rounded flex items-center gap-1" style={fontSizeStyle}>
-                      <input type="month" value={exp.startDate} onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)} className="bg-transparent border-none text-xs w-24 focus:ring-0 p-0 h-auto text-right text-black" />
-                      <span>-</span>
-                      {exp.current ? 'Present' : <input type="month" value={exp.endDate} onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)} className="bg-transparent border-none text-xs w-24 focus:ring-0 p-0 h-auto text-right text-black" />}
+                    <div className="flex items-center gap-0.5" style={fontSizeStyle}>
+                      <div className="relative">
+                        <input type="month" value={exp.startDate} onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)} className="bg-transparent border-none text-xs w-[72px] focus:ring-0 p-0 h-auto text-right text-black print:hidden" />
+                        <span className="hidden print:inline text-xs text-black">{formatDate(exp.startDate)}</span>
+                      </div>
+                      <span className="text-black">-</span>
+                      {exp.current ? (
+                        <span className="text-black text-xs font-medium ml-1">Present</span>
+                      ) : (
+                        <div className="relative">
+                          <input type="month" value={exp.endDate} onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)} className="bg-transparent border-none text-xs w-[72px] focus:ring-0 p-0 h-auto text-right text-black print:hidden" />
+                          <span className="hidden print:inline text-xs text-black">{formatDate(exp.endDate)}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -174,10 +191,20 @@ export function ResumeA4({
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1 text-black">
-                    <div className="flex items-center gap-1 opacity-80" style={fontSizeStyle}>
-                      <input type="month" value={edu.startDate} onChange={(e) => updateEducation(edu.id, 'startDate', e.target.value)} className="bg-transparent border-none text-xs w-24 focus:ring-0 p-0 h-auto text-right text-black" />
+                    <div className="flex items-center gap-0.5 opacity-80" style={fontSizeStyle}>
+                      <div className="relative">
+                        <input type="month" value={edu.startDate} onChange={(e) => updateEducation(edu.id, 'startDate', e.target.value)} className="bg-transparent border-none text-xs w-[72px] focus:ring-0 p-0 h-auto text-right text-black print:hidden" />
+                        <span className="hidden print:inline text-xs text-black">{formatDate(edu.startDate)}</span>
+                      </div>
                       <span>-</span>
-                      {edu.current ? 'Present' : <input type="month" value={edu.endDate} onChange={(e) => updateEducation(edu.id, 'endDate', e.target.value)} className="bg-transparent border-none text-xs w-24 focus:ring-0 p-0 h-auto text-right text-black" />}
+                      {edu.current ? (
+                        <span className="text-xs font-medium ml-1">Present</span>
+                      ) : (
+                        <div className="relative">
+                          <input type="month" value={edu.endDate} onChange={(e) => updateEducation(edu.id, 'endDate', e.target.value)} className="bg-transparent border-none text-xs w-[72px] focus:ring-0 p-0 h-auto text-right text-black print:hidden" />
+                          <span className="hidden print:inline text-xs text-black">{formatDate(edu.endDate)}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
