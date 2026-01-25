@@ -15,8 +15,6 @@
 
 - **Enterprise-Grade Security** – bcrypt password hashing, JWT sessions, Two-Factor Authentication (2FA), rate limiting, and automated email notifications.
 - **Role-Based Collaboration** – project-level roles (owner, admin, editor, viewer) with granular permission checks and activity logging.
-- **Staff Management Portal** – dedicated staff authentication, user management, support queue, analytics dashboard, and approval workflows.
-- **Live Customer Support** – real-time chat widget with staff dashboard for 24/7 support management.
 - **Supabase Backend** – PostgreSQL database with Row-Level Security (RLS), indexed queries, and automatic session cleanup.
 - **Multilingual UI** – centralized translation registry with English and Vietnamese support.
 - **Productivity Suite** – dashboards for projects, kanban, meetings, files, wiki, diagrams, community discussions, and AI tools.
@@ -32,8 +30,7 @@
 | Language | [TypeScript 5](https://www.typescriptlang.org/) |
 | Database | [Supabase](https://supabase.com/) PostgreSQL with RLS policies |
 | Authentication | JWT sessions, bcrypt password hashing, TOTP-based 2FA |
-| Real-Time | [Socket.io](https://socket.io/) for instant messaging and presence |
-| AI Models | Ollama (local) - Privacy-first, no API costs |
+| AI Models | Vercel AI SDK with Google Gemini / Anthropic Claude / OpenAI |
 | Email | Nodemailer with SMTP |
 | Security | Rate limiting, session management, activity logging |
 | Styling | Tailwind CSS + Radix UI components |
@@ -136,16 +133,6 @@ Brain games and relaxation (`/dashboard/entertainment`):
 - **Word Scramble** – Word puzzle game
 - **Sliding Puzzle** – Tile sliding puzzle
 
-### Staff Portal
-
-Full admin interface (`/staff/dashboard`):
-
-- **User Management** – Manage platform users
-- **Analytics Dashboard** – Usage statistics
-- **Activity Logging** – Track all staff actions
-- **Role-Based Access** – Admin privileges
-- **Support Queue** – Manage customer support tickets
-
 ### Settings
 
 User preferences (`/dashboard/settings`):
@@ -193,7 +180,7 @@ pnpm install
 ### Development
 
 ```bash
-# Start with Socket.io real-time support
+# Start development server
 pnpm dev
 ```
 
@@ -223,7 +210,6 @@ lab68dev-platform/
 │   │   ├── todo/             # Task management
 │   │   ├── whiteboard/       # Drawing canvas
 │   │   └── wiki/             # Documentation
-│   └── staff/                # Staff portal
 ├── components/               # Reusable UI components
 ├── lib/                      # Domain logic (auth, email, i18n, database)
 ├── docs/                     # Documentation
@@ -237,8 +223,7 @@ lab68dev-platform/
 
 | Command | Description |
 | --- | --- |
-| `pnpm dev` | Start the development server with Socket.io |
-| `pnpm dev:next` | Start Next.js dev server only |
+| `pnpm dev` | Start the development server |
 | `pnpm build` | Compile the production build |
 | `pnpm start` | Serve the production build |
 | `pnpm lint` | Run ESLint |
