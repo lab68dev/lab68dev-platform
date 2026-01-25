@@ -50,7 +50,7 @@ export function DashboardClient({ initialUser, initialCounts, initialMeetings }:
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[minmax(180px,auto)]">
         <DashboardStats counts={initialCounts} loading={false} />
 
-        <BentoCard colSpan={2} className="relative overflow-hidden flex items-center justify-center p-0">
+        <BentoCard colSpan={2} className="relative overflow-hidden flex items-center justify-center p-0 min-h-[200px] md:min-h-auto">
           <div className="absolute inset-0 z-0">
             <DashboardWeather />
           </div>
