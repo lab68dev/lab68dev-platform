@@ -2,9 +2,12 @@
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Save, Download, Loader2, Palette, Type } from "lucide-react"
-import { Template, StyleSettings, ResumeData } from "@/lib/types/resume"
+import { Separator } from "@/components/ui/separator"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Save, Download, Loader2, Type, FileText } from "lucide-react"
+import { ResumeData } from "@/lib/types/resume"
+import { FontSelector } from "./FontSelector"
+import { ResumeHelpDialog } from "./ResumeHelpDialog"
 
 interface ResumeToolbarProps {
   resumeTitle: string
@@ -13,9 +16,6 @@ interface ResumeToolbarProps {
   handleSave: () => void
   isDownloading: boolean
   handleDownload: () => void
-  templates: any[]
-  selectedTemplate: Template
-  setSelectedTemplate: (val: Template) => void
   resumeData: ResumeData
   setResumeData: (val: ResumeData) => void
   fontOptions: any[]
@@ -28,132 +28,123 @@ export function ResumeToolbar({
   handleSave,
   isDownloading,
   handleDownload,
-  templates,
-  selectedTemplate,
-  setSelectedTemplate,
   resumeData,
   setResumeData,
   fontOptions
 }: ResumeToolbarProps) {
   return (
-    <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            <Input
-              value={resumeTitle}
-              onChange={(e) => setResumeTitle(e.target.value)}
-              className="h-8 w-full md:w-64 text-sm font-semibold"
-              placeholder="Resume Title"
-            />
+    <div className="sticky top-6 z-50 px-4 mb-8 print:hidden">
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-gray-950/90 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 rounded-2xl p-2.5 pr-3 flex items-center justify-between gap-4 ring-1 ring-white/5 transition-all hover:bg-gray-950/95 hover:shadow-blue-900/10">
+          
+          {/* Group 1: File Info */}
+          <div className="flex items-center gap-3 pl-2">
+            <div className="h-10 w-10 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20">
+               <FileText className="h-5 w-5 text-blue-400" />
+            </div>
+            <div className="flex flex-col justify-center">
+              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-0.5">Filename</span>
+              <Input
+                value={resumeTitle}
+                onChange={(e) => setResumeTitle(e.target.value)}
+                className="h-6 w-40 md:w-52 bg-transparent border-none shadow-none focus-visible:ring-0 font-semibold text-base px-0 p-0 text-gray-200 placeholder:text-gray-700 focus:text-blue-400 transition-colors"
+                placeholder="Untitled Resume"
+              />
+            </div>
           </div>
-          <div className="flex gap-2 w-full md:w-auto justify-end">
-            <Button variant="outline" size="sm" onClick={handleSave} disabled={isSaving} className="flex-1 md:flex-none">
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save
-                </>
-              )}
-            </Button>
-            <Button size="sm" onClick={handleDownload} disabled={isDownloading} className="flex-1 md:flex-none">
-              {isDownloading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Creating PDF...
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </>
-              )}
-            </Button>
+
+          <div className="h-10 w-[1px] bg-white/10 mx-2 hidden md:block" />
+
+          {/* Group 2: Editor Tools */}
+          <div className="hidden md:flex items-center gap-2 bg-gray-900/50 p-1.5 rounded-xl border border-white/5">
+             <TooltipProvider>
+                <Tooltip delayDuration={300}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center">
+                       <FontSelector
+                        value={resumeData.styleSettings.fontFamily}
+                        onChange={(val) => setResumeData({
+                          ...resumeData,
+                          styleSettings: { ...resumeData.styleSettings, fontFamily: val }
+                        })}
+                        fonts={fontOptions}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-gray-900 border-gray-800 text-gray-300">Change Font</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <div className="w-[1px] h-6 bg-white/10 mx-1" />
+
+              <TooltipProvider>
+                <Tooltip delayDuration={300}>
+                  <TooltipTrigger asChild>
+                     <div className="flex items-center bg-gray-950 rounded-lg px-2 h-9 border border-white/10 shadow-sm focus-within:ring-1 focus-within:ring-blue-500/50 transition-all hover:border-white/20">
+                        <Type className="h-4 w-4 text-gray-500 mr-2" />
+                        <Input
+                            type="number"
+                            value={resumeData.styleSettings.fontSize.replace('pt', '')}
+                            onChange={(e) => setResumeData({
+                              ...resumeData,
+                              styleSettings: { ...resumeData.styleSettings, fontSize: e.target.value } 
+                            })}
+                            className="w-10 h-full p-0 bg-transparent border-none text-sm font-medium text-center focus-visible:ring-0 appearance-none text-gray-300"
+                            min={8}
+                            max={24}
+                        />
+                        <span className="text-[10px] font-medium text-gray-600 ml-1 select-none">pt</span>
+                     </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-gray-900 border-gray-800 text-gray-300">Font Size</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+          </div>
+
+          {/* Group 3: Actions */}
+          <div className="flex items-center gap-2 ml-auto">
+            <ResumeHelpDialog />
+            
+            <div className="w-2" />
+
+            <TooltipProvider>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="icon" onClick={handleSave} disabled={isSaving} className="rounded-xl h-10 w-10 bg-transparent border-white/10 text-gray-400 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                    {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-gray-900 border-gray-800 text-gray-300">Save Progress</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <Button 
+                    size="sm" 
+                    onClick={handleDownload} 
+                    disabled={isDownloading} 
+                    className="rounded-xl px-5 h-10 font-semibold shadow-lg shadow-blue-500/10 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    {isDownloading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4 mr-2" />
+                        Download PDF
+                      </>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-gray-900 border-gray-800 text-gray-300">Export to PDF</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
-      </div>
-
-      <div className="container mx-auto px-4 pb-4">
-        <Card className="p-3 shadow-lg bg-card/95 backdrop-blur border-primary/10">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-            <div className="flex p-1 bg-muted rounded-xl overflow-x-auto scrollbar-hide w-full lg:w-auto">
-              {templates.map(t => (
-                <button
-                  key={t.value}
-                  onClick={() => setSelectedTemplate(t.value)}
-                  className={`px-4 py-2 text-xs font-semibold rounded-lg whitespace-nowrap transition-all duration-200 ${
-                    selectedTemplate === t.value 
-                      ? 'bg-background text-primary shadow-sm ring-1 ring-black/5' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-black/5'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-6 border-t lg:border-t-0 lg:border-l pt-4 lg:pt-0 lg:pl-6 w-full lg:w-auto justify-center lg:justify-end">
-              <div className="flex items-center gap-2 group">
-                <div className="p-1.5 rounded-md group-hover:bg-accent transition-colors">
-                  <Palette className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="relative w-8 h-8 rounded-full border-2 border-background shadow-inner cursor-pointer overflow-hidden ring-1 ring-border">
-                  <input
-                    type="color"
-                    value={resumeData.styleSettings.primaryColor}
-                    onChange={(e) => setResumeData({
-                      ...resumeData,
-                      styleSettings: { ...resumeData.styleSettings, primaryColor: e.target.value }
-                    })}
-                    className="absolute inset-0 w-full h-full scale-150 cursor-pointer border-none p-0"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 group">
-                <div className="p-1.5 rounded-md group-hover:bg-accent transition-colors">
-                  <Type className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <select
-                  value={resumeData.styleSettings.fontFamily}
-                  onChange={(e) => setResumeData({
-                    ...resumeData,
-                    styleSettings: { ...resumeData.styleSettings, fontFamily: e.target.value }
-                  })}
-                  className="bg-transparent text-sm font-medium border-none focus:ring-0 cursor-pointer hover:text-primary transition-colors"
-                >
-                  {fontOptions.map(font => (
-                    <option key={font.value} value={font.value} className="bg-card text-foreground">{font.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex bg-muted rounded-lg p-1 ring-1 ring-black/5">
-                {(['small', 'medium', 'large'] as const).map(size => (
-                  <button
-                    key={size}
-                    onClick={() => setResumeData({
-                      ...resumeData,
-                      styleSettings: { ...resumeData.styleSettings, fontSize: size }
-                    })}
-                    className={`px-3 py-1 text-[10px] uppercase font-bold rounded-md transition-all ${
-                      resumeData.styleSettings.fontSize === size 
-                        ? 'bg-background text-primary shadow-sm' 
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {size[0]}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Card>
       </div>
     </div>
   )
