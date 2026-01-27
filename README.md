@@ -11,6 +11,12 @@
 
 ---
 
+## Demo
+
+![Platform Demo](public/demo_video/Demo_Video.gif)
+
+---
+
 ## Highlights
 
 - **Enterprise-Grade Security** – bcrypt password hashing, JWT sessions, Two-Factor Authentication (2FA), rate limiting, and automated email notifications.
