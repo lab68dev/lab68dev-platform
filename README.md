@@ -13,7 +13,7 @@
 
 ## Demo
 
-![Platform Demo](public/demo_video/Demo_Video.gif)
+<video src="public/demo_video/demo.mp4" controls width="100%"></video>
 
 ---
 
