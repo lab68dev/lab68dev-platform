@@ -128,13 +128,18 @@ export function Footer() {
             <div className="space-y-4">
               <h4 className="text-sm font-mono font-semibold text-white uppercase tracking-wider">Company</h4>
               <ul className="space-y-3">
-                {["About", "Careers", "Blog", "Contact"].map((item) => (
-                  <li key={item}>
+                {[
+                  { label: "About", href: "#mission" }, // Linked to Mission section
+                  { label: "Careers", href: "#" },
+                  { label: "Blog", href: "/blog" },
+                  { label: "Contact", href: "mailto:lab68dev@gmail.com" }
+                ].map((item) => (
+                  <li key={item.label}>
                      <Link 
-                      href="#" 
+                      href={item.href} 
                       className="text-sm text-gray-500 hover:text-pink-400 transition-colors"
                     >
-                      {item}
+                      {item.label}
                     </Link>
                   </li>
                 ))}
@@ -166,7 +171,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600 font-mono">
           <p>
-            © {currentYear} Lab68Dev Platform. All code is open source.
+            © {currentYear} Lab68Dev Studio.
           </p>
           <div className="flex items-center gap-6">
             <Link href="#" className="hover:text-gray-400 transition-colors flex items-center gap-2">
