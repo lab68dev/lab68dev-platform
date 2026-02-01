@@ -7,7 +7,6 @@ import { MissionSection } from "./MissionSection"
 import { TechStackSection } from "./TechStackSection"
 import { ServicesSection } from "./ServicesSection"
 import { WhyChooseUsSection } from "./WhyChooseUsSection"
-import { TeamSection } from "./TeamSection"
 import { SponsorSection } from "./SponsorSection"
 import { Footer } from "@/components/footer"
 
@@ -38,7 +37,6 @@ const navItems: CardNavItem[] = [
     textColor: "oklch(1 0 0)",
     links: [
       { label: "Mission", href: "#mission", ariaLabel: "Our Mission" },
-      { label: "Team", href: "#founder", ariaLabel: "Meet the Team" },
       { label: "Contact", href: "mailto:lab68dev@gmail.com", ariaLabel: "Contact Us" }
     ]
   }
@@ -65,7 +63,6 @@ export function LandingClient() {
         <TechStackSection t={t} />
         <ServicesSection t={t} />
         <WhyChooseUsSection t={t} />
-        <TeamSection t={t} />
         <SponsorSection t={t} />
         
         <Footer />
