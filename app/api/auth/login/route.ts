@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { loginRateLimit, clearRateLimit } from '@/lib/utils/rate-limiter'
 import { verifyMFAToken } from '@/lib/utils/mfa'
 import { sendSecurityNotification } from '@/lib/utils/security-notifications'
-import { createSession, detectSuspiciousActivity } from '@/lib/utils/session-manager'
+import { createSession, detectSuspiciousActivity, type UserSession } from '@/lib/utils/session-manager'
 import bcrypt from 'bcryptjs'
 
 // TODO: Replace with your actual database client
@@ -116,11 +116,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 7. Create session
-    const session = await createSession(
+    const session = createSession(
       user.id,
       userAgent,
       ip,
-      { expiresInDays: 7 }
+      7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
     )
 
     // 8. Check for suspicious activity
@@ -129,23 +129,39 @@ export async function POST(request: NextRequest) {
     //   where: { userId: user.id, isActive: true }
     // })
     
-    const allUserSessions = [] // Mock empty sessions
-
-    const suspiciousFlags = detectSuspiciousActivity(session, allUserSessions)
+    const allUserSessions: UserSession[] = [] // Mock empty sessions
     
-    if (suspiciousFlags.length > 0) {
-      await sendSecurityNotification({
-        type: 'suspicious_activity',
-        userEmail: user.email,
-        userName: user.name,
-        details: {
-          reason: suspiciousFlags.join(', '),
-          ipAddress: session.ipAddress,
-          location: session.location,
-          device: `${session.deviceInfo.browser} on ${session.deviceInfo.os}`,
-          timestamp: new Date().toISOString(),
+    // Only check for suspicious activity if there's a previous session
+    if (allUserSessions.length > 0) {
+      const previousSession = allUserSessions[0]
+      // Add location to current session for suspicious activity check
+      const sessionWithLocation: UserSession = {
+        ...session,
+        location: {
+          ip: ip,
+          country: undefined,
+          city: undefined
         },
-      })
+        isActive: true,
+        isCurrent: true
+      }
+      
+      const suspiciousFlags = detectSuspiciousActivity(sessionWithLocation, previousSession)
+      
+      if (suspiciousFlags.suspicious && suspiciousFlags.reasons.length > 0) {
+        await sendSecurityNotification({
+          type: 'suspicious_activity',
+          userEmail: user.email,
+          userName: user.name,
+          details: {
+            reason: suspiciousFlags.reasons.join(', '),
+            ipAddress: ip,
+            location: 'Unknown',
+            device: `${session.deviceInfo.browser} on ${session.deviceInfo.os}`,
+            timestamp: new Date().toISOString(),
+          },
+        })
+      }
     }
 
     // 9. Save session to database
@@ -165,7 +181,7 @@ export async function POST(request: NextRequest) {
     // })
 
     // 10. Clear rate limit on successful login
-    await clearRateLimit(`login:${ip}`)
+    await clearRateLimit(request, () => `login:${ip}`)
 
     // 11. Send login notification
     await sendSecurityNotification({
@@ -173,8 +189,8 @@ export async function POST(request: NextRequest) {
       userEmail: user.email,
       userName: user.name,
       details: {
-        ipAddress: session.ipAddress,
-        location: session.location,
+        ipAddress: ip,
+        location: 'Unknown',
         device: `${session.deviceInfo.browser} on ${session.deviceInfo.os}`,
         timestamp: new Date().toISOString(),
       },
@@ -186,8 +202,8 @@ export async function POST(request: NextRequest) {
     //   where: { id: user.id },
     //   data: {
     //     lastLoginAt: new Date(),
-    //     lastLoginIP: session.ipAddress,
-    //     lastLoginLocation: session.location,
+    //     lastLoginIP: ip,
+    //     lastLoginLocation: 'Unknown',
     //   }
     // })
 
