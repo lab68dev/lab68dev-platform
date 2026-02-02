@@ -13,7 +13,9 @@
 
 ## Demo
 
-<video src="public/demo_video/demo.mp4" controls width="100%"></video>
+[![Demo Video](https://img.shields.io/badge/▶️_Watch-Demo_Video-red?style=for-the-badge)](public/demo_video/demo.mp4)
+
+*Click above to download and watch the demo video*
 
 ---
 
