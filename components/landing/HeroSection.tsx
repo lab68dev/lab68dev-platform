@@ -49,7 +49,7 @@ export function HeroSection({ t }: HeroSectionProps) {
           <div className="flex justify-center items-center w-full mb-4">
              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance animate-fade-in-up flex items-center justify-center gap-3">
               <RotatingText
-                texts={['Think', 'Code', 'Test', 'Ship']}
+                texts={['Manage', 'Code', 'Collaborate', 'Deploy']}
                 mainClassName="px-2 sm:px-2 md:px-3 bg-primary text-primary-foreground overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
                 staggerFrom="last"
                 initial={{ y: "100%" }}
@@ -90,16 +90,16 @@ export function HeroSection({ t }: HeroSectionProps) {
           {/* Stats Section */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-16 max-w-2xl mx-auto animate-fade-in-up delay-700">
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">10+</div>
-              <div className="text-sm text-muted-foreground">Features</div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">GenAI</div>
+              <div className="text-sm text-muted-foreground">{t.landing.stats.features}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">100%</div>
-              <div className="text-sm text-muted-foreground">Open Source</div>
+              <div className="text-sm text-muted-foreground">{t.landing.stats.openSource}</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-sm text-muted-foreground">Available</div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">Live</div>
+              <div className="text-sm text-muted-foreground">{t.landing.stats.available}</div>
             </div>
           </div>
         </div>
