@@ -738,14 +738,14 @@ const translations: Record<Language, any> = {
     landing: {
       hero: {
         title: "Think. Code. Test. Ship.",
-        subtitle: "The ultimate platform for developers who build, learn, and collaborate.",
+        subtitle: "A complete workspace featuring AI tools, Kanban boards, and real-time collaboration. Open source and built for developers.",
         cta: "Enter Lab68",
-        badge: "Next-Gen Collaboration Platform",
+        badge: "v1.0 Now Available",
       },
       stats: {
-        features: "Features",
+        features: "AI Powered",
         openSource: "Open Source",
-        available: "Available",
+        available: "Real-Time",
       },
       mission: {
         title: "Our Mission",
