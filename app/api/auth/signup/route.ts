@@ -1,3 +1,4 @@
+import 'server-only'
 import { NextRequest, NextResponse } from 'next/server'
 import { signupRateLimit, clearRateLimit } from '@/lib/utils/rate-limiter'
 import { validatePasswordStrength } from '@/lib/utils/password-validator'
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
   try {
     // 1. Rate limiting - Prevent brute force signup attempts
     const rateLimitResult = await signupRateLimit(request)
-    
+
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         {
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     // 5. Validate password strength
     const passwordValidation = await validatePasswordStrength(password, [email, name])
-    
+
     if (passwordValidation.score < 3) {
       return NextResponse.json(
         {
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
     // const existingUser = await db.users.findUnique({
     //   where: { email: email.toLowerCase() }
     // })
-    
+
     // if (existingUser) {
     //   return NextResponse.json(
     //     { error: 'An account with this email already exists' },
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     // 10. Send welcome email (optional)
     const userAgent = request.headers.get('user-agent') || 'Unknown'
-    
+
     await sendSecurityNotification({
       type: 'login',
       userEmail: user.email,

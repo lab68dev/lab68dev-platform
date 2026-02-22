@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
+import { Trophy } from "lucide-react"
 
 type Position = { x: number; y: number }
 type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT"
@@ -9,6 +10,9 @@ type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT"
 const GRID_SIZE = 20
 const CELL_SIZE = 20
 const INITIAL_SPEED = 150
+
+import { getCurrentUser } from "@/lib/features/auth"
+import { saveScore } from "@/lib/features/games"
 
 export default function SnakePage() {
   const [snake, setSnake] = useState<Position[]>([{ x: 10, y: 10 }])
@@ -20,10 +24,14 @@ export default function SnakePage() {
   const [score, setScore] = useState(0)
   const [highScore, setHighScore] = useState(0)
   const [speed, setSpeed] = useState(INITIAL_SPEED)
+  const [user, setUser] = useState<any>(null)
   
   const gameLoopRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    const currentUser = getCurrentUser()
+    setUser(currentUser)
+
     // Load high score from localStorage
     const savedHighScore = localStorage.getItem("snakeHighScore")
     if (savedHighScore) {
@@ -38,6 +46,13 @@ export default function SnakePage() {
       localStorage.setItem("snakeHighScore", score.toString())
     }
   }, [score, highScore])
+
+  // Handle game over - save to DB
+  useEffect(() => {
+    if (isGameOver && score > 0 && user) {
+      saveScore(user.id, "snake", score).catch(err => console.error("Score save failed:", err))
+    }
+  }, [isGameOver, score, user])
 
   const generateFood = useCallback((currentSnake: Position[]): Position => {
     let newFood: Position
@@ -166,9 +181,15 @@ export default function SnakePage() {
     <div className="p-8 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/dashboard/entertainment" className="text-primary hover:underline mb-2 inline-block">
-          ← Back to Games
-        </Link>
+        <div className="flex items-center gap-4 mb-2">
+          <Link href="/dashboard/entertainment" className="text-primary hover:underline">
+            ← Back to Games
+          </Link>
+          <span className="text-muted-foreground/30">|</span>
+          <Link href="/dashboard/entertainment/leaderboard" className="text-primary hover:underline flex items-center gap-1">
+            <Trophy className="h-3 w-3" /> Hall of Fame
+          </Link>
+        </div>
         <h1 className="text-4xl font-bold mb-2">Snake</h1>
         <p className="text-muted-foreground">Classic snake game - eat food and grow!</p>
       </div>

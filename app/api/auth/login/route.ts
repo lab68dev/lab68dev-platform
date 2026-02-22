@@ -1,3 +1,4 @@
+import 'server-only'
 import { NextRequest, NextResponse } from 'next/server'
 import { loginRateLimit, clearRateLimit } from '@/lib/utils/rate-limiter'
 import { verifyMFAToken } from '@/lib/utils/mfa'
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     // 1. Rate limiting - Prevent brute force attacks
     const rateLimitResult = await loginRateLimit(request)
-    
+
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         {
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     // 5. Verify password
     const isValidPassword = await bcrypt.compare(password, user.password)
-    
+
     if (!isValidPassword) {
       // Send notification after multiple failed attempts
       if (rateLimitResult.remaining <= 2) {
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
 
       // Verify MFA token
       const mfaValid = verifyMFAToken(user.mfaSecret!, mfaToken)
-      
+
       if (!mfaValid.valid) {
         return NextResponse.json(
           { error: 'Invalid MFA code. Please try again.' },
@@ -128,9 +129,9 @@ export async function POST(request: NextRequest) {
     // const allUserSessions = await db.sessions.findMany({
     //   where: { userId: user.id, isActive: true }
     // })
-    
+
     const allUserSessions: UserSession[] = [] // Mock empty sessions
-    
+
     // Only check for suspicious activity if there's a previous session
     if (allUserSessions.length > 0) {
       const previousSession = allUserSessions[0]
@@ -145,9 +146,9 @@ export async function POST(request: NextRequest) {
         isActive: true,
         isCurrent: true
       }
-      
+
       const suspiciousFlags = detectSuspiciousActivity(sessionWithLocation, previousSession)
-      
+
       if (suspiciousFlags.suspicious && suspiciousFlags.reasons.length > 0) {
         await sendSecurityNotification({
           type: 'suspicious_activity',

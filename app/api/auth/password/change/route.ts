@@ -1,3 +1,4 @@
+import 'server-only'
 import { NextRequest, NextResponse } from 'next/server'
 import { validatePasswordStrength } from '@/lib/utils/password-validator'
 import { sendSecurityNotification } from '@/lib/utils/security-notifications'
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     // TODO: Get authenticated user from session/JWT
     const userId = request.headers.get('x-user-id')
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Unauthorized. Please log in.' },
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Verify current password
     const isValidPassword = await bcrypt.compare(currentPassword, user.password)
-    
+
     if (!isValidPassword) {
       return NextResponse.json(
         { error: 'Current password is incorrect' },
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     // 4. Check if new password is same as current password
     const isSamePassword = await bcrypt.compare(newPassword, user.password)
-    
+
     if (isSamePassword) {
       return NextResponse.json(
         { error: 'New password must be different from current password' },
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // 5. Validate new password strength
     const passwordValidation = await validatePasswordStrength(newPassword, [user.email, user.name])
-    
+
     if (passwordValidation.score < 3) {
       return NextResponse.json(
         {

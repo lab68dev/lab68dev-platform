@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
+import { Trophy } from "lucide-react"
+import { getCurrentUser } from "@/lib/features/auth"
+import { saveScore } from "@/lib/features/games"
 
 type Cell = string | null
 type Position = { x: number; y: number }
@@ -48,11 +51,15 @@ export default function TetrisPage() {
   const [isGameOver, setIsGameOver] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [highScore, setHighScore] = useState(0)
+  const [user, setUser] = useState<any>(null)
 
   const gameLoopRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const dropSpeed = Math.max(100, 1000 - (level - 1) * 100)
 
   useEffect(() => {
+    const currentUser = getCurrentUser()
+    setUser(currentUser)
+
     const savedHighScore = localStorage.getItem("tetrisHighScore")
     if (savedHighScore) {
       setHighScore(parseInt(savedHighScore))
@@ -66,6 +73,12 @@ export default function TetrisPage() {
       localStorage.setItem("tetrisHighScore", score.toString())
     }
   }, [score, highScore])
+
+  useEffect(() => {
+    if (isGameOver && score > 0 && user) {
+      saveScore(user.id, "tetris", score).catch(err => console.error("Score save failed:", err))
+    }
+  }, [isGameOver, score, user])
 
   const getRandomShape = useCallback((): ShapeType => {
     const shapes = Object.keys(SHAPES) as ShapeType[]
@@ -304,9 +317,15 @@ export default function TetrisPage() {
     <div className="p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/dashboard/entertainment" className="text-primary hover:underline mb-2 inline-block">
-          ← Back to Games
-        </Link>
+        <div className="flex items-center gap-4 mb-2">
+          <Link href="/dashboard/entertainment" className="text-primary hover:underline">
+            ← Back to Games
+          </Link>
+          <span className="text-muted-foreground/30">|</span>
+          <Link href="/dashboard/entertainment/leaderboard" className="text-primary hover:underline flex items-center gap-1">
+            <Trophy className="h-3 w-3" /> Hall of Fame
+          </Link>
+        </div>
         <h1 className="text-4xl font-bold mb-2">Tetris</h1>
         <p className="text-muted-foreground">Classic falling blocks puzzle game</p>
       </div>

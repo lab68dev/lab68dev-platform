@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Clock, Zap, Trophy, RotateCcw, Home, Target, Keyboard } from "lucide-react"
 import Link from "next/link"
+import { getCurrentUser } from "@/lib/features/auth"
+import { saveScore } from "@/lib/features/games"
 
 type Difficulty = "easy" | "medium" | "hard" | "expert"
 type TimeLength = 30 | 60 | 120
@@ -73,7 +75,12 @@ export default function TypingGamePage() {
   const [totalAttempts, setTotalAttempts] = useState(0)
   const [errors, setErrors] = useState(0)
   const [stats, setStats] = useState<GameStats | null>(null)
+  const [user, setUser] = useState<any>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setUser(getCurrentUser())
+  }, [])
 
   // Generate random words based on difficulty
   const generateWords = useCallback((diff: Difficulty, count: number = 100) => {
@@ -132,6 +139,11 @@ export default function TypingGamePage() {
       errors
     })
     setGameState("finished")
+
+    // Save score to DB
+    if (user && wpm > 0) {
+      saveScore(user.id, "typing", wpm).catch(err => console.error("Score save failed:", err))
+    }
   }
 
   // Handle word input
@@ -195,7 +207,13 @@ export default function TypingGamePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold mb-2">⌨️ Typing Speed Test</h1>
-            <p className="text-muted-foreground">Test your typing speed and accuracy</p>
+            <div className="flex items-center gap-4">
+              <p className="text-muted-foreground">Test your typing speed and accuracy</p>
+              <span className="text-muted-foreground/30">|</span>
+              <Link href="/dashboard/entertainment/leaderboard" className="text-primary hover:underline flex items-center gap-1">
+                <Trophy className="h-3 w-3" /> Hall of Fame
+              </Link>
+            </div>
           </div>
           <Link href="/dashboard/entertainment">
             <Button variant="outline" className="gap-2">

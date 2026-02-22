@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Bell, X, Calendar, Clock } from "lucide-react"
+import { createClient } from "@/lib/database/supabase-client"
 import { getCurrentUser } from "@/lib/features/auth"
 import { getTranslations, getUserLanguage } from "@/lib/config"
 
@@ -20,32 +21,58 @@ export function NotificationsPanel() {
   const [language, setLanguage] = useState(getUserLanguage())
   const t = getTranslations(language)
 
+  const fetchUpcomingMeetings = async (userId: string) => {
+    const supabase = createClient()
+    const now = new Date().toISOString()
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
+    const { data, error } = await supabase
+      .from('meetings')
+      .select('*')
+      .eq('user_id', userId)
+      .gt('date', now.split('T')[0])
+      .lte('date', tomorrow.split('T')[0])
+      .order('date', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching meetings:', error)
+      return
+    }
+
+    setUpcomingMeetings(data || [])
+  }
+
   useEffect(() => {
     const user = getCurrentUser()
     if (!user) return
 
-    const checkUpcomingMeetings = () => {
-      const storedMeetings = localStorage.getItem("lab68_meetings")
-      if (!storedMeetings) return
+    fetchUpcomingMeetings(user.id)
 
-      const allMeetings: Meeting[] = JSON.parse(storedMeetings)
-      const userMeetings = allMeetings.filter((m) => m.userId === user.id)
+    // Set up Supabase Realtime subscription
+    const supabase = createClient()
+    const channel = supabase
+      .channel('meetings-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'meetings',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchUpcomingMeetings(user.id)
+        }
+      )
+      .subscribe()
 
-      const now = new Date()
-      const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+    // Fallback polling for time-based updates (e.g. "Starts in 5m" changes every minute)
+    const interval = setInterval(() => fetchUpcomingMeetings(user.id), 60000)
 
-      const upcoming = userMeetings.filter((meeting) => {
-        const meetingDateTime = new Date(`${meeting.date}T${meeting.time}`)
-        return meetingDateTime > now && meetingDateTime <= next24Hours
-      })
-
-      setUpcomingMeetings(upcoming)
+    return () => {
+      supabase.removeChannel(channel)
+      clearInterval(interval)
     }
-
-    checkUpcomingMeetings()
-    const interval = setInterval(checkUpcomingMeetings, 60000) // Check every minute
-
-    return () => clearInterval(interval)
   }, [])
 
   const formatTimeUntil = (date: string, time: string) => {

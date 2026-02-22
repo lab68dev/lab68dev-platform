@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import { Trophy } from "lucide-react"
+import { getCurrentUser } from "@/lib/features/auth"
+import { saveScore } from "@/lib/features/games"
 
 type GameMode = "scramble" | "typing"
 
@@ -54,9 +57,12 @@ export default function WordScramblePage() {
   const [wpm, setWpm] = useState(0)
   const [startTime, setStartTime] = useState<number | null>(null)
   const [totalChars, setTotalChars] = useState(0)
+  const [user, setUser] = useState<any>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    setUser(getCurrentUser())
+    
     const savedHighScore = localStorage.getItem(`${gameMode}HighScore`)
     if (savedHighScore) {
       setHighScore(parseInt(savedHighScore))
@@ -86,6 +92,14 @@ export default function WordScramblePage() {
     }
     return () => clearInterval(timer)
   }, [isPlaying, timeLeft])
+
+  // Handle game over - save to DB
+  useEffect(() => {
+    if (gameOver && score > 0 && user) {
+      saveScore(user.id, gameMode === "scramble" ? "scramble" : "typing", score)
+        .catch(err => console.error("Score save failed:", err))
+    }
+  }, [gameOver, score, user, gameMode])
 
   function scrambleWord(word: string): string {
     const arr = word.split("")
@@ -224,9 +238,15 @@ export default function WordScramblePage() {
     <div className="p-8 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/dashboard/entertainment" className="text-primary hover:underline mb-2 inline-block">
-          ← Back to Games
-        </Link>
+        <div className="flex items-center gap-4 mb-2">
+          <Link href="/dashboard/entertainment" className="text-primary hover:underline">
+            ← Back to Games
+          </Link>
+          <span className="text-muted-foreground/30">|</span>
+          <Link href="/dashboard/entertainment/leaderboard" className="text-primary hover:underline flex items-center gap-1">
+            <Trophy className="h-3 w-3" /> Hall of Fame
+          </Link>
+        </div>
         <h1 className="text-4xl font-bold mb-2">Word Challenge</h1>
         <p className="text-muted-foreground">Test your word skills with scramble or typing challenges!</p>
       </div>

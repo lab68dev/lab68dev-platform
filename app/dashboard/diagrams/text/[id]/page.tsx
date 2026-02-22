@@ -5,7 +5,8 @@ import { useRouter, useParams } from "next/navigation"
 import { getCurrentUser } from "@/lib/features/auth"
 import { useLanguage } from "@/lib/config"
 import { Save, Download, ArrowLeft, Copy, Maximize2, Minimize2, BookOpen } from "lucide-react"
-import mermaid from "mermaid"
+// Removed static import for mermaid to enable lazy-loading
+// import mermaid from "mermaid"
 
 interface Diagram {
   id: string
@@ -33,7 +34,8 @@ export default function TextDiagramEditorPage() {
   const [showDocumentation, setShowDocumentation] = useState(false)
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    const initMermaid = async () => {
+      const { default: mermaid } = await import("mermaid")
       mermaid.initialize({
         startOnLoad: false,
         theme: "dark",
@@ -50,6 +52,10 @@ export default function TextDiagramEditorPage() {
           fontSize: "16px",
         },
       })
+    }
+    
+    if (typeof window !== "undefined") {
+      initMermaid()
     }
   }, [])
 
@@ -85,6 +91,7 @@ export default function TextDiagramEditorPage() {
       setError(null)
       previewRef.current.innerHTML = ""
       
+      const { default: mermaid } = await import("mermaid")
       const id = `mermaid-${Date.now()}`
       const { svg } = await mermaid.render(id, textContent)
       previewRef.current.innerHTML = svg
@@ -118,6 +125,7 @@ export default function TextDiagramEditorPage() {
     if (!textContent) return
 
     try {
+      const { default: mermaid } = await import("mermaid")
       const id = `mermaid-export-${Date.now()}`
       const { svg } = await mermaid.render(id, textContent)
       

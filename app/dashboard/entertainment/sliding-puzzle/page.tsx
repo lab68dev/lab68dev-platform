@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { Trophy } from "lucide-react"
+import { getCurrentUser } from "@/lib/features/auth"
+import { saveScore } from "@/lib/features/games"
 
 type Tile = number | null
 
@@ -12,10 +15,26 @@ export default function SlidingPuzzlePage() {
   const [isComplete, setIsComplete] = useState(false)
   const [timer, setTimer] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
+  const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
+    setUser(getCurrentUser())
     initializeGame(gridSize)
   }, [])
+
+  // Handle game complete - save to DB
+  useEffect(() => {
+    if (isComplete && user) {
+      // Calculate score for Sliding Puzzle: (GridSize^4) / (Moves + Time)
+      // Example: 3x3 (size 3) with 50 moves and 60 seconds = 81 / 110 * 1000 = ~736 points
+      const basePoints = Math.pow(gridSize, 4) * 10
+      const movePenalty = moves * 2
+      const timePenalty = timer
+      const finalScore = Math.max(10, Math.floor(basePoints * 100 / (movePenalty + timePenalty + 1)))
+      
+      saveScore(user.id, "sliding", finalScore).catch(err => console.error("Score save failed:", err))
+    }
+  }, [isComplete, user, gridSize, moves, timer])
 
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -118,9 +137,15 @@ export default function SlidingPuzzlePage() {
     <div className="p-8 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/dashboard/entertainment" className="text-primary hover:underline mb-2 inline-block">
-          ← Back to Games
-        </Link>
+        <div className="flex items-center gap-4 mb-2">
+          <Link href="/dashboard/entertainment" className="text-primary hover:underline">
+            ← Back to Games
+          </Link>
+          <span className="text-muted-foreground/30">|</span>
+          <Link href="/dashboard/entertainment/leaderboard" className="text-primary hover:underline flex items-center gap-1">
+            <Trophy className="h-3 w-3" /> Hall of Fame
+          </Link>
+        </div>
         <h1 className="text-4xl font-bold mb-2">Sliding Puzzle</h1>
         <p className="text-muted-foreground">Arrange the tiles in numerical order</p>
       </div>

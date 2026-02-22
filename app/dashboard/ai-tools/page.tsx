@@ -20,7 +20,7 @@ export default function AIToolsPage() {
   
   // Manual input state management for @ai-sdk/react v3+
   const [input, setInput] = useState("")
-  const [selectedModel, setSelectedModel] = useState("google:gemini-1.5-pro")
+  const [selectedModel, setSelectedModel] = useState("llama-3.3-70b-versatile")
 
   const { messages, sendMessage, status, setMessages } = useChat({
     // Cast to any to bypass strict UIMessage type vs helper type conflicts if necessary
@@ -99,7 +99,7 @@ export default function AIToolsPage() {
                 <div className="flex items-center gap-2 mt-1">
                   <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
                   <p className="text-sm text-muted-foreground">
-                    Powered by Vercel AI Gateway
+                    Powered by Groq
                   </p>
                 </div>
               </div>
@@ -112,9 +112,10 @@ export default function AIToolsPage() {
                     <SelectValue placeholder="Select Model" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="google:gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
-                    <SelectItem value="anthropic:claude-3-5-sonnet">Claude 3.5 Sonnet</SelectItem>
-                    <SelectItem value="openai:gpt-4o">GPT-4o</SelectItem>
+                    <SelectItem value="llama-3.3-70b-versatile">Llama 3.3 70B</SelectItem>
+                    <SelectItem value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</SelectItem>
+                    <SelectItem value="gemma2-9b-it">Gemma 2 9B</SelectItem>
+                    <SelectItem value="mixtral-8x7b-32768">Mixtral 8x7B</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -160,7 +161,7 @@ export default function AIToolsPage() {
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold text-foreground">
-                        {message.role === "user" ? "You" : selectedModel.split(':')[1] || selectedModel}
+                        {message.role === "user" ? "You" : selectedModel}
                       </span>
                     </div>
                     <div className={`group relative rounded-2xl p-4 shadow-sm ${
@@ -199,7 +200,7 @@ export default function AIToolsPage() {
                   </div>
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-foreground">{selectedModel.split(':')[1] || selectedModel}</span>
+                      <span className="text-xs font-semibold text-foreground">{selectedModel}</span>
                     </div>
                     <div className="rounded-2xl p-4 bg-card border border-border shadow-sm">
                       <div className="flex items-center gap-2">
@@ -228,7 +229,7 @@ export default function AIToolsPage() {
                   type="text"
                   value={input}
                   onChange={handleInputChange}
-                  placeholder={`Ask ${selectedModel.split(':')[1] || "AI"} anything...`}
+                  placeholder={`Ask ${selectedModel} anything...`}
                   className="w-full bg-background border border-border rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted-foreground/60"
                   disabled={isLoading}
                 />

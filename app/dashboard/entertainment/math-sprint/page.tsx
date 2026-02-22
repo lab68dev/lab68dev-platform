@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import { Trophy } from "lucide-react"
+import { getCurrentUser } from "@/lib/features/auth"
+import { saveScore } from "@/lib/features/games"
 
 type Operation = "+" | "-" | "×" | "÷" | "^" | "√" | "%" | "log"
 type Difficulty = "easy" | "medium" | "hard" | "engineering"
@@ -29,9 +32,12 @@ export default function MathSprintPage() {
   const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(0)
   const [highScore, setHighScore] = useState(0)
+  const [user, setUser] = useState<any>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    setUser(getCurrentUser())
+    
     const savedHighScore = localStorage.getItem("mathSprintHighScore")
     if (savedHighScore) {
       setHighScore(parseInt(savedHighScore))
@@ -61,6 +67,13 @@ export default function MathSprintPage() {
     }
     return () => clearInterval(timer)
   }, [isPlaying, timeLeft])
+
+  // Handle game over - save to DB
+  useEffect(() => {
+    if (gameOver && score > 0 && user) {
+      saveScore(user.id, "math", score).catch(err => console.error("Score save failed:", err))
+    }
+  }, [gameOver, score, user])
 
   function generateQuestion(): Question {
     const operations: Operation[] = ["+", "-", "×"]
@@ -198,9 +211,15 @@ export default function MathSprintPage() {
     <div className="p-8 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/dashboard/entertainment" className="text-primary hover:underline mb-2 inline-block">
-          ← Back to Games
-        </Link>
+        <div className="flex items-center gap-4 mb-2">
+          <Link href="/dashboard/entertainment" className="text-primary hover:underline">
+            ← Back to Games
+          </Link>
+          <span className="text-muted-foreground/30">|</span>
+          <Link href="/dashboard/entertainment/leaderboard" className="text-primary hover:underline flex items-center gap-1">
+            <Trophy className="h-3 w-3" /> Hall of Fame
+          </Link>
+        </div>
         <h1 className="text-4xl font-bold mb-2">Math Sprint</h1>
         <p className="text-muted-foreground">Solve as many math problems as you can in 60 seconds!</p>
       </div>

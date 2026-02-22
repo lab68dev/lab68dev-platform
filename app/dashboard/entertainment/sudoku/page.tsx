@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { Trophy } from "lucide-react"
+import { getCurrentUser } from "@/lib/features/auth"
+import { saveScore } from "@/lib/features/games"
 
 type Cell = {
   value: number
@@ -21,10 +24,24 @@ export default function SudokuPage() {
   const [isComplete, setIsComplete] = useState(false)
   const [timer, setTimer] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
+  const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
+    setUser(getCurrentUser())
     generateNewGame(difficulty)
   }, [])
+
+  // Handle game complete - save to DB
+  useEffect(() => {
+    if (isComplete && user) {
+      // Calculate a "score" for Sudoku: Difficulty multiplier / time
+      const basePoints = difficulty === "easy" ? 1000 : difficulty === "medium" ? 3000 : 6000
+      const timePenalty = timer * 2
+      const finalScore = Math.max(100, basePoints - timePenalty)
+      
+      saveScore(user.id, "sudoku", finalScore).catch(err => console.error("Score save failed:", err))
+    }
+  }, [isComplete, user, difficulty, timer])
 
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -193,9 +210,15 @@ export default function SudokuPage() {
     <div className="p-8 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/dashboard/entertainment" className="text-primary hover:underline mb-2 inline-block">
-          ← Back to Games
-        </Link>
+        <div className="flex items-center gap-4 mb-2">
+          <Link href="/dashboard/entertainment" className="text-primary hover:underline">
+            ← Back to Games
+          </Link>
+          <span className="text-muted-foreground/30">|</span>
+          <Link href="/dashboard/entertainment/leaderboard" className="text-primary hover:underline flex items-center gap-1">
+            <Trophy className="h-3 w-3" /> Hall of Fame
+          </Link>
+        </div>
         <h1 className="text-4xl font-bold mb-2">Sudoku</h1>
         <p className="text-muted-foreground">Fill the grid so each row, column, and 3×3 box contains 1-9</p>
       </div>
