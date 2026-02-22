@@ -1,10 +1,19 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { JetBrains_Mono } from "next/font/google"
+import { JetBrains_Mono, IBM_Plex_Sans } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "sonner"
 
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] })
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+})
+
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+})
 
 export const metadata: Metadata = {
   title: "lab68dev Platform - Build, Learn, Collaborate",
@@ -45,12 +54,12 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body 
-        className={`${jetbrainsMono.className} font-mono antialiased bg-background text-foreground`}
+      <body
+        className={`${ibmPlexSans.className} ${ibmPlexSans.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background text-foreground`}
         suppressHydrationWarning
       >
         {children}
-        <Toaster 
+        <Toaster
           position="top-right"
           toastOptions={{
             style: {

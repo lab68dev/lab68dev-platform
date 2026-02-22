@@ -10,7 +10,10 @@ import { DashboardCalendar } from "@/components/dashboard-calendar"
 import { RecentActivity } from "@/components/recent-activity"
 import { OnboardingFlow } from "@/components/onboarding-flow"
 import { BentoCard } from "@/components/bento-card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { useLanguage } from "@/lib/config"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 interface DashboardClientProps {
   initialUser: any
@@ -92,9 +95,17 @@ export function DashboardClient({ initialUser, initialCounts, initialMeetings }:
         </BentoCard>
 
         <BentoCard colSpan={2} title="Recent Projects" icon={<FolderKanban className="h-4 w-4" />}>
-          <div className="flex h-full items-center justify-center text-muted-foreground text-sm flex-col gap-2 opacity-50">
-            <FolderKanban className="h-8 w-8" />
-            <p>No recent projects</p>
+          <div className="h-full flex items-center justify-center">
+            <EmptyState
+              icon={FolderKanban}
+              title="No active projects"
+              description="You haven't created any projects yet. Start building something amazing!"
+              action={
+                <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary/10">
+                  <Link href="/dashboard/projects">Create Project</Link>
+                </Button>
+              }
+            />
           </div>
         </BentoCard>
       </div>

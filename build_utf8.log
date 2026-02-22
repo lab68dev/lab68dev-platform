@@ -1,0 +1,15 @@
+﻿
+> lab68dev-platform@0.1.1 build D:\lab68dev-platform
+> next build
+
+   Γû▓ Next.js 16.0.10 (Turbopack)
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully in 5.5s
+   Skipping validation of types
+   Collecting page data using 15 workers ...
+   Generating static pages using 15 workers (0/44) ...
+   Generating static pages using 15 workers (11/44) 
+   Generating static pages using 15 workers (22/44) 
+   Generating static pages using 15 workers (33/44) 
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.
