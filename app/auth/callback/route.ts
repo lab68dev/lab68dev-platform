@@ -71,29 +71,34 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // If profile doesn't exist, it might be a new OAuth user where trigger failed or hasn't run yet,
-    // or a manual signup where we need them to complete a profile. 
-    // However, for standard email signup with trigger, profile should exist.
     if (!existingProfile) {
-      console.log('👤 New user/No profile detected, redirecting to signup...')
+      console.log('👤 New user/No profile detected, creating default profile...')
 
       const userData = {
         email: user.email,
-        name: user.user_metadata.full_name || user.user_metadata.name || '',
-        avatar_url: user.user_metadata.avatar_url || user.user_metadata.picture || '',
+        name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+        avatar: user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
       }
 
-      // Redirect to signup to complete profile creation if needed
-      const signupUrl = new URL('/signup', origin)
-      signupUrl.searchParams.set('email', userData.email || '')
-      if (userData.name) signupUrl.searchParams.set('name', userData.name)
-      if (userData.avatar_url) signupUrl.searchParams.set('avatar', userData.avatar_url)
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          name: userData.name,
+          language: 'en',
+          avatar: userData.avatar
+        })
 
-      return NextResponse.redirect(signupUrl.toString())
+      if (insertError) {
+        console.error('❌ Error creating profile:', insertError)
+        return NextResponse.redirect(
+          `${origin}/login?error=profile_creation_failed&message=${encodeURIComponent(insertError.message)}`
+        )
+      }
     }
 
-    // User exists, redirect to dashboard
-    console.log('✅ Existing user found, redirecting to dashboard')
+    // User profile exists or was just created, redirect to dashboard
+    console.log('✅ User profile ready, redirecting to dashboard')
     return NextResponse.redirect(`${origin}/dashboard`)
 
   } catch (error) {
