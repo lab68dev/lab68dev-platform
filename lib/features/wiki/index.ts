@@ -1,4 +1,3 @@
-import 'server-only'
 import { createClient } from '@/lib/database/supabase-client'
 import type { WikiArticle } from '@/lib/database/connection'
 

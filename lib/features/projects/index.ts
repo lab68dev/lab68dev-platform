@@ -1,4 +1,3 @@
-import 'server-only'
 import { createClient } from '@/lib/database/supabase-client'
 import { logActivity } from '@/lib/features/activity'
 import type { Project, ProjectCollaborator } from '@/lib/database/connection'
@@ -89,4 +88,15 @@ export async function searchUsers(query: string) {
     if (!res.ok) return []
     const data = await res.json()
     return data.users || []
+}
+
+export async function getProfileByEmail(email: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', email)
+        .single()
+    if (error && error.code !== 'PGRST116') throw error
+    return data || null
 }

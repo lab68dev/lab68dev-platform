@@ -1,4 +1,3 @@
-import 'server-only'
 import { createClient } from '@/lib/database/supabase-client'
 
 export async function saveScore(userId: string, game: string, score: number) {

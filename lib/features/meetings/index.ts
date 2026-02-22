@@ -1,4 +1,3 @@
-import 'server-only'
 import { createClient } from '@/lib/database/supabase-client'
 import { logActivity } from '@/lib/features/activity'
 import type { Meeting } from '@/lib/database/connection'
