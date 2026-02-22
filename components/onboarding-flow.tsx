@@ -71,8 +71,17 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingProps) {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    // Fade in animation
-    setTimeout(() => setIsVisible(true), 100)
+    // Check if user has already seen onboarding
+    const hasSeenOnboarding = localStorage.getItem("lab68dev_has_seen_onboarding")
+
+    if (!hasSeenOnboarding) {
+      // Fade in animation if they haven't seen it
+      setTimeout(() => setIsVisible(true), 100)
+    } else {
+      // Skip automatically if already seen
+      onSkip()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleNext = () => {
@@ -90,20 +99,21 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingProps) {
   }
 
   const handleComplete = () => {
+    localStorage.setItem("lab68dev_has_seen_onboarding", "true")
     setIsVisible(false)
     setTimeout(() => onComplete(), 300)
   }
 
   const handleSkipOnboarding = () => {
+    localStorage.setItem("lab68dev_has_seen_onboarding", "true")
     setIsVisible(false)
     setTimeout(() => onSkip(), 300)
   }
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center px-4 transition-opacity duration-300 ${
-        isVisible ? "opacity-100" : "opacity-0"
-      }`}
+      className={`fixed inset-0 z-50 flex items-center justify-center px-4 transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"
+        }`}
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-background/95 backdrop-blur-sm" />
@@ -127,9 +137,8 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingProps) {
               {steps.map((_, index) => (
                 <div
                   key={index}
-                  className={`h-1 flex-1 transition-colors ${
-                    index <= currentStep ? "bg-primary" : "bg-border"
-                  }`}
+                  className={`h-1 flex-1 transition-colors ${index <= currentStep ? "bg-primary" : "bg-border"
+                    }`}
                 />
               ))}
             </div>
