@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { signUp } from "@/lib/features/auth"
+import { signInOrSignUpWithEmailOnly } from "@/lib/features/auth"
 import { getTranslations, getUserLanguage } from "@/lib/config"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import {
@@ -17,20 +17,13 @@ import {
   ArrowRightIcon,
   BoltIcon,
   CheckCircleIcon,
-  ShieldCheckIcon,
-  LockClosedIcon,
-  EyeIcon,
-  EyeSlashIcon
+  ShieldCheckIcon
 } from "@heroicons/react/24/outline"
 
 export default function SignUpPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [t, setT] = useState(getTranslations("en"))
 
   useEffect(() => {
@@ -41,23 +34,12 @@ export default function SignUpPage() {
     e.preventDefault()
     setError("")
 
-    if (!email || !password) {
-      setError("Email and password are required")
+    if (!email) {
+      setError(t.auth.email + " is required")
       return
     }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match")
-      return
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters")
-      return
-    }
-
-    // Name is optional in our new flow, passing undefined
-    const result = await signUp(email, password)
+    const result = await signInOrSignUpWithEmailOnly(email, true)
 
     if (result.success) {
       router.push("/dashboard")
@@ -201,60 +183,6 @@ export default function SignUpPage() {
                     className="pl-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05]"
                     required
                   />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-                  {t.auth.password}
-                </Label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                    <LockClosedIcon className="h-5 w-5 text-slate-500 group-focus-within:text-primary transition-colors" />
-                  </div>
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-12 pr-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05]"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
-                  >
-                    {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-                  Confirm Password
-                </Label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                    <LockClosedIcon className="h-5 w-5 text-slate-500 group-focus-within:text-primary transition-colors" />
-                  </div>
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="pl-12 pr-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05]"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
-                  >
-                    {showConfirmPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
-                  </button>
                 </div>
               </div>
             </div>

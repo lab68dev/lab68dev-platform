@@ -8,13 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { signIn, checkRememberMe } from "@/lib/features/auth"
+import { signInOrSignUpWithEmailOnly, checkRememberMe } from "@/lib/features/auth"
 import { getTranslations, getUserLanguage } from "@/lib/config"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import {
-  EyeIcon,
-  EyeSlashIcon,
-  LockClosedIcon,
   EnvelopeIcon,
   ArrowRightIcon,
   SparklesIcon,
@@ -26,10 +23,8 @@ import {
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
   const [t, setT] = useState(getTranslations("en"))
 
   useEffect(() => {
@@ -49,12 +44,12 @@ export default function LoginPage() {
     e.preventDefault()
     setError("")
 
-    if (!email || !password) {
-      setError("Email and password are required")
+    if (!email) {
+      setError(t.auth.email + " is required")
       return
     }
 
-    const result = await signIn(email, password, rememberMe)
+    const result = await signInOrSignUpWithEmailOnly(email, rememberMe)
 
     if (result.success) {
       router.push("/dashboard")
@@ -200,33 +195,6 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-                  {t.auth.password}
-                </Label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                    <LockClosedIcon className="h-5 w-5 text-slate-500 group-focus-within:text-primary transition-colors" />
-                  </div>
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-12 pr-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05]"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
-                  >
-                    {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
-                  </button>
-                </div>
-              </div>
             </div>
 
             <div className="flex items-center justify-between px-1">
@@ -244,16 +212,13 @@ export default function LoginPage() {
                   {t.auth.rememberMe}
                 </span>
               </label>
-              <Link href="#" className="text-sm text-primary hover:text-white font-bold transition-colors">
-                Forgot password?
-              </Link>
             </div>
 
             <Button
               type="submit"
               className="w-full h-14 text-lg font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-slate-950 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all group rounded-2xl"
             >
-              Sign In
+              Log In
               <ArrowRightIcon className="ml-3 h-5 w-5 group-hover:translate-x-1.5 transition-transform" />
             </Button>
           </form>

@@ -200,6 +200,40 @@ export async function signIn(
   }
 }
 
+// Instant Passwordless Authentication (Hidden Password)
+// This orchestrates a seamless login/signup flow using just an email.
+export async function signInOrSignUpWithEmailOnly(
+  email: string,
+  rememberMe = true,
+): Promise<{ success: boolean; error?: string; user?: User }> {
+  try {
+    // Generate a consistent, structurally strong "hidden" password
+    // In a real production app, this should ideally use a pepper/HMAC on the backend, 
+    // but for this instant-auth lab requirement we create it deterministically here.
+    const hiddenPassword = `L@b68!${email.length}${email}SecureHash`;
+
+    // 1. Attempt to sign in first (assuming the user already exists)
+    const signInResult = await signIn(email, hiddenPassword, rememberMe);
+
+    if (signInResult.success) {
+      return signInResult; // Successfully logged in
+    }
+
+    // 2. If sign in fails (likely because user doesn't exist), attempt to sign up
+    const signUpResult = await signUp(email, hiddenPassword);
+
+    if (signUpResult.success) {
+      // Supabase signUp auto-logs you in if email confirmation is disabled,
+      // but to ensure the `rememberMe` and cache states are identical to a normal login,
+      // we'll run a clean signIn immediately after a successful signUp.
+      return await signIn(email, hiddenPassword, rememberMe);
+    }
+
+    return { success: false, error: signUpResult.error || "Instant authentication failed" };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Instant authentication encountered an error" };
+  }
+}
 
 // Sign out user
 export async function signOut(): Promise<void> {
