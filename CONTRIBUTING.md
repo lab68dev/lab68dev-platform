@@ -1,121 +1,85 @@
 # Contributing to Lab68 Development Platform
 
-Thanks for helping improve the **Lab68 Development Platform**. This guide summarizes how to get set up, follow our workflow, and ship changes that integrate smoothly with the rest of the codebase.
+Welcome to the **Lab68 Development Platform**! We're thrilled you want to contribute. This living document outlines our architecture, design principles, and how to successfully merge your code into this high-performance collaborative environment.
 
 ---
 
-## Project Overview
+## Technical Architecture
 
-- **Framework:** Next.js 16 App Router with TypeScript 5
-- **Package manager:** pnpm (workspace aware)
-- **Styling:** Tailwind CSS, component primitives in `components/ui`
-- **Localization:** Deep-merge strategy in `lib/i18n.ts` with English defaults
-- **Tooling:** ESLint, Prettier, markdownlint, and custom scripts in the repo root
+Before you dive in, here is a quick overview of our cutting-edge stack:
 
-If you are new to the project, skim `README.md` for a high-level tour before diving in.
+- **Framework:** Next.js 16 (App Router & `proxy.ts`)
+- **Language:** TypeScript 5
+- **Package Manager:** pnpm 8+
+- **Database & Auth:** Supabase (PostgreSQL with RLS)
+- **Styling:** Tailwind CSS V4 + Pre-built UI Primitives (`components/ui`)
+- **Aesthetic:** High-Contrast Cyberpunk / Brutalist Dark Mode
 
 ---
 
-## Before You Start
+## Local Development Setup
 
-### Prerequisites
+### 1. Prerequisites
+- [Node.js](https://nodejs.org/) >= 18
+- [pnpm](https://pnpm.io/) >= 8
+- A free [Supabase](https://supabase.com/) account for database provisioning.
 
-- Node.js ≥ 18
-- pnpm ≥ 8 (`corepack enable` is recommended)
-- GitHub account with a fork or branch permissions
-
-### Environment Setup
-
+### 2. Up & Running
+Clone the repository and install the dependencies:
 ```bash
 git clone https://github.com/lab68dev/lab68dev-platform.git
 cd lab68dev-platform
 pnpm install
+```
+
+### 3. Environment Configuration
+We utilize **Instant Passwordless Authentication**. This means you must connect the app to a Supabase project.
+
+1. Go to your Supabase Dashboard -> Project Settings -> API.
+2. Form a `.env.local` file at the root:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_project_url_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+```
+3. Boot the development server:
+```bash
 pnpm dev
 ```
-
-Visit [http://localhost:3000](http://localhost:3000) to confirm the app boots. Use `pnpm build && pnpm start` to preview a production build locally.
-
----
-
-## Development Workflow
-
-1. **Create a branch** describing your work, for example `feature/ai-tooling` or `fix/sidebar-layout`.
-2. **Implement the change** alongside relevant tests, docs, or localization entries.
-3. **Validate locally** before pushing: run `pnpm lint`, `pnpm build`, and any targeted scripts you touched.
-4. **Commit with Conventional Commits** syntax (`feat:`, `fix:`, `docs:`, etc.).
-5. **Push the branch** and open a Pull Request against `main`, filling out the PR template.
-
-We prefer small, focused PRs that are easy to review and merge.
+> **Note**: Our authentication automatically deterministically secures users based on their email. Do NOT introduce or submit PRs containing `bcrypt` or standard password-hashing logic.
 
 ---
 
-## Coding Standards
+## Code & Design Guidelines
 
-- **Language & Framework:** TypeScript with Next.js App Router patterns (`app/` directory routes, server components where possible).
-- **Styling:** Favor Tailwind CSS utility classes or existing components in `components/`. Keep class lists tidy and co-locate styles with the component.
-- **State & Data:** Reuse helpers in `lib/` (e.g., `lib/team.ts`, `lib/auth.ts`) rather than duplicating logic.
-- **Localization:** When adding UI copy, update `lib/i18n.ts` by extending the locale object and relying on the English default keys. Avoid hard-coded strings in components.
-- **Utilities:** Leverage shared functions in `lib/utils.ts` to maintain consistent behavior.
+### Typography System
+To maintain our premium, developer-centric aesthetic, we employ a strict dual-font system natively enforced in `app/layout.tsx`:
+- **IBM Plex Sans** (`font-sans`): MUST be used for all body text, paragraphs, descriptions, and prose. 
+- **JetBrains Mono** (`font-mono`): MUST be used for headings, numerics, code blocks, navigation elements, and dashboard statistics.
 
-Run the formatters before committing:
+### Component Design (Empty States)
+When building lists, tables, or sections that fetch data, you **MUST** account for empty data arrays.
+Do not use plain text `No results found`. Always import and utilize the `<EmptyState />` component from `components/ui/empty-state.tsx`.
+```tsx
+import { EmptyState } from "@/components/ui/empty-state"
+import { Sparkles } from "lucide-react"
 
-```bash
-pnpm prettier --write .
-pnpm lint
+<EmptyState 
+  icon={Sparkles}
+  title="No data found"
+  description="Your new data will appear right here."
+/>
 ```
 
----
-
-## Testing & Quality
-
-- **Static checks:** `pnpm lint`, `pnpm prettier --check .`
-- **Build verification:** `pnpm build`
-- **Feature-specific scripts:** Review the root scripts (e.g., `fix_*` helpers) if your change impacts localization or documentation automation.
-
-Add or update tests when the change alters behavior or fixes a regression. If automated coverage is not available, document manual verification steps in the PR.
+### Routing Convention
+Next.js 16 deprecated `middleware.ts`. All middleware logic is now co-located and routed through `proxy.ts`. If you need to intercept routes or manipulate headers, modify `proxy.ts`.
 
 ---
 
-## Commit Guidelines
+## Pull Request Lifecycle
 
-We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+1. **Branch Naming**: Prefix branches cleanly: `feat/cool-widget`, `fix/navbar-contrast`, or `chore/deps-update`.
+2. **Commit Convention**: We enforce [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). E.g. `feat(dashboard): add weather widget`.
+3. **Lint & Test**: Ensure `pnpm lint` and `pnpm build` exhibit zero warnings. 
+4. **Draft PR**: Open a PR against `main`. It is highly encouraged to attach screenshots of UI changes.
 
-```text
-<type>[optional scope]: <short summary>
-```
-
-Common types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`. Keep summaries short and in the imperative mood (e.g., `fix: handle empty project list`).
-
----
-
-## Pull Request Checklist
-
-- Branch rebased on the latest `main`
-- Lint, build, and relevant scripts passing locally
-- Screenshots or demos attached for UI changes
-- Translation keys updated when introducing user-facing text
-- Documentation updated (`README.md`, `docs/`, or inline comments) if behavior changes
-- PR description explains the problem, the solution, and testing performed
-
----
-
-## Reporting Issues & Feature Ideas
-
-1. Search existing [GitHub issues](https://github.com/F4P1E/lab68dev-platform/issues) to avoid duplicates.
-2. Describe the problem clearly with reproduction steps and expected vs. actual behavior.
-3. Attach logs, stack traces, or screenshots when relevant.
-4. For enhancements, explain the use case and potential impact.
-
----
-
-## Community Standards & Support
-
-Participation is covered by our [Code of Conduct](./CODE_OF_CONDUCT.md). Be respectful, inclusive, and mindful of fellow contributors.
-
-Need help? Reach out via GitHub Issues or mention **@F4P1E** on your PR.
-
----
-
-### Thank You
-
-Every contribution—bug report, suggestion, or pull request—helps Lab68dev grow. We appreciate your time and input!
+Thank you for building Lab68dev with us! 🚀
