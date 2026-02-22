@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { signInWithEmail } from "@/lib/features/auth"
+import { signUp } from "@/lib/features/auth"
 import { getTranslations, getUserLanguage } from "@/lib/config"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import {
@@ -17,14 +17,20 @@ import {
   ArrowRightIcon,
   BoltIcon,
   CheckCircleIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  LockClosedIcon,
+  EyeIcon,
+  EyeSlashIcon
 } from "@heroicons/react/24/outline"
 
 export default function SignUpPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
-  const [message, setMessage] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [t, setT] = useState(getTranslations("en"))
 
   useEffect(() => {
@@ -34,17 +40,27 @@ export default function SignUpPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
-    setMessage("")
 
-    if (!email) {
-      setError("Email is required")
+    if (!email || !password) {
+      setError("Email and password are required")
       return
     }
 
-    const result = await signInWithEmail(email)
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
+      return
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters")
+      return
+    }
+
+    // Name is optional in our new flow, passing undefined
+    const result = await signUp(email, password)
 
     if (result.success) {
-      setMessage("Check your email for the magic link to complete sign up!")
+      router.push("/dashboard")
     } else {
       setError(result.error || "Sign up failed")
     }
@@ -165,19 +181,6 @@ export default function SignUpPage() {
                   </div>
                 </motion.div>
               )}
-              {message && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="rounded-2xl border border-green-500/50 bg-green-500/5 p-4 text-sm text-green-400 overflow-hidden"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-6 bg-green-500 rounded-full"></div>
-                    <p className="font-medium">{message}</p>
-                  </div>
-                </motion.div>
-              )}
             </AnimatePresence>
 
             <div className="space-y-5">
@@ -200,6 +203,60 @@ export default function SignUpPage() {
                   />
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
+                  {t.auth.password}
+                </Label>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                    <LockClosedIcon className="h-5 w-5 text-slate-500 group-focus-within:text-primary transition-colors" />
+                  </div>
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-12 pr-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05]"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
+                  Confirm Password
+                </Label>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                    <LockClosedIcon className="h-5 w-5 text-slate-500 group-focus-within:text-primary transition-colors" />
+                  </div>
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-12 pr-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05]"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className="text-sm text-slate-500 font-medium px-1">
@@ -213,7 +270,7 @@ export default function SignUpPage() {
               type="submit"
               className="w-full h-14 text-lg font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-slate-950 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all group rounded-2xl"
             >
-              Send Magic Link
+              Sign Up
               <ArrowRightIcon className="ml-3 h-5 w-5 group-hover:translate-x-1.5 transition-transform" />
             </Button>
           </form>
