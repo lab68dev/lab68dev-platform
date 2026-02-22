@@ -90,11 +90,12 @@ export function getCurrentUserSync(): User | null {
 export async function signUp(
   email: string,
   password: string,
-  name: string,
+  name?: string,
   language?: string,
 ): Promise<{ success: boolean; error?: string; user?: User }> {
   try {
     const supabase = createClient()
+    const autoName = name || email.split('@')[0] || 'User';
 
     // Sign up with Supabase Auth
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -102,7 +103,7 @@ export async function signUp(
       password,
       options: {
         data: {
-          name,
+          name: autoName,
           language: language || 'en'
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`
@@ -123,7 +124,7 @@ export async function signUp(
     const newUser: User = {
       id: authData.user.id,
       email,
-      name,
+      name: autoName,
       createdAt: new Date().toISOString(),
       language: language || 'en',
     }
@@ -199,29 +200,6 @@ export async function signIn(
   }
 }
 
-// Sign in or sign up with magic link (Passwordless)
-export async function signInWithEmail(
-  email: string,
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const supabase = createClient()
-
-    const { error: signInError } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      }
-    })
-
-    if (signInError) {
-      return { success: false, error: signInError.message }
-    }
-
-    return { success: true }
-  } catch (error: any) {
-    return { success: false, error: error.message || 'Magic link failed' }
-  }
-}
 
 // Sign out user
 export async function signOut(): Promise<void> {
