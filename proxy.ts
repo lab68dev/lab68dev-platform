@@ -8,7 +8,7 @@ import {
   type MiddlewareContext,
 } from '@/lib/middleware'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Apply rate limiting for API routes
   const rateLimitResult = rateLimitMiddleware(request)
   if (rateLimitResult) return rateLimitResult
