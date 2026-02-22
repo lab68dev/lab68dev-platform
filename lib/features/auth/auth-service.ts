@@ -219,29 +219,7 @@ export async function signInOrSignUpWithEmailOnly(
       return signInResult; // Successfully logged in
     }
 
-    // 2. If sign in fails due to "Invalid login credentials", the user might exist but with a different password.
-    // We call our secure backend bypass to sync their password to the hidden instant auth password.
-    if (signInResult.error && signInResult.error.toLowerCase().includes("invalid login credentials")) {
-      try {
-        const syncRes = await fetch('/api/auth/instant', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password: hiddenPassword })
-        });
-
-        if (syncRes.ok) {
-          const syncData = await syncRes.json();
-          if (syncData.success) {
-            // Password successfully synced! Retry sign in.
-            return await signIn(email, hiddenPassword, rememberMe);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to sync instant auth password:", err);
-      }
-    }
-
-    // 3. If sign in fails and sync didn't resolve it (likely because user doesn't exist), attempt to sign up
+    // 2. If sign in fails (likely because user doesn't exist), attempt to sign up
     const signUpResult = await signUp(email, hiddenPassword);
 
     if (signUpResult.success) {
