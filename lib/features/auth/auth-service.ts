@@ -199,6 +199,30 @@ export async function signIn(
   }
 }
 
+// Sign in or sign up with magic link (Passwordless)
+export async function signInWithEmail(
+  email: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = createClient()
+
+    const { error: signInError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      }
+    })
+
+    if (signInError) {
+      return { success: false, error: signInError.message }
+    }
+
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Magic link failed' }
+  }
+}
+
 // Sign out user
 export async function signOut(): Promise<void> {
   try {
