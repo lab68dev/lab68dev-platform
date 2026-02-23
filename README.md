@@ -11,7 +11,7 @@
 
 ---
 
-## ⚡ Highlights
+## Highlights
 
 - **Instant Passwordless Auth** – Seamlessly magic login without passwords or typical email-link delays. Our deterministic authentication layer secures accounts effortlessly upon email entry.
 - **Premium Dual-Typography** – Optimized readability utilizing `IBM Plex Sans` for long-form prose and `JetBrains Mono` for data and code.
@@ -22,7 +22,7 @@
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Layer | Details |
 | --- | --- |
@@ -36,7 +36,7 @@
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -73,7 +73,7 @@ Visit [http://localhost:3000](http://localhost:3000) to view the platform.
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 lab68dev-platform/
@@ -93,7 +93,7 @@ lab68dev-platform/
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We heavily encourage community pull requests to enhance the platform. Please read our newly updated [CONTRIBUTING.md](./CONTRIBUTING.md) for specifics on local environments, the instant auth requirement, and our strict dual-typography standards.
 
@@ -106,7 +106,7 @@ Please adhere to our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ---
 
-## 💬 Support & Feedback
+## Support & Feedback
 
 - GitHub Issues: [lab68dev-platform/issues](https://github.com/lab68dev/lab68dev-platform/issues)
 - Maintainers: [@DongDuong2001](https://github.com/DongDuong2001)
