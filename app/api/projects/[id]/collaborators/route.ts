@@ -125,16 +125,8 @@ export async function POST(
       }
     }
 
-    // 3. User Lookup (Bypass RLS using Admin Client)
-    // We need to find the user by email, but normal users might not have permission to list/search profiles
-    const { createAdminClient } = await import("@/lib/database/supabase-admin")
-    const supabaseAdmin = createAdminClient()
-
-    if (!supabaseAdmin) {
-      return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
-    }
-
-    const { data: userProfile, error: profileError } = await supabaseAdmin
+    // 3. User Lookup
+    const { data: userProfile, error: profileError } = await supabase
       .from("profiles")
       .select("*")
       .ilike("email", email.trim())
@@ -155,9 +147,9 @@ export async function POST(
       )
     }
 
-    // 4. Add Collaborator (Use Admin Client to ensure insert succeeds regardless of RLS)
+    // 4. Add Collaborator
     // First check if already exists
-    const { data: existingCollab } = await supabaseAdmin
+    const { data: existingCollab } = await supabase
       .from("project_collaborators")
       .select("user_id")
       .eq("project_id", projectId)
@@ -171,7 +163,7 @@ export async function POST(
       )
     }
 
-    const { data: newCollaborator, error: insertError } = await supabaseAdmin
+    const { data: newCollaborator, error: insertError } = await supabase
       .from("project_collaborators")
       .insert({
         project_id: projectId,
