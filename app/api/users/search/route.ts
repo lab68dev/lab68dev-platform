@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/database/supabase-admin'
 import { createServerSupabaseClient } from '@/lib/database/supabase-server'
 
 export async function GET(request: Request) {
@@ -19,25 +18,18 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // 2. Use Admin Client to bypass RLS for search
-        const supabaseAdmin = createAdminClient()
-
-        if (!supabaseAdmin) {
-            console.error('Supabase Admin Client could not be initialized')
-            return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
-        }
-
+        // 2. Use Standard Server Client instead of Admin to fetch profiles
         const trimmedQuery = query.trim()
         const safeQuery = trimmedQuery.replace(/[,%()]/g, '')
 
-        const { data, error } = await supabaseAdmin
+        const { data, error } = await supabaseServer
             .from('profiles')
             .select('id, email, name, avatar')
             .or(`email.ilike.%${safeQuery}%,name.ilike.%${safeQuery}%`)
             .limit(10)
 
         if (error) {
-            console.error('Error searching users via Admin:', error)
+            console.error('Error searching users:', error)
             return NextResponse.json({ error: 'Search failed' }, { status: 500 })
         }
 
