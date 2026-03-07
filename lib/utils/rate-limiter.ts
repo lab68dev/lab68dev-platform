@@ -141,12 +141,17 @@ export const apiRateLimit = rateLimit({
 
 /**
  * Clear rate limit for a specific key (e.g., after successful login)
+ * Accepts either a Request object or a pre-computed string key.
  */
-export function clearRateLimit(req: Request, keyGenerator?: (req: Request) => string): void {
-  const key = keyGenerator
-    ? keyGenerator(req)
-    : req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
-  
+export function clearRateLimit(reqOrKey: Request | string, keyGenerator?: (req: Request) => string): void {
+  let key: string
+  if (typeof reqOrKey === 'string') {
+    key = reqOrKey
+  } else {
+    key = keyGenerator
+      ? keyGenerator(reqOrKey)
+      : reqOrKey.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
+  }
   rateLimitStore.delete(key)
 }
 
