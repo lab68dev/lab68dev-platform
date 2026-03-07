@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       messages,
     })
 
-    return result.toTextStreamResponse()
+    return result.toUIMessageStreamResponse()
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to process request"
     console.error("Error in AI chat:", error)
