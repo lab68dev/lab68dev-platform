@@ -59,10 +59,10 @@ export function LandingClient() {
         />
 
         <HeroSection t={t} />
-        <MissionSection t={t} />
-        <TechStackSection t={t} />
         <ServicesSection t={t} />
+        <MissionSection t={t} />
         <WhyChooseUsSection t={t} />
+        <TechStackSection t={t} />
         <SponsorSection t={t} />
         
         <Footer />
