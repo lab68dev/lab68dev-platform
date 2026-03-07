@@ -103,10 +103,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 9. Clear rate limit on successful signup
-    const ip = request.headers.get('x-forwarded-for') || 'unknown'
-    await clearRateLimit(`signup:${ip}`)
+    await clearRateLimit(request)
 
     // 10. Send welcome email (optional)
+    const forwarded = request.headers.get('x-forwarded-for')
+    const ip = forwarded ? forwarded.split(',')[0] : 'unknown'
     const userAgent = request.headers.get('user-agent') || 'Unknown'
 
     await sendSecurityNotification({
