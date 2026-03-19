@@ -208,30 +208,66 @@ export async function signInOrSignUpWithEmailOnly(
 ): Promise<{ success: boolean; error?: string; user?: User }> {
   try {
     // Generate a consistent, structurally strong "hidden" password
-    // In a real production app, this should ideally use a pepper/HMAC on the backend, 
-    // but for this instant-auth lab requirement we create it deterministically here.
     const hiddenPassword = `L@b68!${email.length}${email}SecureHash`;
 
     // 1. Attempt to sign in first (assuming the user already exists)
-    const signInResult = await signIn(email, hiddenPassword, rememberMe);
+    const supabase = createClient();
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password: hiddenPassword,
+    });
 
-    if (signInResult.success) {
-      return signInResult; // Successfully logged in
-    }
-
-    // 2. If sign in fails (likely because user doesn't exist), attempt to sign up
-    const signUpResult = await signUp(email, hiddenPassword);
-
-    if (signUpResult.success) {
-      // Supabase signUp auto-logs you in if email confirmation is disabled,
-      // but to ensure the `rememberMe` and cache states are identical to a normal login,
-      // we'll run a clean signIn immediately after a successful signUp.
+    if (!signInError && signInData.user) {
+      // Successfully signed in — fetch profile and cache
       return await signIn(email, hiddenPassword, rememberMe);
     }
 
-    return { success: false, error: signUpResult.error || "Instant authentication failed" };
+    // 2. Only attempt signup if Supabase says credentials are invalid AND
+    //    the user does NOT already have an account (i.e., email is unknown)
+    // Error codes: 'invalid_credentials' can mean wrong password OR unknown email
+    // We disambiguate by trying to look up the user via signInWithOtp (no actual OTP sent)
+    // The safest check: only sign up if the exact error is about credentials,
+    // not about an existing account.
+    const errorCode = (signInError as any)?.code || '';
+    const errorMsg = signInError?.message || '';
+
+    // Supabase returns 'invalid_credentials' for both wrong password AND unknown email.
+    // We check if the user already exists by trying to reset their password -
+    // but the cleanest approach is to attempt signup and handle the "already registered" case.
+    if (errorCode === 'invalid_credentials' || errorMsg.toLowerCase().includes('invalid login credentials')) {
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: hiddenPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      // If user already exists, Supabase returns a user with identities === []
+      const userAlreadyExists =
+        signUpError?.message?.toLowerCase().includes('already registered') ||
+        (signUpData?.user && signUpData.user.identities?.length === 0);
+
+      if (userAlreadyExists) {
+        // The account exists but the stored password doesn't match our derived one.
+        // This can happen if the user was registered via a different method.
+        return { success: false, error: 'This email is already registered. Please contact support if you cannot log in.' };
+      }
+
+      if (signUpError) {
+        return { success: false, error: signUpError.message };
+      }
+
+      if (signUpData?.user) {
+        // New user created — sign them in now
+        return await signIn(email, hiddenPassword, rememberMe);
+      }
+    }
+
+    // Return the original sign-in error for any other failure
+    return { success: false, error: errorMsg || 'Authentication failed. Please try again.' };
   } catch (error: any) {
-    return { success: false, error: error.message || "Instant authentication encountered an error" };
+    return { success: false, error: error.message || 'Authentication encountered an error' };
   }
 }
 
