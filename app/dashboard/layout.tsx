@@ -3,6 +3,8 @@ import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { MobileBottomNav } from "@/components/mobile-bottom-nav"
 import { GlobalSearch } from "@/components/global-search"
 import { MeetingNotifier } from "@/components/meeting-notifier"
+import { SkipNav } from "@/components/ui/skip-nav"
+import { ErrorBoundary } from "@/components/ui/error-boundary"
 
 import { createServerSupabaseClient } from "@/lib/database/supabase-server"
 import { DashboardLayoutClient } from "@/components/dashboard/dashboard-layout-client"
@@ -28,10 +30,13 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      <SkipNav />
       <DashboardSidebar />
-      <main className="lg:ml-64 min-h-screen lg:border-l border-border dark:border-white/5 bg-background dark:bg-transparent pb-20 lg:pb-0">
+      <main id="main-content" role="main" className="lg:ml-64 min-h-screen lg:border-l border-border dark:border-white/5 bg-background dark:bg-transparent pb-20 lg:pb-0">
         <DashboardLayoutClient showOnboarding={showOnboarding} userId={user?.id || ""}>
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </DashboardLayoutClient>
       </main>
       <MobileBottomNav />
