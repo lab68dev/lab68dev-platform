@@ -30,7 +30,7 @@
 | Language | [TypeScript 5](https://www.typescriptlang.org/) |
 | Database | [Supabase](https://supabase.com/) PostgreSQL + Edge Functions |
 | Authentication | Deterministic Email-Only Identity (Instant Auth) |
-| AI Models | Local Ollama Integration for zero-cost RAG |
+| AI Models | Groq AI Integration for blazing-fast inference |
 | Styling | Tailwind CSS V4 + Lucide Icons + Custom UI Primitives |
 | Package Manager | pnpm 8+ |
 
@@ -80,7 +80,7 @@ lab68dev-platform/
 ├── app/                      # Next.js 16 App Router maps
 │   └── dashboard/            # Cyberpunk Dashboard views
 │       ├── projects/         # Kanban & Issues
-│       ├── ai-tools/         # Local Ollama AI Assistant
+│       ├── ai-tools/         # Groq AI Assistant
 │       ├── meeting/          # Scheduler & Reminders
 │       └── ...
 ├── components/               # 
