@@ -3,40 +3,46 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Plus, Edit, Trash2 } from "lucide-react"
-import { getUserWhiteboards, createWhiteboard, deleteWhiteboard, type Whiteboard } from "@/lib/features/whiteboard"
-import { getTimeAgo } from "@/lib/features/team"
+import { getWhiteboards, createWhiteboard, deleteWhiteboard } from "@/lib/features/whiteboard/whiteboard-service"
+import type { Whiteboard } from "@/lib/features/whiteboard/database"
+import { createClient } from "@/lib/database/supabase-client"
 
 export default function WhiteboardPage() {
-  const [currentUser] = useState("user@example.com") // In real app, get from auth
+  const [currentUser, setCurrentUser] = useState<string | null>(null)
   const [whiteboards, setWhiteboards] = useState<Whiteboard[]>([])
   const [showNewModal, setShowNewModal] = useState(false)
+  const supabase = createClient()
 
   useEffect(() => {
-    loadWhiteboards()
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setCurrentUser(data.user.id)
+        loadWhiteboards(data.user.id)
+      }
+    })
   }, [])
 
-  function loadWhiteboards() {
-    const userWhiteboards = getUserWhiteboards(currentUser)
-    setWhiteboards(userWhiteboards.sort((a, b) => 
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    ))
+  async function loadWhiteboards(userId: string) {
+    const userWhiteboards = await getWhiteboards(userId)
+    setWhiteboards(userWhiteboards)
   }
 
-  function handleCreate(e: React.FormEvent<HTMLFormElement>) {
+  async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (!currentUser) return
     const formData = new FormData(e.currentTarget)
     const name = formData.get("name") as string
     const description = formData.get("description") as string
 
-    createWhiteboard(name, currentUser, { description })
+    await createWhiteboard(currentUser, name, description)
     setShowNewModal(false)
-    loadWhiteboards()
+    loadWhiteboards(currentUser)
   }
 
-  function handleDelete(whiteboardId: string) {
+  async function handleDelete(whiteboardId: string) {
     if (confirm("Are you sure you want to delete this whiteboard?")) {
-      deleteWhiteboard(whiteboardId)
-      loadWhiteboards()
+      await deleteWhiteboard(whiteboardId)
+      if (currentUser) loadWhiteboards(currentUser)
     }
   }
 
@@ -81,7 +87,7 @@ export default function WhiteboardPage() {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-lg truncate mb-1">{whiteboard.name}</h3>
+                  <h3 className="font-bold text-lg truncate mb-1">{whiteboard.title}</h3>
                   {whiteboard.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {whiteboard.description}
@@ -93,14 +99,13 @@ export default function WhiteboardPage() {
               {/* Preview */}
               <div className="bg-white border border-border h-40 mb-4 flex items-center justify-center">
                 <span className="text-muted-foreground text-sm">
-                  {whiteboard.elements.length} elements
+                  {(whiteboard.elements || []).length} elements
                 </span>
               </div>
 
               {/* Meta */}
               <div className="text-xs text-muted-foreground mb-4">
-                <p>Updated {getTimeAgo(whiteboard.updatedAt)}</p>
-                <p>{whiteboard.collaborators.length} collaborator(s)</p>
+                <p>Updated {new Date(whiteboard.updated_at).toLocaleDateString()}</p>
               </div>
 
               {/* Actions */}
