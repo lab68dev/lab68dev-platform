@@ -161,6 +161,29 @@
   [data-nextjs-scroll-focus-boundary] {
     @apply bg-background text-foreground;
   }
+
+  /* Focus-visible styles for keyboard accessibility */
+  *:focus-visible {
+    outline: 2px solid hsl(from var(--primary) h s l);
+    outline-offset: 2px;
+  }
+
+  /* Remove default focus outline when not keyboard-navigating */
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/* Reduced motion for users with vestibular disorders */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Logo scroll animation */
