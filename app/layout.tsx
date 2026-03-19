@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   title: "lab68dev Platform - Build, Learn, Collaborate",
   description:
     "An open developer platform by lab68dev. Empowering developers to build, learn, and collaborate using cutting-edge technologies.",
+  manifest: "/manifest.json",
   icons: {
     icon: [
       {
@@ -26,6 +27,14 @@ export const metadata: Metadata = {
         type: "image/x-icon",
       },
     ],
+    apple: [
+      { url: "/icons/icon-192.png", sizes: "192x192" },
+    ],
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
   },
 }
 
@@ -37,6 +46,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#0a0a0a" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -71,6 +81,17 @@ export default function RootLayout({
           }}
           richColors
           closeButton
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
+                });
+              }
+            `,
+          }}
         />
       </body>
     </html>
