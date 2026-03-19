@@ -44,17 +44,24 @@ export const DEFAULT_RESUME_DATA: ResumeData = {
         },
     ],
     skills: [
-        { id: '1', name: 'JavaScript', level: 'Expert' },
-        { id: '2', name: 'React', level: 'Advanced' },
-        { id: '3', name: 'Node.js', level: 'Advanced' },
-        { id: '4', name: 'TypeScript', level: 'Advanced' },
-        { id: '5', name: 'Python', level: 'Intermediate' },
-        { id: '6', name: 'SQL', level: 'Advanced' },
+        { id: '1', category: 'Languages', items: 'JavaScript, TypeScript, Python, SQL' },
+        { id: '2', category: 'Frameworks', items: 'React, Next.js, Node.js' },
+        { id: '3', category: 'Tools', items: 'Git, Docker, AWS, Google Cloud' },
     ],
     certifications: [
         'AWS Certified Solutions Architect',
         'Professional Scrum Master (PSM I)',
         'Google Cloud Professional Developer',
+    ],
+    projects: [
+        {
+            id: '1',
+            name: 'Portfolio Builder Platform',
+            description: 'A comprehensive platform for developers to build and manage their portfolios with integrated AI assistance.',
+            url: 'https://github.com/lab68dev/platform',
+            codeSnippet: 'function executeTask() {\n  return "Done!";\n}',
+            language: 'typescript'
+        }
     ],
     sectionOrder: [
         { id: 'summary', visible: true },
@@ -62,6 +69,7 @@ export const DEFAULT_RESUME_DATA: ResumeData = {
         { id: 'education', visible: true },
         { id: 'skills', visible: true },
         { id: 'certifications', visible: true },
+        { id: 'projects', visible: true },
     ],
     styleSettings: {
         primaryColor: '#000000',

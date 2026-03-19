@@ -1,5 +1,14 @@
 export type Template = 'modern' | 'classic' | 'minimal' | 'creative' | 'professional' | 'harvard'
-export type SectionType = 'summary' | 'experience' | 'education' | 'skills' | 'certifications'
+export type SectionType = 'summary' | 'experience' | 'education' | 'skills' | 'certifications' | 'projects'
+
+export interface Project {
+    id: string
+    name: string
+    description: string
+    url: string
+    codeSnippet: string
+    language: string
+}
 
 export interface Experience {
     id: string
@@ -55,6 +64,7 @@ export interface ResumeData {
     education: Education[]
     skills: Skill[]
     certifications: string[]
+    projects: Project[]
     sectionOrder: SectionOrder[]
     styleSettings: StyleSettings
 }

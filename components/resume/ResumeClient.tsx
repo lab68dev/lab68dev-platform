@@ -11,7 +11,8 @@ import {
   SectionType, 
   Experience, 
   Education, 
-  Skill 
+  Skill,
+  Project
 } from "@/lib/types/resume"
 import { saveResumeAction } from "@/app/dashboard/resume/actions"
 
@@ -72,8 +73,11 @@ export function ResumeClient({ initialData, initialTitle, initialId }: ResumeCli
           { id: '2', category: 'Frameworks & Libraries', items: 'React, Next.js, Node.js, Tailwind CSS, PostgreSQL' },
           { id: '3', category: 'Tools & Infrastructure', items: 'Git, Docker, AWS, Vercel, Figma' },
           { id: '4', category: 'Concepts', items: 'REST APIs, Agile/Scrum, CI/CD, System Design' },
-        ]
+        ],
+        projects: prev.projects || []
       }))
+    } else if (!resumeData.projects) {
+      setResumeData(prev => ({ ...prev, projects: [] }))
     }
   }, [])
 
@@ -306,6 +310,32 @@ export function ResumeClient({ initialData, initialTitle, initialId }: ResumeCli
     setResumeData({ ...resumeData, certifications: [...resumeData.certifications, ""] })
   }
 
+  const updateProject = (id: string, field: keyof Project, value: any) => {
+    setResumeData({
+      ...resumeData,
+      projects: (resumeData.projects || []).map(proj => proj.id === id ? { ...proj, [field]: value } : proj)
+    })
+  }
+
+  const removeProject = (id: string) => {
+    setResumeData({
+      ...resumeData,
+      projects: (resumeData.projects || []).filter(proj => proj.id !== id)
+    })
+  }
+
+  const addProject = () => {
+    const newProject: Project = { 
+      id: Date.now().toString(), 
+      name: "", 
+      description: "", 
+      url: "", 
+      codeSnippet: "", 
+      language: "javascript" 
+    }
+    setResumeData({ ...resumeData, projects: [...(resumeData.projects || []), newProject] })
+  }
+
   const toggleSectionVisibility = (sectionId: SectionType) => {
     setResumeData({
       ...resumeData,
@@ -395,6 +425,9 @@ export function ResumeClient({ initialData, initialTitle, initialId }: ResumeCli
               updateCertification={updateCertification}
               removeCertification={removeCertification}
               addCertification={addCertification}
+              updateProject={updateProject}
+              removeProject={removeProject}
+              addProject={addProject}
               getFontSizeClass={getFontSizeClass}
             />
           </div>

@@ -8,6 +8,8 @@ import { Save, Download, Loader2, Type, FileText } from "lucide-react"
 import { ResumeData } from "@/lib/types/resume"
 import { FontSelector } from "./FontSelector"
 import { ResumeHelpDialog } from "./ResumeHelpDialog"
+import { ResumeSnapshots } from "./ResumeSnapshots"
+import { AnalyticsDialog } from "./AnalyticsDialog"
 
 interface ResumeToolbarProps {
   resumeTitle: string
@@ -103,6 +105,12 @@ export function ResumeToolbar({
 
           {/* Group 3: Actions */}
           <div className="flex items-center gap-2 ml-auto">
+            <AnalyticsDialog resumeId={typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('id') : null} />
+            <ResumeSnapshots 
+               resumeId={typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('id') : null} 
+               resumeData={resumeData} 
+               setResumeData={setResumeData} 
+            />
             <ResumeHelpDialog />
             
             <div className="w-2" />

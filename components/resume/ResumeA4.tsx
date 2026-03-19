@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Trash2, Plus, Eye, EyeOff, GripVertical } from "lucide-react"
 import { InlineInput } from "./InlineFields"
 import { RichInput } from "./RichInput"
-import { ResumeData, Template, SectionType, Experience, Education, Skill } from "@/lib/types/resume"
+import { ResumeData, Template, SectionType, Experience, Education, Skill, Project } from "@/lib/types/resume"
 
 interface ResumeA4Props {
   editorRef: React.RefObject<HTMLDivElement>
@@ -34,6 +34,9 @@ interface ResumeA4Props {
   updateCertification: (index: number, val: string) => void
   removeCertification: (index: number) => void
   addCertification: () => void
+  updateProject: (id: string, field: keyof Project, value: any) => void
+  removeProject: (id: string) => void
+  addProject: () => void
   getFontSizeClass: () => string
 }
 
@@ -66,6 +69,9 @@ export function ResumeA4({
   updateCertification,
   removeCertification,
   addCertification,
+  updateProject,
+  removeProject,
+  addProject,
   getFontSizeClass
 }: ResumeA4Props) {
 
@@ -279,6 +285,66 @@ export function ResumeA4({
             </div>
             <Button variant="ghost" size="sm" onClick={addCertification} className="w-full border-dashed border-2 opacity-0 group-hover/sec:opacity-100 transition-opacity mt-2 h-8 text-xs no-print text-black">
               <Plus className="h-3 w-3 mr-1" /> Add Certification
+            </Button>
+          </div>
+        )
+
+      case 'projects':
+        return (
+          <div className="mb-6 relative group/sec text-black">
+            <h2 className={hTitleClass}>
+              Projects
+            </h2>
+            {(resumeData.projects || []).map((proj) => (
+              <div key={proj.id} className="mb-4 relative group/item">
+                <div className="absolute -left-8 top-0 opacity-0 group-hover/item:opacity-100 transition-opacity flex flex-col gap-1 no-print">
+                  <Button size="icon" variant="ghost" className="h-6 w-6 text-red-500" onClick={() => removeProject(proj.id)}>
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+                <div className="flex justify-between items-start mb-1">
+                  <div className="flex-1">
+                    <InlineInput
+                      value={proj.name}
+                      onChange={(val: string) => updateProject(proj.id, 'name', val)}
+                      placeholder="Project Name"
+                      className={hSubTitleClass}
+                      style={fontSizeStyle}
+                    />
+                    <InlineInput
+                      value={proj.url}
+                      onChange={(val: string) => updateProject(proj.id, 'url', val)}
+                      placeholder="https://github.com/user/project"
+                      className="text-xs block text-blue-600 underline"
+                      style={fontSizeStyle}
+                    />
+                  </div>
+                </div>
+                <RichInput
+                  value={proj.description}
+                  onChange={(val: string) => updateProject(proj.id, 'description', val)}
+                  placeholder="Project description..."
+                  className={`text-sm leading-snug mb-2 ${contentClass}`}
+                  style={fontSizeStyle}
+                  multiline
+                />
+                
+                {/* Code Snippet Editor (Only show empty if hovered/active, else show nothing if empty unless interacted) */}
+                {(proj.codeSnippet || proj.codeSnippet === "") && (
+                  <div className="mt-2 text-xs font-mono bg-neutral-900 text-neutral-200 p-3 rounded-md overflow-x-auto print:bg-neutral-100 print:text-black print:border print:border-neutral-300">
+                    <textarea 
+                      value={proj.codeSnippet || ''}
+                      onChange={(e) => updateProject(proj.id, 'codeSnippet', e.target.value)}
+                      placeholder="// Add code snippet here..."
+                      className="w-full bg-transparent border-none p-0 focus:ring-0 text-xs text-neutral-200 print:text-black min-h-[60px] resize-none overflow-hidden"
+                      style={{ height: proj.codeSnippet ? `${Math.max(60, proj.codeSnippet.split('\n').length * 20)}px` : '60px' }}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+            <Button variant="ghost" size="sm" onClick={addProject} className="w-full border-dashed border-2 opacity-0 group-hover/sec:opacity-100 transition-opacity mt-2 h-8 text-xs no-print text-black">
+              <Plus className="h-3 w-3 mr-1" /> Add Project (with Code Block)
             </Button>
           </div>
         )

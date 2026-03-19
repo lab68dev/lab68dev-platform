@@ -23,6 +23,7 @@ import {
   Type,
   EyeOff,
   Eye,
+  Sparkles,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -430,6 +431,45 @@ export default function ResumeEditorPage() {
               </h1>
             </div>
             <div className="flex gap-2">
+              <Button 
+                variant="default" 
+                size="sm" 
+                className="bg-purple-600 hover:bg-purple-700 text-white border-purple-800"
+                onClick={async () => {
+                  const prompt = window.prompt("What kind of resume would you like to generate? (e.g. Senior React Developer with 5 years experience)")
+                  if (!prompt) return
+                  
+                  try {
+                    const res = await fetch('/api/resumes/generate', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ prompt })
+                    })
+                    const data = await res.json()
+                    
+                    if (data.error) {
+                      alert("Error generating: " + data.error)
+                      return
+                    }
+
+                    setResumeData(prev => ({
+                      ...prev,
+                      personalInfo: { ...prev.personalInfo, ...(data.personalInfo || {}) },
+                      summary: data.summary || prev.summary,
+                      experience: data.experience || prev.experience,
+                      education: data.education || prev.education,
+                      skills: data.skills || prev.skills,
+                      certifications: data.certifications || prev.certifications,
+                    }))
+                    
+                  } catch(e) {
+                      alert("Error connecting to AI generator.")
+                  }
+                }}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                AI Auto-Fill
+              </Button>
               <Button variant="outline" size="sm" onClick={handleSave}>
                 <Save className="h-4 w-4 mr-2" />
                 Save
