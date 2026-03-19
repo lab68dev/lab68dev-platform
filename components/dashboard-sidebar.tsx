@@ -24,6 +24,7 @@ import {
   Headphones,
   ChevronDown,
   ChevronRight,
+  Receipt,
 } from "lucide-react"
 import { getCurrentUser, signOut } from "@/lib/features/auth"
 import { useEffect, useState } from "react"
@@ -73,6 +74,7 @@ export function DashboardSidebar() {
         { href: "/dashboard/todo", label: t.todo?.title || "To Do", icon: CheckSquare },
         { href: "/dashboard/meeting", label: t.meeting?.title || "Meeting", icon: Calendar },
         { href: "/dashboard/planning", label: t.planning?.title || "Planning", icon: ClipboardList },
+        { href: "/dashboard/invoices", label: "Invoices", icon: Receipt },
       ],
     },
     {
@@ -155,7 +157,10 @@ export function DashboardSidebar() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 z-40 h-screen w-64 border-r border-border dark:border-white/5 bg-background transition-transform duration-300 ${
+      <aside
+        role="navigation"
+        aria-label="Dashboard navigation"
+        className={`fixed left-0 top-0 z-40 h-screen w-64 border-r border-border dark:border-white/5 bg-background transition-transform duration-300 ${
         isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
         <div className="flex h-full flex-col">
