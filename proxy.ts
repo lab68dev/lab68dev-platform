@@ -9,43 +9,37 @@ import {
 } from '@/lib/middleware'
 
 export async function proxy(request: NextRequest) {
-  // Apply rate limiting for API routes
+  // 1. Rate limit API routes (100 req/min per IP per endpoint)
   const rateLimitResult = rateLimitMiddleware(request)
   if (rateLimitResult) return rateLimitResult
 
-  // Create Supabase client and refresh auth token
+  // 2. Create Supabase client and refresh auth token
   const { supabaseResponse, user } = await createSupabaseMiddlewareClient(request)
 
-  // Create middleware context
   const context: MiddlewareContext = {
     request,
     response: supabaseResponse,
     user,
   }
 
-  // Check API authentication
+  // 3. API Authentication check
   const apiAuthResult = apiAuthMiddleware(context)
-  if (apiAuthResult) return apiAuthResult
+  if (apiAuthResult) return addSecurityHeaders(apiAuthResult)
 
-  // Check page authentication and redirects
+  // 4. Page Authentication and redirects
   const authResult = authMiddleware(context)
-  if (authResult) return authResult
+  if (authResult) return addSecurityHeaders(authResult)
 
-  // Add security headers to response
-  addSecurityHeaders(supabaseResponse)
-
-  return supabaseResponse
+  // 5. Add security headers to the main response
+  return addSecurityHeaders(supabaseResponse)
 }
 
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public (public files)
+     * Match all routes except static files, _next internals, and public assets
+     * This includes sw.js and manifest.json to ensure PWA works correctly
      */
-    '/((?!_next/static|_next/image|favicon.ico|public|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|images|icons|sw.js|manifest.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 }
