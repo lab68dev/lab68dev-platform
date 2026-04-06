@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { signupRateLimit, clearRateLimit } from '@/lib/utils/rate-limiter'
 import { validatePasswordStrength } from '@/lib/utils/password-validator'
 import { sendSecurityNotification } from '@/lib/utils/security-notifications'
-import bcrypt from 'bcryptjs'
 
 // TODO: Replace with your actual database client
 // import { db } from '@/lib/database'
@@ -26,7 +25,9 @@ export async function POST(request: NextRequest) {
 
     // 2. Parse request body
     const body = await request.json()
-    const { email, password, name } = body
+    const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
+    const password = typeof body?.password === 'string' ? body.password : ''
+    const name = typeof body?.name === 'string' ? body.name.trim() : ''
 
     // 3. Validate required fields
     if (!email || !password || !name) {
@@ -76,10 +77,7 @@ export async function POST(request: NextRequest) {
     //   )
     // }
 
-    // 7. Hash password with bcrypt (12 salt rounds)
-    const hashedPassword = await bcrypt.hash(password, 12)
-
-    // 8. Create user in database
+    // 7. Create user in database
     // TODO: Replace with your database query
     // const user = await db.users.create({
     //   data: {
@@ -102,15 +100,15 @@ export async function POST(request: NextRequest) {
       name,
     }
 
-    // 9. Clear rate limit on successful signup
+    // 8. Clear rate limit on successful signup
     await clearRateLimit(request)
 
-    // 10. Send welcome email (optional)
+    // 9. Send security notification (best effort, should not block signup)
     const forwarded = request.headers.get('x-forwarded-for')
     const ip = forwarded ? forwarded.split(',')[0] : 'unknown'
     const userAgent = request.headers.get('user-agent') || 'Unknown'
 
-    await sendSecurityNotification({
+    void sendSecurityNotification({
       type: 'login',
       userEmail: user.email,
       userName: user.name,
@@ -120,9 +118,9 @@ export async function POST(request: NextRequest) {
         device: userAgent,
         timestamp: new Date().toISOString(),
       },
-    })
+    }).catch(() => false)
 
-    // 11. Return success response
+    // 10. Return success response
     return NextResponse.json(
       {
         success: true,
