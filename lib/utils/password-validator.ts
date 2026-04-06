@@ -2,6 +2,7 @@ import zxcvbn from 'zxcvbn'
 
 export interface PasswordStrength {
   score: number // 0-4 (0: very weak, 4: very strong)
+  label: string
   feedback: {
     warning: string
     suggestions: string[]
@@ -47,10 +48,11 @@ export function validatePasswordStrength(
   const isStrong = result.score >= 3 && meetsAllRequirements
 
   // Format crack time for display
-  const crackTime = formatCrackTime(result.crack_times_display.offline_slow_hashing_1e4_per_second)
+  const crackTime = formatCrackTime(String(result.crack_times_display.offline_slow_hashing_1e4_per_second))
 
   return {
     score: result.score,
+    label: getPasswordStrengthLabel(result.score),
     feedback: {
       warning: result.feedback.warning || '',
       suggestions: result.feedback.suggestions || [],
