@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Bell, X, Calendar, Clock } from "lucide-react"
 import { createClient } from "@/lib/database/supabase-client"
 import { getCurrentUser } from "@/lib/features/auth"
@@ -19,6 +19,12 @@ export function NotificationsPanel() {
   const [isOpen, setIsOpen] = useState(false)
   const [upcomingMeetings, setUpcomingMeetings] = useState<Meeting[]>([])
   const [language, setLanguage] = useState(getUserLanguage())
+  const channelInstanceIdRef = useRef(
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `notifications-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  )
+  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null)
   const t = getTranslations(language)
 
   const fetchUpcomingMeetings = async (userId: string) => {
@@ -46,12 +52,18 @@ export function NotificationsPanel() {
     const user = getCurrentUser()
     if (!user) return
 
+    const channelName = `meetings-realtime:${user.id}:${channelInstanceIdRef.current}`
     fetchUpcomingMeetings(user.id)
 
     // Set up Supabase Realtime subscription
     const supabase = createClient()
+    if (channelRef.current) {
+      void supabase.removeChannel(channelRef.current)
+      channelRef.current = null
+    }
+
     const channel = supabase
-      .channel('meetings-realtime')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -66,10 +78,13 @@ export function NotificationsPanel() {
       )
       .subscribe()
 
+    channelRef.current = channel
+
     // Fallback polling for time-based updates (e.g. "Starts in 5m" changes every minute)
     const interval = setInterval(() => fetchUpcomingMeetings(user.id), 60000)
 
     return () => {
+      channelRef.current = null
       supabase.removeChannel(channel)
       clearInterval(interval)
     }
