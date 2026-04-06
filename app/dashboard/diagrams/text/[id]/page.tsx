@@ -60,22 +60,24 @@ export default function TextDiagramEditorPage() {
   }, [])
 
   useEffect(() => {
-    const currentUser = getCurrentUser()
-    if (!currentUser) {
-      router.push("/login")
-      return
-    }
+    queueMicrotask(() => {
+      const currentUser = getCurrentUser()
+      if (!currentUser) {
+        router.push("/login")
+        return
+      }
 
-    const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
-    const foundDiagram = allDiagrams.find((d: any) => d.id === params.id)
+      const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
+      const foundDiagram = allDiagrams.find((d: any) => d.id === params.id)
 
-    if (!foundDiagram || foundDiagram.userId !== currentUser.id) {
-      router.push("/dashboard/diagrams")
-      return
-    }
+      if (!foundDiagram || foundDiagram.userId !== currentUser.id) {
+        router.push("/dashboard/diagrams")
+        return
+      }
 
-    setDiagram(foundDiagram)
-    setTextContent(foundDiagram.textContent || "")
+      setDiagram(foundDiagram)
+      setTextContent(foundDiagram.textContent || "")
+    })
   }, [params.id, router])
 
   useEffect(() => {
