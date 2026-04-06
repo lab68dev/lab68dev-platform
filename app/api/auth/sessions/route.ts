@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { formatSessionDisplay } from '@/lib/utils/session-manager'
+import { formatSessionDisplay, type UserSession } from '@/lib/utils/session-manager'
 
 // TODO: Replace with your actual database client
 // import { db } from '@/lib/database'
@@ -29,21 +29,26 @@ export async function GET(request: NextRequest) {
     // })
 
     // Mock sessions for demonstration
-    const sessions = [
+    const sessions: UserSession[] = [
       {
         id: 'session_1',
         userId,
         deviceInfo: {
+          userAgent: 'Mozilla/5.0',
           browser: 'Chrome',
           os: 'Windows',
           device: 'Desktop',
         },
-        location: 'New York, USA',
-        ipAddress: '192.168.1.1',
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        lastActivity: new Date(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        location: {
+          ip: '192.168.1.1',
+          city: 'New York',
+          country: 'USA',
+        },
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+        lastActivity: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         isActive: true,
+        isCurrent: false,
       },
     ]
 
