@@ -88,7 +88,7 @@ export function createSession(
   userAgent: string,
   ip: string,
   expiresIn: number = 7 * 24 * 60 * 60 * 1000 // 7 days default
-): Omit<UserSession, 'location'> {
+): UserSession {
   const now = new Date().toISOString()
   const deviceInfo = parseUserAgent(userAgent)
 
