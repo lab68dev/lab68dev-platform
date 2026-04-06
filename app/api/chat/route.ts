@@ -14,6 +14,10 @@ export async function POST(req: Request) {
   try {
     const { messages, model } = await req.json()
 
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({ error: "Messages are required" }, { status: 400 })
+    }
+
     if (!process.env.GROQ_API_KEY) {
       return NextResponse.json(
         { error: "GROQ_API_KEY is not configured. Add it to your .env.local file." },
@@ -30,13 +34,24 @@ export async function POST(req: Request) {
     
     let contextStr = ""
     if (user) {
-        const [todosRes, projectsRes] = await Promise.all([
-            supabaseServer.from('todos').select('title,description,status,priority').eq('user_id', user.id).eq('completed', false),
-            supabaseServer.from('projects').select('title,status').eq('user_id', user.id).limit(10)
-        ])
-        
-        const todos = todosRes.data || []
-        const projects = projectsRes.data || []
+      const [todosRes, projectsRes] = await Promise.all([
+        supabaseServer
+          .from('todos')
+          .select('title,status,priority')
+          .eq('user_id', user.id)
+          .eq('completed', false)
+          .order('updated_at', { ascending: false })
+          .limit(8),
+        supabaseServer
+          .from('projects')
+          .select('title,status')
+          .eq('user_id', user.id)
+          .order('updated_at', { ascending: false })
+          .limit(6)
+      ])
+
+      const todos = todosRes.data || []
+      const projects = projectsRes.data || []
         
         if (todos.length > 0 || projects.length > 0) {
             contextStr = `\n\nUSER CONTEXT:\nThe user currently has ${todos.length} active todos and ${projects.length} projects.`
