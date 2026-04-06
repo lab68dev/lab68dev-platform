@@ -70,15 +70,45 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Run npm audit
         run: npm audit --audit-level=moderate
         continue-on-error: true
 
-      - name: Check for secrets
+      - name: Determine TruffleHog scan mode
+        id: trufflehog-range
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            HEAD="${{ github.event.pull_request.head.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+            HEAD="${{ github.sha }}"
+          fi
+
+          if [[ -z "$BASE" || "$BASE" == "0000000000000000000000000000000000000000" || "$BASE" == "$HEAD" ]]; then
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=range" >> "$GITHUB_OUTPUT"
+            echo "base=$BASE" >> "$GITHUB_OUTPUT"
+            echo "head=$HEAD" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check for secrets (commit range)
+        if: steps.trufflehog-range.outputs.mode == 'range'
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: main
-          head: HEAD
+          base: ${{ steps.trufflehog-range.outputs.base }}
+          head: ${{ steps.trufflehog-range.outputs.head }}
+          extra_args: --debug --only-verified
+
+      - name: Check for secrets (full scan fallback)
+        if: steps.trufflehog-range.outputs.mode == 'full'
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
           extra_args: --debug --only-verified
