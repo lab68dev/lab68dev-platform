@@ -36,19 +36,23 @@ export default function MathSprintPage() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    setUser(getCurrentUser())
-    
-    const savedHighScore = localStorage.getItem("mathSprintHighScore")
-    if (savedHighScore) {
-      setHighScore(parseInt(savedHighScore))
-    }
+    queueMicrotask(() => {
+      setUser(getCurrentUser())
+
+      const savedHighScore = localStorage.getItem("mathSprintHighScore")
+      if (savedHighScore) {
+        setHighScore(parseInt(savedHighScore))
+      }
+    })
   }, [])
 
   useEffect(() => {
-    if (score > highScore) {
-      setHighScore(score)
-      localStorage.setItem("mathSprintHighScore", score.toString())
-    }
+    queueMicrotask(() => {
+      if (score > highScore) {
+        setHighScore(score)
+        localStorage.setItem("mathSprintHighScore", score.toString())
+      }
+    })
   }, [score, highScore])
 
   useEffect(() => {
@@ -395,7 +399,7 @@ export default function MathSprintPage() {
             <div className="text-6xl mb-4">🧮</div>
             <h2 className="text-2xl font-bold mb-4">Ready to Sprint?</h2>
             <p className="text-muted-foreground mb-6">
-              Select a difficulty level and click "Start Game" to begin!
+              Select a difficulty level and click &quot;Start Game&quot; to begin!
             </p>
             <button
               onClick={startGame}
@@ -411,7 +415,7 @@ export default function MathSprintPage() {
       {gameOver && (
         <div className="mb-6 border-4 border-primary rounded-lg p-8 bg-primary/10">
           <div className="max-w-md mx-auto text-center">
-            <h2 className="text-3xl font-bold text-primary mb-4">⏰ Time's Up!</h2>
+            <h2 className="text-3xl font-bold text-primary mb-4">⏰ Time&apos;s Up!</h2>
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="border border-border bg-card p-4 rounded-lg">
                 <div className="text-3xl font-bold text-primary">{score}</div>
