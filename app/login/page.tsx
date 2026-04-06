@@ -193,8 +193,8 @@ function LoginPageContent() {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight text-white">Sign In</h2>
-            <p className="text-slate-400 text-lg font-light">
+            <h2 className="text-4xl font-bold tracking-tight text-[#f8fafc]">Sign In</h2>
+            <p className="text-[#cbd5e1] text-lg font-light">
               Welcome back! Enter your email to receive a magic link.
             </p>
           </div>
@@ -231,7 +231,7 @@ function LoginPageContent() {
 
             <div className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
+                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-[#cbd5e1] ml-1">
                   {t.auth?.email || "Email"}
                 </Label>
                 <div className="relative group">
@@ -245,7 +245,7 @@ function LoginPageContent() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isLoading || !!success}
-                    className="pl-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="pl-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg text-[#f8fafc] placeholder:text-[#94a3b8] focus:ring-0 focus:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
                     required
                   />
                 </div>
@@ -264,7 +264,7 @@ function LoginPageContent() {
                   />
                   <CheckCircleIcon className="absolute top-0.5 left-0.5 w-4 h-4 text-slate-950 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                 </div>
-                <span className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">
+                <span className="text-sm font-medium text-[#cbd5e1] group-hover:text-[#f8fafc] transition-colors">
                   {t.auth?.rememberMe || "Remember me"}
                 </span>
               </label>
@@ -273,7 +273,7 @@ function LoginPageContent() {
             <Button
               type="submit"
               disabled={isLoading || !!success}
-              className="w-full h-14 text-lg font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-slate-950 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all group rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-14 text-lg font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-[#f8fafc] shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all group rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
@@ -290,11 +290,11 @@ function LoginPageContent() {
           </form>
 
           <footer className="pt-6 space-y-6 text-center border-t border-white/5">
-            <p className="text-slate-500 font-medium">
+            <p className="text-[#cbd5e1] font-medium">
               Don&apos;t have an account?{" "}
               <Link
                 href="/signup"
-                className="text-white hover:text-primary font-bold underline decoration-primary/30 underline-offset-4 decoration-2 transition-all"
+                className="text-[#f8fafc] hover:text-primary font-bold underline decoration-primary/30 underline-offset-4 decoration-2 transition-all"
               >
                 Sign Up
               </Link>
@@ -302,7 +302,7 @@ function LoginPageContent() {
 
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-600 hover:text-primary transition-all"
+              className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[#cbd5e1] hover:text-primary transition-all"
             >
               <span>← Back to Home</span>
             </Link>
