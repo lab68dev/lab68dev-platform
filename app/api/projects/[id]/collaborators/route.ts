@@ -5,10 +5,10 @@ import { createClient, getProjectCollaborators, removeProjectCollaborator } from
 // GET /api/projects/[id]/collaborators - List collaborators for a project
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const projectId = params.id
+    const { id: projectId } = await params
     const supabase = createClient()
 
     // Check if user is authenticated
@@ -68,10 +68,10 @@ export async function GET(
 // POST /api/projects/[id]/collaborators - Add a collaborator to a project
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const projectId = params.id
+    const { id: projectId } = await params
     const { email, role = "viewer" } = await request.json()
 
     if (!email) {
@@ -201,10 +201,10 @@ export async function POST(
 // DELETE /api/projects/[id]/collaborators - Remove a collaborator from a project
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const projectId = params.id
+    const { id: projectId } = await params
     const { searchParams } = new URL(request.url)
     const userIdToRemove = searchParams.get("userId")
 
