@@ -18,22 +18,14 @@ export interface AuthState {
   isAuthenticated: boolean
 }
 
-// Get all users from localStorage (legacy - for migration)
-export function getAllUsers(): User[] {
-  if (typeof window === "undefined") return []
-  const users = localStorage.getItem("lab68_users")
-  return users ? JSON.parse(users) : []
-}
-
-// Synchronous version for immediate access (uses cached session)
-// This is the default export that most components currently use
+// Get current user from localStorage cache (for immediate UI rendering)
 export function getCurrentUser(): User | null {
   if (typeof window === "undefined") return null
   const session = localStorage.getItem("lab68_session")
   return session ? JSON.parse(session) : null
 }
 
-// Async version that fetches from Supabase and updates cache
+// Get current user session from Supabase (authoritative source)
 export async function getCurrentUserAsync(): Promise<User | null> {
   if (typeof window === "undefined") return null
 
@@ -52,16 +44,18 @@ export async function getCurrentUserAsync(): Promise<User | null> {
 
     if (profileError || !profile) {
       // Return basic user info if profile doesn't exist
-      return {
+      const user: User = {
         id: authUser.id,
         email: authUser.email || '',
         name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
         createdAt: authUser.created_at,
         language: 'en'
       }
+      localStorage.setItem("lab68_session", JSON.stringify(user))
+      return user
     }
 
-    return {
+    const user: User = {
       id: profile.id,
       email: authUser.email || '',
       name: profile.name,
@@ -72,21 +66,17 @@ export async function getCurrentUserAsync(): Promise<User | null> {
       website: profile.website,
       avatar: profile.avatar
     }
+
+    // Cache user in localStorage for immediate UI rendering
+    localStorage.setItem("lab68_session", JSON.stringify(user))
+    return user
   } catch (error) {
     console.error('Error getting current user:', error)
     return null
   }
 }
 
-// Synchronous version for components that need immediate user data
-// Uses localStorage cache - should be updated after auth state changes
-export function getCurrentUserSync(): User | null {
-  if (typeof window === "undefined") return null
-  const session = localStorage.getItem("lab68_session")
-  return session ? JSON.parse(session) : null
-}
-
-// Sign up a new user
+// Sign up a new user with email and password
 export async function signUp(
   email: string,
   password: string,
@@ -118,9 +108,6 @@ export async function signUp(
       return { success: false, error: 'Sign up failed' }
     }
 
-    // Profile creation is handled by the database trigger 'on_auth_user_created'
-    // This allows us to avoid race conditions and client-side RLS issues during signup
-
     const newUser: User = {
       id: authData.user.id,
       email,
@@ -138,7 +125,7 @@ export async function signUp(
   }
 }
 
-// Sign in user
+// Sign in user with email and password
 export async function signIn(
   email: string,
   password: string,
@@ -200,75 +187,117 @@ export async function signIn(
   }
 }
 
-// Instant Passwordless Authentication (Hidden Password)
-// This orchestrates a seamless login/signup flow using just an email.
+// Passwordless authentication using magic link/OTP
+// This sends a one-time password to the user's email
+export async function signInWithOtp(
+  email: string,
+  rememberMe = true,
+): Promise<{ success: boolean; error?: string; message?: string }> {
+  try {
+    const supabase = createClient()
+
+    // Send OTP to user's email
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    // Store remember me preference for after OTP verification
+    if (rememberMe) {
+      localStorage.setItem("lab68_remember", "true")
+    }
+
+    return {
+      success: true,
+      message: 'Check your email for the magic link to sign in.'
+    }
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to send login link' }
+  }
+}
+
+// Verify OTP code
+export async function verifyOtp(
+  email: string,
+  token: string,
+  rememberMe = true
+): Promise<{ success: boolean; error?: string; user?: User }> {
+  try {
+    const supabase = createClient()
+
+    const { data: authData, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email',
+    })
+
+    if (error || !authData.user) {
+      return { success: false, error: error?.message || 'Invalid or expired code' }
+    }
+
+    // Fetch or create user profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single()
+
+    const user: User = profile ? {
+      id: profile.id,
+      email: authData.user.email || '',
+      name: profile.name,
+      createdAt: profile.created_at,
+      language: profile.language,
+      bio: profile.bio,
+      location: profile.location,
+      website: profile.website,
+      avatar: profile.avatar
+    } : {
+      id: authData.user.id,
+      email: authData.user.email || '',
+      name: authData.user.user_metadata?.name || authData.user.email?.split('@')[0] || 'User',
+      createdAt: authData.user.created_at,
+      language: 'en'
+    }
+
+    // Cache user in localStorage
+    localStorage.setItem("lab68_session", JSON.stringify(user))
+
+    if (rememberMe) {
+      localStorage.setItem("lab68_remember", "true")
+    }
+
+    return { success: true, user }
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Verification failed' }
+  }
+}
+
+// Legacy function kept for backwards compatibility
+// DEPRECATED: Use signInWithOtp instead
 export async function signInOrSignUpWithEmailOnly(
   email: string,
   rememberMe = true,
 ): Promise<{ success: boolean; error?: string; user?: User }> {
-  try {
-    // Generate a consistent, structurally strong "hidden" password
-    const hiddenPassword = `L@b68!${email.length}${email}SecureHash`;
+  // This now uses proper OTP-based authentication
+  const result = await signInWithOtp(email, rememberMe)
 
-    // 1. Attempt to sign in first (assuming the user already exists)
-    const supabase = createClient();
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password: hiddenPassword,
-    });
-
-    if (!signInError && signInData.user) {
-      // Successfully signed in — fetch profile and cache
-      return await signIn(email, hiddenPassword, rememberMe);
+  if (result.success) {
+    // For this flow, we return success but the user needs to verify their email
+    // The actual sign-in happens after clicking the magic link
+    return {
+      success: true,
+      user: undefined // User not fully authenticated yet
     }
-
-    // 2. Only attempt signup if Supabase says credentials are invalid AND
-    //    the user does NOT already have an account (i.e., email is unknown)
-    // Error codes: 'invalid_credentials' can mean wrong password OR unknown email
-    // We disambiguate by trying to look up the user via signInWithOtp (no actual OTP sent)
-    // The safest check: only sign up if the exact error is about credentials,
-    // not about an existing account.
-    const errorCode = (signInError as any)?.code || '';
-    const errorMsg = signInError?.message || '';
-
-    // Supabase returns 'invalid_credentials' for both wrong password AND unknown email.
-    // We check if the user already exists by trying to reset their password -
-    // but the cleanest approach is to attempt signup and handle the "already registered" case.
-    if (errorCode === 'invalid_credentials' || errorMsg.toLowerCase().includes('invalid login credentials')) {
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password: hiddenPassword,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      // If user already exists, Supabase returns a user with identities === []
-      const userAlreadyExists =
-        signUpError?.message?.toLowerCase().includes('already registered') ||
-        (signUpData?.user && signUpData.user.identities?.length === 0);
-
-      if (userAlreadyExists) {
-        // The account exists but the stored password doesn't match our derived one.
-        // This can happen if the user was registered via a different method.
-        return { success: false, error: 'This email is already registered. Please contact support if you cannot log in.' };
-      }
-
-      if (signUpError) {
-        return { success: false, error: signUpError.message };
-      }
-
-      if (signUpData?.user) {
-        // New user created — sign them in now
-        return await signIn(email, hiddenPassword, rememberMe);
-      }
-    }
-
-    // Return the original sign-in error for any other failure
-    return { success: false, error: errorMsg || 'Authentication failed. Please try again.' };
-  } catch (error: any) {
-    return { success: false, error: error.message || 'Authentication encountered an error' };
   }
+
+  return { success: false, error: result.error }
 }
 
 // Sign out user
@@ -280,6 +309,9 @@ export async function signOut(): Promise<void> {
     localStorage.removeItem("lab68_remember")
   } catch (error) {
     console.error('Error signing out:', error)
+    // Still clear localStorage even if Supabase signout fails
+    localStorage.removeItem("lab68_session")
+    localStorage.removeItem("lab68_remember")
   }
 }
 
@@ -334,6 +366,7 @@ export async function updateUserProfile(
   }
 }
 
+// Check if user has a remembered session
 export async function checkRememberMe(): Promise<User | null> {
   if (typeof window === "undefined") return null
 
@@ -341,37 +374,17 @@ export async function checkRememberMe(): Promise<User | null> {
     const remember = localStorage.getItem("lab68_remember")
     if (!remember) return null
 
-    const supabase = createClient()
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-
-    if (!authUser) return null
-
-    // Fetch user profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', authUser.id)
-      .single()
-
-    if (!profile) return null
-
-    const user: User = {
-      id: profile.id,
-      email: authUser.email || '',
-      name: profile.name,
-      createdAt: profile.created_at,
-      language: profile.language,
-      bio: profile.bio,
-      location: profile.location,
-      website: profile.website,
-      avatar: profile.avatar
-    }
-
-    // Restore session cache
-    localStorage.setItem("lab68_session", JSON.stringify(user))
+    const user = await getCurrentUserAsync()
     return user
   } catch (error) {
     localStorage.removeItem("lab68_remember")
     return null
   }
+}
+
+// Clear all auth data (useful for debugging)
+export function clearAuthData(): void {
+  if (typeof window === "undefined") return
+  localStorage.removeItem("lab68_session")
+  localStorage.removeItem("lab68_remember")
 }
