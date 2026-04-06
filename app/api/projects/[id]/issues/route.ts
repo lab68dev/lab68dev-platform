@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createServerSupabaseClient } from "@/lib/database/supabase-server"
+import { createRouteHandlerClient } from "@/lib/database/supabase-server"
 
 // GET /api/projects/[id]/issues - List all issues for a project
 export async function GET(
@@ -18,7 +18,7 @@ export async function GET(
     const epicId = searchParams.get("epicId")
     const search = searchParams.get("search")
 
-    const supabase = createServerClient()
+    const supabase = createRouteHandlerClient(request)
 
     // Build query
     let query = supabase
@@ -71,7 +71,7 @@ export async function GET(
     }
 
     // Transform the data to flatten labels
-    const transformedData = data?.map((issue) => ({
+    const transformedData = data?.map((issue: any) => ({
       ...issue,
       labels: issue.labels?.map((il: any) => il.label) || [],
       commentCount: issue.comments?.[0]?.count || 0,
@@ -98,7 +98,7 @@ export async function POST(
 ) {
   try {
     const { id: projectId } = await params
-    const supabase = createClient()
+    const supabase = createRouteHandlerClient(request)
 
     // Get current user
     const {
