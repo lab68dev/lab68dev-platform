@@ -1,14 +1,14 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useState, useEffect, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { signInOrSignUpWithEmailOnly } from "@/lib/features/auth"
+import { signUp, signInWithOtp, getCurrentUserAsync } from "@/lib/features/auth"
 import { getTranslations, getUserLanguage } from "@/lib/config"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import {
@@ -17,35 +17,116 @@ import {
   ArrowRightIcon,
   BoltIcon,
   CheckCircleIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  ArrowPathIcon,
+  LockClosedIcon
 } from "@heroicons/react/24/outline"
 
-export default function SignUpPage() {
+function SignUpPageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get('redirect') || '/dashboard'
+
   const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [usePassword, setUsePassword] = useState(false)
   const [t, setT] = useState(getTranslations("en"))
+
+  // Check if user is already authenticated
+  const checkAuth = useCallback(async () => {
+    try {
+      const user = await getCurrentUserAsync()
+      if (user) {
+        router.push(redirectPath)
+      }
+    } catch (err) {
+      console.error('Auth check error:', err)
+    } finally {
+      setIsCheckingAuth(false)
+    }
+  }, [router, redirectPath])
 
   useEffect(() => {
     setT(getTranslations(getUserLanguage()))
-  }, [])
+    checkAuth()
+  }, [checkAuth])
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setSuccess("")
 
     if (!email) {
-      setError(t.auth.email + " is required")
+      setError("Email is required")
       return
     }
 
-    const result = await signInOrSignUpWithEmailOnly(email, true)
-
-    if (result.success) {
-      router.push("/dashboard")
-    } else {
-      setError(result.error || "Sign up failed")
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address")
+      return
     }
+
+    if (usePassword) {
+      if (!password || password.length < 8) {
+        setError("Password must be at least 8 characters")
+        return
+      }
+      if (!name) {
+        setError("Name is required")
+        return
+      }
+    }
+
+    setIsLoading(true)
+
+    try {
+      if (usePassword) {
+        // Traditional password-based signup
+        const result = await signUp(email, password, name)
+
+        if (result.success) {
+          setSuccess("Account created successfully! Please check your email to verify your account.")
+          // Redirect to login after a delay
+          setTimeout(() => {
+            router.push('/login')
+          }, 3000)
+        } else {
+          setError(result.error || "Sign up failed")
+        }
+      } else {
+        // Passwordless signup with magic link
+        const result = await signInWithOtp(email, true)
+
+        if (result.success) {
+          setSuccess(result.message || "Check your email for the magic link to complete your registration.")
+        } else {
+          setError(result.error || "Sign up failed")
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <div className="flex flex-col items-center gap-4">
+          <ArrowPathIcon className="h-8 w-8 text-primary animate-spin" />
+          <p className="text-slate-400">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -149,7 +230,7 @@ export default function SignUpPage() {
           </div>
 
           <form onSubmit={handleSignUp} className="space-y-6">
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               {error && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
@@ -163,12 +244,51 @@ export default function SignUpPage() {
                   </div>
                 </motion.div>
               )}
+              {success && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="rounded-2xl border border-green-500/50 bg-green-500/5 p-4 text-sm text-green-400 overflow-hidden"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-1.5 h-6 bg-green-500 rounded-full shrink-0 mt-0.5"></div>
+                    <p className="font-medium">{success}</p>
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
 
             <div className="space-y-5">
+              {/* Name field - only show when using password */}
+              {usePassword && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="name" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
+                    Full Name
+                  </Label>
+                  <div className="relative group">
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="John Doe"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      disabled={isLoading || !!success}
+                      className="h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05] disabled:opacity-50"
+                      required={usePassword}
+                    />
+                  </div>
+                </motion.div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-                  {t.auth.email}
+                  Email
                 </Label>
                 <div className="relative group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
@@ -180,11 +300,54 @@ export default function SignUpPage() {
                     placeholder="email@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05]"
+                    disabled={isLoading || !!success}
+                    className="pl-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05] disabled:opacity-50"
                     required
                   />
                 </div>
               </div>
+
+              {/* Password field - only show when using password */}
+              {usePassword && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
+                    Password
+                  </Label>
+                  <div className="relative group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                      <LockClosedIcon className="h-5 w-5 text-slate-500 group-focus-within:text-primary transition-colors" />
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading || !!success}
+                      className="pl-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05] disabled:opacity-50"
+                      required={usePassword}
+                      minLength={8}
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 ml-1">Must be at least 8 characters</p>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Toggle between passwordless and password signup */}
+            <div className="flex items-center gap-2 px-1">
+              <button
+                type="button"
+                onClick={() => setUsePassword(!usePassword)}
+                className="text-sm text-slate-400 hover:text-primary transition-colors underline decoration-primary/30 underline-offset-2"
+              >
+                {usePassword ? "Use magic link instead" : "Use password instead"}
+              </button>
             </div>
 
             <div className="text-sm text-slate-500 font-medium px-1">
@@ -196,10 +359,20 @@ export default function SignUpPage() {
 
             <Button
               type="submit"
-              className="w-full h-14 text-lg font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-slate-950 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all group rounded-2xl"
+              disabled={isLoading || !!success}
+              className="w-full h-14 text-lg font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-slate-950 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all group rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign Up
-              <ArrowRightIcon className="ml-3 h-5 w-5 group-hover:translate-x-1.5 transition-transform" />
+              {isLoading ? (
+                <>
+                  <ArrowPathIcon className="mr-2 h-5 w-5 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                <>
+                  {usePassword ? "Create Account" : "Send Magic Link"}
+                  <ArrowRightIcon className="ml-3 h-5 w-5 group-hover:translate-x-1.5 transition-transform" />
+                </>
+              )}
             </Button>
           </form>
 
@@ -224,5 +397,24 @@ export default function SignUpPage() {
         </motion.div>
       </div>
     </div>
+  )
+}
+
+function SignUpPageFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-950">
+      <div className="flex flex-col items-center gap-4">
+        <ArrowPathIcon className="h-8 w-8 text-primary animate-spin" />
+        <p className="text-slate-400">Loading...</p>
+      </div>
+    </div>
+  )
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<SignUpPageFallback />}>
+      <SignUpPageContent />
+    </Suspense>
   )
 }
