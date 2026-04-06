@@ -39,9 +39,12 @@ export default function AIToolsPage() {
   // Derived loading state
   const isLoading = status === "submitted" || status === "streaming"
 
-  useEffect(() => {
-    setT(getTranslations(getUserLanguage()))
-  }, [])
+  // Initialize translations on client side only
+  useState(() => {
+    const lang = getUserLanguage()
+    setT(getTranslations(lang))
+    return null
+  })
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
