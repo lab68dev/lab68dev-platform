@@ -26,11 +26,6 @@ export default function SudokuPage() {
   const [isRunning, setIsRunning] = useState(false)
   const [user, setUser] = useState<any>(null)
 
-  useEffect(() => {
-    setUser(getCurrentUser())
-    generateNewGame(difficulty)
-  }, [])
-
   // Handle game complete - save to DB
   useEffect(() => {
     if (isComplete && user) {
@@ -132,6 +127,13 @@ export default function SudokuPage() {
     setIsRunning(true)
     setSelectedCell(null)
   }
+
+  // Initialize game on mount
+  useEffect(() => {
+    setUser(getCurrentUser())
+    generateNewGame(difficulty)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function handleCellClick(row: number, col: number) {
     if (!grid[row][col].isFixed && !isComplete) {
