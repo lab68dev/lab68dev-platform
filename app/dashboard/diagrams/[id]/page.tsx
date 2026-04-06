@@ -88,29 +88,6 @@ export default function DiagramEditorPage() {
   const [connectionWidth, setConnectionWidth] = useState(2)
   const [connectionStyle, setConnectionStyle] = useState<"solid" | "dashed" | "dotted">("solid")
 
-  useEffect(() => {
-    const currentUser = getCurrentUser()
-    if (!currentUser) {
-      router.push("/login")
-      return
-    }
-
-    const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
-    const foundDiagram = allDiagrams.find((d: any) => d.id === params.id)
-
-    if (!foundDiagram || foundDiagram.userId !== currentUser.id) {
-      router.push("/dashboard/diagrams")
-      return
-    }
-
-    setDiagram(foundDiagram)
-    setData(foundDiagram.data || { nodes: [], connections: [] })
-  }, [params.id, router])
-
-  useEffect(() => {
-    drawCanvas()
-  }, [data, zoom, offset, selectedNode, connectFrom, connectingFrom, mousePos, hoveredHandle])
-
   const getConnectionHandles = (node: Node): ConnectionHandle[] => {
     return [
       { nodeId: node.id, position: "top", x: node.x + node.width / 2, y: node.y },
@@ -300,6 +277,34 @@ export default function DiagramEditorPage() {
 
     ctx.restore()
   }
+
+  // Redraw canvas when dependencies change
+  useEffect(() => {
+    drawCanvas()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, zoom, offset, selectedNode, connectFrom, connectingFrom, mousePos, hoveredHandle])
+
+  // Load diagram data on mount
+  useEffect(() => {
+    queueMicrotask(() => {
+      const currentUser = getCurrentUser()
+      if (!currentUser) {
+        router.push("/login")
+        return
+      }
+
+      const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
+      const foundDiagram = allDiagrams.find((d: any) => d.id === params.id)
+
+      if (!foundDiagram || foundDiagram.userId !== currentUser.id) {
+        router.push("/dashboard/diagrams")
+        return
+      }
+
+      setDiagram(foundDiagram)
+      setData(foundDiagram.data || { nodes: [], connections: [] })
+    })
+  }, [params.id, router])
 
   const getNodeAtPosition = (x: number, y: number): Node | null => {
     return (
