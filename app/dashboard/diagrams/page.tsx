@@ -35,21 +35,23 @@ export default function DiagramsPage() {
   const [user, setUser] = useState<any>(null)
   const [searchQuery, setSearchQuery] = useState("")
 
-  useEffect(() => {
-    const currentUser = getCurrentUser()
-    if (!currentUser) {
-      router.push("/login")
-      return
-    }
-    setUser(currentUser)
-    loadDiagrams(currentUser.id)
-  }, [router])
-
   const loadDiagrams = (userId: string) => {
     const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
     const userDiagrams = allDiagrams.filter((d: Diagram) => d.userId === userId)
     setDiagrams(userDiagrams)
   }
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      const currentUser = getCurrentUser()
+      if (!currentUser) {
+        router.push("/login")
+        return
+      }
+      setUser(currentUser)
+      loadDiagrams(currentUser.id)
+    })
+  }, [router])
 
   const handleCreateDiagram = () => {
     if (!newDiagram.name.trim() || !user) return
