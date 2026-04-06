@@ -1,9 +1,10 @@
 "use client"
 
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { GoArrowUpRight } from 'react-icons/go';
 import Link from 'next/link';
+import Image from 'next/image';
 
 type CardNavLink = {
   label: string;
@@ -71,8 +72,7 @@ const CardNav: React.FC<CardNavProps> = ({
         contentEl.style.height = 'auto';
 
         // Force layout
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const _ = contentEl.offsetHeight;
+        contentEl.offsetHeight;
 
         const topBar = 60;
         const padding = 16; 
@@ -91,7 +91,7 @@ const CardNav: React.FC<CardNavProps> = ({
     return 260;
   };
 
-  const createTimeline = () => {
+  const createTimeline = useCallback(() => {
     const navEl = navRef.current;
     if (!navEl) return null;
 
@@ -110,7 +110,7 @@ const CardNav: React.FC<CardNavProps> = ({
     tl.to(cardsRef.current, { y: 0, opacity: 1, duration: 0.4, ease, stagger: 0.08 }, '-=0.1');
 
     return tl;
-  };
+  }, [ease]);
 
   useLayoutEffect(() => {
     const tl = createTimeline();
@@ -120,7 +120,7 @@ const CardNav: React.FC<CardNavProps> = ({
       tl?.kill();
       tlRef.current = null;
     };
-  }, [ease, items]);
+  }, [createTimeline]);
 
   useLayoutEffect(() => {
     const handleResize = () => {
@@ -150,7 +150,7 @@ const CardNav: React.FC<CardNavProps> = ({
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [isExpanded]);
+  }, [isExpanded, createTimeline]);
 
   const toggleMenu = () => {
     const tl = tlRef.current;
@@ -206,7 +206,7 @@ const CardNav: React.FC<CardNavProps> = ({
           {/* Logo */}
           <div className="logo-container flex items-center md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 order-1 md:order-none">
             {/* If logo is a text or image url */}
-            <img src={logo} alt={logoAlt} className="logo h-[28px] object-contain" />
+            <Image src={logo} alt={logoAlt} width={132} height={28} className="logo h-[28px] w-auto object-contain" priority />
           </div>
 
           {/* Connect Button */}
@@ -226,7 +226,6 @@ const CardNav: React.FC<CardNavProps> = ({
           className={`card-nav-content absolute left-0 right-0 top-[60px] bottom-0 p-2 flex flex-col items-stretch gap-2 justify-start z-[1] ${
             isExpanded ? 'visible pointer-events-auto' : 'invisible pointer-events-none'
           } md:flex-row md:items-end md:gap-[12px]`}
-          aria-hidden={!isExpanded}
         >
           {(items || []).slice(0, 3).map((item, idx) => (
             <div
