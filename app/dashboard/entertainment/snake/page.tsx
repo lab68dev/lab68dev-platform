@@ -29,22 +29,26 @@ export default function SnakePage() {
   const gameLoopRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    const currentUser = getCurrentUser()
-    setUser(currentUser)
+    queueMicrotask(() => {
+      const currentUser = getCurrentUser()
+      setUser(currentUser)
 
-    // Load high score from localStorage
-    const savedHighScore = localStorage.getItem("snakeHighScore")
-    if (savedHighScore) {
-      setHighScore(parseInt(savedHighScore))
-    }
+      // Load high score from localStorage
+      const savedHighScore = localStorage.getItem("snakeHighScore")
+      if (savedHighScore) {
+        setHighScore(parseInt(savedHighScore))
+      }
+    })
   }, [])
 
   useEffect(() => {
-    // Save high score
-    if (score > highScore) {
-      setHighScore(score)
-      localStorage.setItem("snakeHighScore", score.toString())
-    }
+    queueMicrotask(() => {
+      // Save high score
+      if (score > highScore) {
+        setHighScore(score)
+        localStorage.setItem("snakeHighScore", score.toString())
+      }
+    })
   }, [score, highScore])
 
   // Handle game over - save to DB
@@ -369,7 +373,7 @@ export default function SnakePage() {
           <li>• Arrow Keys or WASD to move</li>
           <li>• SPACE to pause/resume</li>
           <li>• Eat red food to grow and score points</li>
-          <li>• Don't hit the walls or yourself!</li>
+          <li>• Don&apos;t hit the walls or yourself!</li>
         </ul>
       </div>
     </div>
