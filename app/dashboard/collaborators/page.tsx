@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Users, Search, Mail, FolderKanban, X, Plus } from "lucide-react"
-import { getCurrentUser, getAllUsers } from "@/lib/features/auth"
+import { getCurrentUser } from "@/lib/features/auth"
 import { Translations, getUserLanguage, getTranslations, type Language } from "@/lib/config"
 import { getProfileByEmail, searchUsers } from "@/lib/database"
 import Link from "next/link"
@@ -38,11 +38,6 @@ export default function CollaboratorsPage() {
   const [userSearchResults, setUserSearchResults] = useState<any[]>([])
   const [showUserSearch, setShowUserSearch] = useState(false)
   const t = getTranslations(language)
-
-  useEffect(() => {
-    setLanguage(getUserLanguage())
-    loadCollaborators()
-  }, [])
 
   const loadCollaborators = async () => {
     const user = getCurrentUser()
@@ -104,6 +99,12 @@ export default function CollaboratorsPage() {
       setCollaborators([])
     }
   }
+
+  // Initialize on client side only
+  useEffect(() => {
+    setLanguage(getUserLanguage())
+    void loadCollaborators()
+  }, [])
 
   const handleRemoveCollaboratorFromAll = async (email: string) => {
     if (!confirm(`Remove ${email} from all projects?`)) return
@@ -184,9 +185,10 @@ export default function CollaboratorsPage() {
       return
     }
 
-    const results = await searchUsers(query, 5)
-    setUserSearchResults(results)
-    setShowUserSearch(results.length > 0)
+    const results = await searchUsers(query)
+    const limitedResults = results.slice(0, 5)
+    setUserSearchResults(limitedResults)
+    setShowUserSearch(limitedResults.length > 0)
   }
 
   const handleSelectInviteUser = (user: any) => {
@@ -445,7 +447,7 @@ export default function CollaboratorsPage() {
                   {/* No results message */}
                   {showUserSearch && userSearchResults.length === 0 && inviteEmail.length >= 2 && (
                     <div className="absolute z-10 w-full mt-1 bg-card border border-border shadow-lg p-4 text-xs text-muted-foreground">
-                      No users found matching "{inviteEmail}"
+                      No users found matching &quot;{inviteEmail}&quot;
                     </div>
                   )}
                 </div>
