@@ -1,14 +1,14 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useState, useEffect, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { signInOrSignUpWithEmailOnly, checkRememberMe } from "@/lib/features/auth"
+import { signInWithOtp, checkRememberMe, getCurrentUserAsync } from "@/lib/features/auth"
 import { getTranslations, getUserLanguage } from "@/lib/config"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import {
@@ -17,45 +17,86 @@ import {
   SparklesIcon,
   BoltIcon,
   ShieldCheckIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  ArrowPathIcon
 } from "@heroicons/react/24/outline"
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get('redirect') || '/dashboard'
+
   const [email, setEmail] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const [t, setT] = useState(getTranslations("en"))
+
+  // Check if user is already authenticated
+  const checkAuth = useCallback(async () => {
+    try {
+      const user = await getCurrentUserAsync()
+      if (user) {
+        router.push(redirectPath)
+      }
+    } catch (err) {
+      console.error('Auth check error:', err)
+    } finally {
+      setIsCheckingAuth(false)
+    }
+  }, [router, redirectPath])
 
   useEffect(() => {
     setT(getTranslations(getUserLanguage()))
-
-    const checkAuth = async () => {
-      const rememberedUser = await checkRememberMe()
-      if (rememberedUser) {
-        router.push("/dashboard")
-      }
-    }
-
     checkAuth()
-  }, [router])
+  }, [checkAuth])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setSuccess("")
 
     if (!email) {
-      setError(t.auth.email + " is required")
+      setError(t.auth?.email + " is required" || "Email is required")
       return
     }
 
-    const result = await signInOrSignUpWithEmailOnly(email, rememberMe)
-
-    if (result.success) {
-      router.push("/dashboard")
-    } else {
-      setError(result.error || "Login failed")
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address")
+      return
     }
+
+    setIsLoading(true)
+
+    try {
+      const result = await signInWithOtp(email, rememberMe)
+
+      if (result.success) {
+        setSuccess(result.message || "Check your email for the magic link to sign in.")
+      } else {
+        setError(result.error || "Login failed")
+      }
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <div className="flex flex-col items-center gap-4">
+          <ArrowPathIcon className="h-8 w-8 text-primary animate-spin" />
+          <p className="text-slate-400">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -154,12 +195,12 @@ export default function LoginPage() {
           <div className="space-y-4">
             <h2 className="text-4xl font-bold tracking-tight text-white">Sign In</h2>
             <p className="text-slate-400 text-lg font-light">
-              Welcome back! Please enter your details.
+              Welcome back! Enter your email to receive a magic link.
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               {error && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
@@ -173,12 +214,25 @@ export default function LoginPage() {
                   </div>
                 </motion.div>
               )}
+              {success && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="rounded-2xl border border-green-500/50 bg-green-500/5 p-4 text-sm text-green-400 overflow-hidden"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-1.5 h-6 bg-green-500 rounded-full shrink-0 mt-0.5"></div>
+                    <p className="font-medium">{success}</p>
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
 
             <div className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-                  {t.auth.email}
+                  {t.auth?.email || "Email"}
                 </Label>
                 <div className="relative group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
@@ -190,7 +244,8 @@ export default function LoginPage() {
                     placeholder="email@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05]"
+                    disabled={isLoading || !!success}
+                    className="pl-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg placeholder:text-slate-600 focus:ring-0 focus:bg-white/[0.05] disabled:opacity-50 disabled:cursor-not-allowed"
                     required
                   />
                 </div>
@@ -204,28 +259,39 @@ export default function LoginPage() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="peer appearance-none w-5 h-5 rounded-md border border-white/10 checked:bg-primary checked:border-primary transition-all cursor-pointer"
+                    disabled={isLoading || !!success}
+                    className="peer appearance-none w-5 h-5 rounded-md border border-white/10 checked:bg-primary checked:border-primary transition-all cursor-pointer disabled:opacity-50"
                   />
                   <CheckCircleIcon className="absolute top-0.5 left-0.5 w-4 h-4 text-slate-950 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                 </div>
                 <span className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">
-                  {t.auth.rememberMe}
+                  {t.auth?.rememberMe || "Remember me"}
                 </span>
               </label>
             </div>
 
             <Button
               type="submit"
-              className="w-full h-14 text-lg font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-slate-950 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all group rounded-2xl"
+              disabled={isLoading || !!success}
+              className="w-full h-14 text-lg font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-slate-950 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all group rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Log In
-              <ArrowRightIcon className="ml-3 h-5 w-5 group-hover:translate-x-1.5 transition-transform" />
+              {isLoading ? (
+                <>
+                  <ArrowPathIcon className="mr-2 h-5 w-5 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  Send Magic Link
+                  <ArrowRightIcon className="ml-3 h-5 w-5 group-hover:translate-x-1.5 transition-transform" />
+                </>
+              )}
             </Button>
           </form>
 
           <footer className="pt-6 space-y-6 text-center border-t border-white/5">
             <p className="text-slate-500 font-medium">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
                 href="/signup"
                 className="text-white hover:text-primary font-bold underline decoration-primary/30 underline-offset-4 decoration-2 transition-all"
@@ -244,5 +310,24 @@ export default function LoginPage() {
         </motion.div>
       </div>
     </div>
+  )
+}
+
+function LoginPageFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-950">
+      <div className="flex flex-col items-center gap-4">
+        <ArrowPathIcon className="h-8 w-8 text-primary animate-spin" />
+        <p className="text-slate-400">Loading...</p>
+      </div>
+    </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginPageFallback />}>
+      <LoginPageContent />
+    </Suspense>
   )
 }
