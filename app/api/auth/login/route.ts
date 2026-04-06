@@ -1,17 +1,17 @@
 import 'server-only'
 import { NextRequest, NextResponse } from 'next/server'
 import { loginRateLimit, clearRateLimit } from '@/lib/utils/rate-limiter'
-import { verifyMFAToken } from '@/lib/utils/mfa'
 import { sendSecurityNotification } from '@/lib/utils/security-notifications'
 import { createSession, detectSuspiciousActivity, type UserSession } from '@/lib/utils/session-manager'
-import bcrypt from 'bcryptjs'
+import { createServerSupabaseClient } from '@/lib/database/supabase-server'
 
 // TODO: Replace with your actual database client
 // import { db } from '@/lib/database'
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || 'unknown'
+    const forwarded = request.headers.get('x-forwarded-for')
+    const ip = forwarded ? forwarded.split(',')[0] : 'unknown'
     const userAgent = request.headers.get('user-agent') || 'unknown'
 
     // 1. Rate limiting - Prevent brute force attacks
@@ -30,7 +30,8 @@ export async function POST(request: NextRequest) {
 
     // 2. Parse credentials
     const body = await request.json()
-    const { email, password, mfaToken } = body
+    const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
+    const password = typeof body?.password === 'string' ? body.password : ''
 
     // 3. Validate required fields
     if (!email || !password) {
@@ -40,43 +41,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 4. Find user by email
-    // TODO: Replace with your database query
-    // const user = await db.users.findUnique({
-    //   where: { email: email.toLowerCase() }
-    // })
+    // 4. Verify credentials with Supabase Auth
+    const supabaseServer = await createServerSupabaseClient()
+    const { data: authData, error: signInError } = await supabaseServer.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-    // Mock user for demonstration
-    const user = {
-      id: 'user_123',
-      email: email.toLowerCase(),
-      name: 'Demo User',
-      password: await bcrypt.hash('password123', 12), // Replace with actual hashed password from DB
-      mfaEnabled: false,
-      mfaSecret: null,
-      lastLoginAt: null,
-      lastLoginIP: null,
-      lastLoginLocation: null,
-    }
-
-    if (!user) {
-      // Don't reveal if user exists or not (security best practice)
-      return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
-      )
-    }
-
-    // 5. Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password)
-
-    if (!isValidPassword) {
+    if (signInError || !authData?.user) {
       // Send notification after multiple failed attempts
       if (rateLimitResult.remaining <= 2) {
         await sendSecurityNotification({
           type: 'failed_login',
-          userEmail: user.email,
-          userName: user.name,
+          userEmail: email,
+          userName: email.split('@')[0] || 'User',
           details: {
             ipAddress: ip,
             location: 'Unknown', // TODO: Add IP geolocation
@@ -93,30 +71,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 6. Check if MFA is required
-    if (user.mfaEnabled) {
-      if (!mfaToken) {
-        return NextResponse.json(
-          {
-            requireMFA: true,
-            message: 'Please enter your two-factor authentication code',
-          },
-          { status: 403 }
-        )
-      }
-
-      // Verify MFA token
-      const mfaValid = verifyMFAToken(user.mfaSecret!, mfaToken)
-
-      if (!mfaValid.valid) {
-        return NextResponse.json(
-          { error: 'Invalid MFA code. Please try again.' },
-          { status: 401 }
-        )
-      }
+    const user = {
+      id: authData.user.id,
+      email: authData.user.email || email,
+      name: (authData.user.user_metadata?.name as string) || authData.user.email?.split('@')[0] || 'User',
+      mfaEnabled: false,
     }
 
-    // 7. Create session
+    // 5. Create session
     const session = createSession(
       user.id,
       userAgent,
@@ -124,7 +86,7 @@ export async function POST(request: NextRequest) {
       7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
     )
 
-    // 8. Check for suspicious activity
+    // 6. Check for suspicious activity
     // TODO: Fetch all user sessions from database
     // const allUserSessions = await db.sessions.findMany({
     //   where: { userId: user.id, isActive: true }
@@ -165,7 +127,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 9. Save session to database
+    // 7. Save session to database
     // TODO: Replace with your database query
     // await db.sessions.create({
     //   data: {
@@ -181,10 +143,10 @@ export async function POST(request: NextRequest) {
     //   }
     // })
 
-    // 10. Clear rate limit on successful login
+    // 8. Clear rate limit on successful login
     await clearRateLimit(request, () => `login:${ip}`)
 
-    // 11. Send login notification
+    // 9. Send login notification
     await sendSecurityNotification({
       type: 'login',
       userEmail: user.email,
@@ -197,7 +159,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // 12. Update last login information
+    // 10. Update last login information
     // TODO: Replace with your database query
     // await db.users.update({
     //   where: { id: user.id },
@@ -208,7 +170,7 @@ export async function POST(request: NextRequest) {
     //   }
     // })
 
-    // 13. Set session cookie
+    // 11. Set session cookie
     const response = NextResponse.json({
       success: true,
       message: 'Login successful',
