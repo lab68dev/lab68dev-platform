@@ -108,22 +108,6 @@ export default function TypingGamePage() {
     setTimeout(() => inputRef.current?.focus(), 100)
   }
 
-  // Timer effect
-  useEffect(() => {
-    if (gameState !== "playing") return
-
-    if (timeLeft <= 0) {
-      endGame()
-      return
-    }
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1)
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [gameState, timeLeft])
-
   // End game and calculate stats
   const endGame = () => {
     const timeElapsed = timeLength - timeLeft
@@ -145,6 +129,22 @@ export default function TypingGamePage() {
       saveScore(user.id, "typing", wpm).catch(err => console.error("Score save failed:", err))
     }
   }
+
+  // Timer effect
+  useEffect(() => {
+    if (gameState !== "playing") return
+
+    if (timeLeft <= 0) {
+      endGame()
+      return
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1)
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [gameState, timeLeft])
 
   // Handle word input
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
