@@ -80,6 +80,7 @@ export async function getResumeById(id: string) {
             education: resume.education,
             skills: resume.skills,
             certifications: resume.certifications,
+            projects: resume.projects || [],
             sectionOrder: resume.section_order,
             styleSettings: resume.style_settings
         }
