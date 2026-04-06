@@ -225,9 +225,10 @@ export default function ProjectsPage() {
       return
     }
 
-    const results = await searchUsers(query, 5)
-    setUserSearchResults(results)
-    setShowUserSearch(results.length > 0)
+    const results = await searchUsers(query)
+    const limitedResults = results.slice(0, 5)
+    setUserSearchResults(limitedResults)
+    setShowUserSearch(limitedResults.length > 0)
   }
 
   const handleSelectUser = (user: any) => {
