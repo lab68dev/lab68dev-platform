@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createServerSupabaseClient } from "@/lib/database/supabase-server"
+import { createRouteHandlerClient } from "@/lib/database/supabase-server"
 
 // GET /api/projects/[id]/labels - List all labels
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { id: projectId } = await params
-    const supabase = createClient()
+    const supabase = createRouteHandlerClient(request)
 
     const { data, error } = await supabase
       .from("labels")
@@ -44,7 +44,7 @@ export async function POST(
 ) {
   try {
     const { id: projectId } = await params
-    const supabase = createClient()
+    const supabase = createRouteHandlerClient(request)
 
     // Get current user
     const {
@@ -118,7 +118,7 @@ export async function PUT(
       )
     }
 
-    const supabase = createClient()
+    const supabase = createRouteHandlerClient(request)
 
     // Get current user
     const {
@@ -191,7 +191,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = createClient()
+    const supabase = createRouteHandlerClient(request)
 
     // Get current user
     const {
