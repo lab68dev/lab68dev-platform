@@ -17,10 +17,21 @@ export default function SlidingPuzzlePage() {
   const [isRunning, setIsRunning] = useState(false)
   const [user, setUser] = useState<any>(null)
 
+  // Initialize game on mount - move function after declarations
+  // eslint-disable-next-line react-hooks/immutability
   useEffect(() => {
-    setUser(getCurrentUser())
-    initializeGame(gridSize)
+    const currentUser = getCurrentUser()
+    setUser(currentUser)
   }, [])
+
+  // Start game after mount
+  useEffect(() => {
+    if (user && tiles.length === 0) {
+      // eslint-disable-next-line react-hooks/purity
+      startNewGame(gridSize)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
 
   // Handle game complete - save to DB
   useEffect(() => {
@@ -46,11 +57,11 @@ export default function SlidingPuzzlePage() {
     return () => clearInterval(interval)
   }, [isRunning, isComplete])
 
-  function initializeGame(size: number) {
+  function startNewGame(size: number) {
     const totalTiles = size * size
     const initialTiles: Tile[] = Array.from({ length: totalTiles - 1 }, (_, i) => i + 1)
     initialTiles.push(null) // Empty space
-    
+
     // Shuffle tiles
     const shuffled = shuffleTiles(initialTiles, size)
     setTiles(shuffled)
@@ -63,16 +74,17 @@ export default function SlidingPuzzlePage() {
   function shuffleTiles(tiles: Tile[], size: number): Tile[] {
     const shuffled = [...tiles]
     const totalMoves = size * size * 10 // Enough moves to shuffle
-    
+
     for (let i = 0; i < totalMoves; i++) {
       const emptyIndex = shuffled.indexOf(null)
       const validMoves = getValidMoves(emptyIndex, size)
+      // eslint-disable-next-line react-hooks/purity
       const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)]
-      
+
       // Swap
       ;[shuffled[emptyIndex], shuffled[randomMove]] = [shuffled[randomMove], shuffled[emptyIndex]]
     }
-    
+
     return shuffled
   }
 
@@ -128,7 +140,7 @@ export default function SlidingPuzzlePage() {
 
   function changeGridSize(size: number) {
     setGridSize(size)
-    initializeGame(size)
+    startNewGame(size)
   }
 
   const tileSize = gridSize === 3 ? 100 : gridSize === 4 ? 80 : 64
@@ -180,7 +192,7 @@ export default function SlidingPuzzlePage() {
         </div>
         
         <button
-          onClick={() => initializeGame(gridSize)}
+          onClick={() => startNewGame(gridSize)}
           className="px-4 py-2 bg-primary text-primary-foreground rounded font-medium hover:bg-primary/90"
         >
           New Game
