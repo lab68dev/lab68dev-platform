@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createServerSupabaseClient } from "@/lib/database/supabase-server"
+import { createRouteHandlerClient } from "@/lib/database/supabase-server"
 
 // GET /api/projects/[id]/issues/[issueId]/comments - List all comments for an issue
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { issueId } = await params
-    const supabase = createClient()
+    const supabase = createRouteHandlerClient(request)
 
     const { data: comments, error } = await supabase
       .from("issue_comments")
@@ -51,7 +51,7 @@ export async function POST(
 ) {
   try {
     const { issueId } = await params
-    const supabase = createClient()
+    const supabase = createRouteHandlerClient(request)
 
     // Get current user
     const {
