@@ -34,17 +34,19 @@ export default function CommunityPage() {
   const [language, setLanguage] = useState<Language>("en")
   const t = getTranslations(language)
 
-  useEffect(() => {
-    setLanguage(getUserLanguage())
-    loadDiscussions()
-  }, [])
-
   const loadDiscussions = () => {
     const saved = localStorage.getItem("lab68_discussions")
     if (saved) {
       setDiscussions(JSON.parse(saved))
     }
   }
+
+  // Initialize on client side only
+  useState(() => {
+    setLanguage(getUserLanguage())
+    loadDiscussions()
+    return null
+  })
 
   const saveDiscussions = (updatedDiscussions: Discussion[]) => {
     localStorage.setItem("lab68_discussions", JSON.stringify(updatedDiscussions))
