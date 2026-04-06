@@ -109,13 +109,13 @@ export default function CookiePolicyPage() {
           <section>
             <h2 className="text-2xl font-semibold mb-4">5. Cookie Duration</h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
-              Cookies can be either "session" or "persistent" cookies:
+              Cookies can be either &quot;session&quot; or &quot;persistent&quot; cookies:
             </p>
             <div className="space-y-4">
               <div className="bg-card border border-border p-4 rounded-lg">
                 <p className="font-medium mb-2">Session Cookies</p>
                 <p className="text-sm text-muted-foreground">
-                  Temporary cookies that expire when you close your browser. They help us track your movements from page to page so you don't get asked for information you've already provided.
+                  Temporary cookies that expire when you close your browser. They help us track your movements from page to page so you don&apos;t get asked for information you&apos;ve already provided.
                 </p>
               </div>
               <div className="bg-card border border-border p-4 rounded-lg">
@@ -159,21 +159,21 @@ export default function CookiePolicyPage() {
 
             <h3 className="text-xl font-medium mb-3 mt-4">6.3 Mobile Device Settings</h3>
             <p className="text-muted-foreground leading-relaxed">
-              On mobile devices, you can typically manage cookies and tracking through your device settings or through the app settings if you're using our mobile application.
+              On mobile devices, you can typically manage cookies and tracking through your device settings or through the app settings if you&apos;re using our mobile application.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold mb-4">7. Do Not Track Signals</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Some browsers include a "Do Not Track" (DNT) feature that signals to websites you visit that you do not want to have your online activity tracked. Currently, there is no industry standard for how to respond to DNT signals. At this time, our Service does not respond to DNT signals.
+              Some browsers include a &quot;Do Not Track&quot; (DNT) feature that signals to websites you visit that you do not want to have your online activity tracked. Currently, there is no industry standard for how to respond to DNT signals. At this time, our Service does not respond to DNT signals.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold mb-4">8. Updates to This Cookie Policy</h2>
             <p className="text-muted-foreground leading-relaxed">
-              We may update this Cookie Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We will notify you of any material changes by posting the updated policy on our website with a new "Last updated" date.
+              We may update this Cookie Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We will notify you of any material changes by posting the updated policy on our website with a new &quot;Last updated&quot; date.
             </p>
           </section>
 
