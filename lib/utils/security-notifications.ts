@@ -24,10 +24,16 @@ export interface SecurityEvent {
 export async function sendSecurityNotification(event: SecurityEvent): Promise<boolean> {
   try {
     const emailContent = generateEmailContent(event)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+    const emailApiUrl = process.env.EMAIL_API_URL || (siteUrl ? new URL('/api/send-email', siteUrl).toString() : '')
+
+    if (!emailApiUrl) {
+      return false
+    }
     
     // TODO: Integrate with your email service (SendGrid, AWS SES, Resend, etc.)
     // Example with fetch to your API endpoint:
-    const response = await fetch('/api/send-email', {
+    const response = await fetch(emailApiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
