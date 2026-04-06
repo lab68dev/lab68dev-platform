@@ -25,11 +25,18 @@ export const metadata: Metadata = {
       {
         url: "/images/design-mode/favicon.ico",
         type: "image/x-icon",
+        sizes: "64x64",
+      },
+      {
+        url: "/icons/icon-192.svg",
+        type: "image/svg+xml",
+        sizes: "192x192",
       },
     ],
     apple: [
-      { url: "/icons/icon-192.png", sizes: "192x192" },
+      { url: "/icons/icon-192.svg", sizes: "192x192" },
     ],
+    shortcut: [{ url: "/images/design-mode/favicon.ico" }],
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -46,7 +53,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#0a0a0a" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
