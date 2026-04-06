@@ -11,4 +11,4 @@
 export * from './whiteboard-service'
 
 // Legacy local storage implementation
-export * from './whiteboard-local'
+export * as whiteboardLocal from './whiteboard-local'
