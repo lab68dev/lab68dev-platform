@@ -22,14 +22,19 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci --legacy-peer-deps
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: ESLint check
+        run: npm run lint
 
       - name: TypeScript check
         run: npx tsc --noEmit --pretty
-        continue-on-error: true
 
       - name: Build
         run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
 
   e2e-tests:
     name: E2E Tests (Playwright)
@@ -43,7 +48,8 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci --legacy-peer-deps
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -58,3 +64,21 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Check for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
