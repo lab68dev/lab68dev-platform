@@ -3,28 +3,33 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { 
-  RocketLaunchIcon, ArrowRightIcon, SparklesIcon,
-  CodeBracketIcon, UserGroupIcon, BoltIcon, 
-  ClipboardDocumentListIcon, ChatBubbleLeftRightIcon,
-  DocumentTextIcon
-} from '@heroicons/react/24/outline'
 import { motion } from "framer-motion"
 import { SectionBadge } from "./SectionBadge"
 import PixelBlast from "@/components/PixelBlast"
 import RotatingText from "@/components/RotatingText"
+import {
+  ArrowRightSvgIcon,
+  BoltSvgIcon,
+  ChatBubbleLeftRightSvgIcon,
+  ClipboardDocumentListSvgIcon,
+  CodeBracketSvgIcon,
+  DocumentTextSvgIcon,
+  RocketLaunchSvgIcon,
+  SparklesSvgIcon,
+  UserGroupSvgIcon,
+} from "./LandingSvgIcons"
 
 interface HeroSectionProps {
   t: any
 }
 
 const featurePills = [
-  { icon: ClipboardDocumentListIcon, label: "Project Management", color: "text-sky-400 bg-sky-400/10 border-sky-400/20" },
-  { icon: SparklesIcon,             label: "AI Assistant",        color: "text-pink-400 bg-pink-400/10 border-pink-400/20" },
-  { icon: UserGroupIcon,            label: "Collaboration",       color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" },
-  { icon: CodeBracketIcon,          label: "Code Tools",          color: "text-primary bg-primary/10 border-primary/20" },
-  { icon: DocumentTextIcon,         label: "Resume Builder",      color: "text-purple-400 bg-purple-400/10 border-purple-400/20" },
-  { icon: ChatBubbleLeftRightIcon,  label: "Team Chat",           color: "text-green-400 bg-green-400/10 border-green-400/20" },
+  { icon: ClipboardDocumentListSvgIcon, label: "Project Management", color: "text-sky-400 bg-sky-400/10 border-sky-400/20" },
+  { icon: SparklesSvgIcon,              label: "AI Assistant",        color: "text-pink-400 bg-pink-400/10 border-pink-400/20" },
+  { icon: UserGroupSvgIcon,             label: "Collaboration",       color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" },
+  { icon: CodeBracketSvgIcon,           label: "Code Tools",          color: "text-primary bg-primary/10 border-primary/20" },
+  { icon: DocumentTextSvgIcon,          label: "Resume Builder",      color: "text-purple-400 bg-purple-400/10 border-purple-400/20" },
+  { icon: ChatBubbleLeftRightSvgIcon,   label: "Team Chat",           color: "text-green-400 bg-green-400/10 border-green-400/20" },
 ]
 
 export function HeroSection({ t }: HeroSectionProps) {
@@ -56,7 +61,7 @@ export function HeroSection({ t }: HeroSectionProps) {
               height={120}
               className="hover:scale-105 transition-transform duration-500 rounded-2xl drop-shadow-2xl"
             />
-            <SectionBadge title={t.landing.hero.badge} icon={SparklesIcon as any} />
+            <SectionBadge title={t.landing.hero.badge} icon={SparklesSvgIcon} />
           </motion.div>
 
           {/* Main headline */}
@@ -69,7 +74,7 @@ export function HeroSection({ t }: HeroSectionProps) {
               <span className="text-foreground">One Platform to</span>
               <br />
               <RotatingText
-                texts={['Build Faster', 'Ship Smarter', 'Collaborate', 'Stay Focused']}
+                texts={["Build Faster", "Ship Smarter", "Collaborate", "Stay Focused"]}
                 mainClassName="inline-flex px-4 py-1 md:py-2 bg-primary text-primary-foreground rounded-xl overflow-hidden justify-center mt-2"
                 staggerFrom="last"
                 initial={{ y: "100%" }}
@@ -100,7 +105,7 @@ export function HeroSection({ t }: HeroSectionProps) {
             transition={{ duration: 0.5, delay: 0.5 }}
             className="flex flex-wrap gap-2 justify-center max-w-xl mx-auto"
           >
-            {featurePills.map((pill, i) => (
+            {featurePills.map((pill) => (
               <span
                 key={pill.label}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold ${pill.color}`}
@@ -125,7 +130,7 @@ export function HeroSection({ t }: HeroSectionProps) {
             >
               <Link href="/signup" className="flex items-center gap-2">
                 Get Started Free
-                <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
+                <RocketLaunchSvgIcon className="h-5 w-5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
               </Link>
             </Button>
             <Button
@@ -136,7 +141,7 @@ export function HeroSection({ t }: HeroSectionProps) {
             >
               <Link href="#services" className="flex items-center gap-2">
                 Explore Features
-                <ArrowRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRightSvgIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
           </motion.div>
@@ -150,9 +155,9 @@ export function HeroSection({ t }: HeroSectionProps) {
           >
             <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
               {[
-                { value: "14+", label: t.landing.stats.features, icon: BoltIcon },
-                { value: "100%", label: t.landing.stats.openSource, icon: CodeBracketIcon },
-                { value: "Live", label: t.landing.stats.available, icon: RocketLaunchIcon },
+                { value: "14+", label: t.landing.stats.features, icon: BoltSvgIcon },
+                { value: "100%", label: t.landing.stats.openSource, icon: CodeBracketSvgIcon },
+                { value: "Live", label: t.landing.stats.available, icon: RocketLaunchSvgIcon },
               ].map((stat) => (
                 <div
                   key={stat.label}
