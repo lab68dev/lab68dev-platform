@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { PasswordStrengthIndicator } from '@/components/password-strength-indicator'
 import {
   ShieldCheckIcon,
@@ -365,7 +366,14 @@ export default function SecuritySettingsPage() {
                   Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
                 </p>
                 <div className="bg-white p-4 inline-block border rounded-lg">
-                  <img src={qrCode} alt="MFA QR Code" className="w-64 h-64" />
+                  <Image
+                    src={qrCode}
+                    alt="MFA QR Code"
+                    width={256}
+                    height={256}
+                    unoptimized
+                    className="w-64 h-64"
+                  />
                 </div>
               </div>
 
