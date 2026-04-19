@@ -7,26 +7,24 @@ interface TechStackSectionProps {
 }
 
 const techStack = [
-  { name: "Next.js 16", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
-  { name: "React 19", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
-  { name: "TypeScript 5", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
-  { name: "Supabase", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg" },
-  { name: "PostgreSQL", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
-  { name: "Tailwind CSS 4", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg" },
-
-  { name: "Node.js", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" },
-  { name: "Vercel", logo: "https://assets.vercel.com/image/upload/front/favicon/vercel/180x180.png" }
+  { name: "Next.js 16", logo: "/icons/brands/nextdotjs.svg" },
+  { name: "React 19", logo: "/icons/brands/react.svg" },
+  { name: "TypeScript 5", logo: "/icons/brands/typescript.svg" },
+  { name: "Supabase", logo: "/icons/brands/supabase.svg" },
+  { name: "PostgreSQL", logo: "/icons/brands/postgresql.svg" },
+  { name: "Tailwind CSS 4", logo: "/icons/brands/tailwind-css.svg" },
+  { name: "Node.js", logo: "/icons/brands/nodedotjs.svg" },
+  { name: "Vercel", logo: "/icons/brands/vercel.svg" },
 ]
 
 const poweredBy = [
-  { name: "GitHub", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" },
-  { name: "Vercel", logo: "https://assets.vercel.com/image/upload/front/favicon/vercel/180x180.png" },
-  { name: "Supabase", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg" },
-  { name: "PostgreSQL", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
-  { name: "Node.js", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" },
-
-  { name: "Gmail SMTP", logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300FF99'%3E%3Cpath d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'/%3E%3C/svg%3E" },
-  { name: "pnpm", logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300FF99'%3E%3Cpath d='M0 0v7.5h7.5V0zm8.25 0v7.5h7.5V0zm8.25 0v7.5H24V0zM0 8.25v7.5h7.5v-7.5zm16.5 0v7.5H24v-7.5zM0 16.5V24h7.5v-7.5zm8.25 0V24h7.5v-7.5z'/%3E%3C/svg%3E" },
+  { name: "GitHub", logo: "/icons/brands/github.svg" },
+  { name: "Vercel", logo: "/icons/brands/vercel.svg" },
+  { name: "Supabase", logo: "/icons/brands/supabase.svg" },
+  { name: "PostgreSQL", logo: "/icons/brands/postgresql.svg" },
+  { name: "Node.js", logo: "/icons/brands/nodedotjs.svg" },
+  { name: "Gmail SMTP", logo: "/icons/brands/gmail.svg" },
+  { name: "npm", logo: "/icons/brands/npm.svg" },
 ]
 
 export function TechStackSection({ t }: TechStackSectionProps) {
@@ -51,6 +49,7 @@ export function TechStackSection({ t }: TechStackSectionProps) {
                       alt={tech.name}
                       width={64}
                       height={64}
+                      unoptimized
                       className="object-contain group-hover:scale-110 transition-transform"
                     />
                   </div>
@@ -79,6 +78,7 @@ export function TechStackSection({ t }: TechStackSectionProps) {
                         alt={tech.name}
                         width={64}
                         height={64}
+                        unoptimized
                         className="object-contain"
                       />
                     </div>
