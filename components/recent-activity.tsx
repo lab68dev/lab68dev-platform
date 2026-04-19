@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { formatDistanceToNow } from "date-fns"
 import { 
   FileText, 
@@ -171,9 +172,12 @@ export function RecentActivity({ userId, limit = 10, className = "" }: RecentAct
                   {currentUser && (
                     <div className="flex items-center gap-2">
                       {currentUser.avatar ? (
-                        <img
+                        <Image
                           src={currentUser.avatar}
                           alt={currentUser.name}
+                          width={24}
+                          height={24}
+                          unoptimized
                           className="w-6 h-6 rounded-full border border-border"
                         />
                       ) : (
