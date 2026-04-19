@@ -9,6 +9,7 @@ import { getCurrentUser } from "@/lib/features/auth"
 import { Translations, getUserLanguage, getTranslations, type Language } from "@/lib/config"
 import { getProfileByEmail, searchUsers } from "@/lib/database"
 import Link from "next/link"
+import Image from "next/image"
 
 interface Project {
   id: string
@@ -428,7 +429,14 @@ export default function CollaboratorsPage() {
                         >
                           <div className="flex items-center gap-3">
                             {user.avatar ? (
-                              <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
+                              <Image
+                                src={user.avatar}
+                                alt={user.name || "User avatar"}
+                                width={32}
+                                height={32}
+                                unoptimized
+                                className="w-8 h-8 rounded-full object-cover"
+                              />
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                                 <Users className="h-4 w-4 text-primary" />
