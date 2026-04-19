@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Trophy, Medal, Tv, Gamepad2, User, ChevronRight } from "lucide-react"
 import { getTopScores } from "@/lib/features/games"
 import { getTranslations, getUserLanguage } from "@/lib/config"
@@ -121,7 +122,14 @@ export default function LeaderboardPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary/10 border-2 border-border overflow-hidden flex items-center justify-center">
                           {record.profiles?.avatar ? (
-                            <img src={record.profiles.avatar} alt="" className="w-full h-full object-cover" />
+                            <Image
+                              src={record.profiles.avatar}
+                              alt={`${record.profiles?.name || "Player"} avatar`}
+                              width={40}
+                              height={40}
+                              unoptimized
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <User className="h-6 w-6 text-muted-foreground" />
                           )}
