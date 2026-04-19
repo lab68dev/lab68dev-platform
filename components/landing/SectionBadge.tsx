@@ -1,11 +1,11 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { LucideIcon } from "lucide-react"
+import type { ComponentType, SVGProps } from "react"
 
 interface SectionBadgeProps {
   title: string
-  icon?: LucideIcon
+  icon?: ComponentType<SVGProps<SVGSVGElement>>
   className?: string
 }
 
