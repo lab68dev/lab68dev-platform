@@ -1,21 +1,20 @@
 "use client"
 
-import { 
-  ClipboardDocumentListIcon, 
-  LightBulbIcon, 
-  UserGroupIcon, 
-  FolderIcon, 
-  PresentationChartLineIcon, 
-  DocumentTextIcon, 
-  FaceSmileIcon, 
-  BookOpenIcon, 
-  CalendarIcon, 
-  ChatBubbleLeftRightIcon,
-  ArrowRightIcon
-} from '@heroicons/react/24/outline'
-import { Layers } from "lucide-react"
 import { motion } from "framer-motion"
 import { SectionBadge } from "./SectionBadge"
+import {
+  BookOpenSvgIcon,
+  CalendarSvgIcon,
+  ChatBubbleLeftRightSvgIcon,
+  ClipboardDocumentListSvgIcon,
+  DocumentTextSvgIcon,
+  FaceSmileSvgIcon,
+  FolderSvgIcon,
+  LayersSvgIcon,
+  LightBulbSvgIcon,
+  PresentationChartLineSvgIcon,
+  UserGroupSvgIcon,
+} from "./LandingSvgIcons"
 
 interface ServicesSectionProps {
   t: any
@@ -24,7 +23,7 @@ interface ServicesSectionProps {
 export function ServicesSection({ t }: ServicesSectionProps) {
   const services = [
     {
-      icon: ClipboardDocumentListIcon,
+      icon: ClipboardDocumentListSvgIcon,
       colorClass: "text-sky-400",
       bgClass: "bg-sky-400/10",
       borderHover: "hover:border-sky-400/40",
@@ -32,7 +31,7 @@ export function ServicesSection({ t }: ServicesSectionProps) {
       description: t.landing.services.projectManagementDesc
     },
     {
-      icon: LightBulbIcon,
+      icon: LightBulbSvgIcon,
       colorClass: "text-pink-500",
       bgClass: "bg-pink-500/10",
       borderHover: "hover:border-pink-500/40",
@@ -40,7 +39,7 @@ export function ServicesSection({ t }: ServicesSectionProps) {
       description: t.landing.services.aiAssistantDesc
     },
     {
-      icon: UserGroupIcon,
+      icon: UserGroupSvgIcon,
       colorClass: "text-yellow-400",
       bgClass: "bg-yellow-400/10",
       borderHover: "hover:border-yellow-400/40",
@@ -48,7 +47,7 @@ export function ServicesSection({ t }: ServicesSectionProps) {
       description: t.landing.services.collaborationDesc
     },
     {
-      icon: FolderIcon,
+      icon: FolderSvgIcon,
       colorClass: "text-primary",
       bgClass: "bg-primary/10",
       borderHover: "hover:border-primary/40",
@@ -56,7 +55,7 @@ export function ServicesSection({ t }: ServicesSectionProps) {
       description: t.landing.services.fileManagementDesc
     },
     {
-      icon: PresentationChartLineIcon,
+      icon: PresentationChartLineSvgIcon,
       colorClass: "text-sky-400",
       bgClass: "bg-sky-400/10",
       borderHover: "hover:border-sky-400/40",
@@ -64,7 +63,7 @@ export function ServicesSection({ t }: ServicesSectionProps) {
       description: t.landing.services.diagramsDesc
     },
     {
-      icon: DocumentTextIcon,
+      icon: DocumentTextSvgIcon,
       colorClass: "text-pink-500",
       bgClass: "bg-pink-500/10",
       borderHover: "hover:border-pink-500/40",
@@ -72,7 +71,7 @@ export function ServicesSection({ t }: ServicesSectionProps) {
       description: t.landing.services.resumeEditorDesc
     },
     {
-      icon: FaceSmileIcon,
+      icon: FaceSmileSvgIcon,
       colorClass: "text-yellow-400",
       bgClass: "bg-yellow-400/10",
       borderHover: "hover:border-yellow-400/40",
@@ -80,7 +79,7 @@ export function ServicesSection({ t }: ServicesSectionProps) {
       description: t.landing.services.gamesHubDesc
     },
     {
-      icon: BookOpenIcon,
+      icon: BookOpenSvgIcon,
       colorClass: "text-primary",
       bgClass: "bg-primary/10",
       borderHover: "hover:border-primary/40",
@@ -88,7 +87,7 @@ export function ServicesSection({ t }: ServicesSectionProps) {
       description: t.landing.services.wikiDesc
     },
     {
-      icon: CalendarIcon,
+      icon: CalendarSvgIcon,
       colorClass: "text-sky-400",
       bgClass: "bg-sky-400/10",
       borderHover: "hover:border-sky-400/40",
@@ -96,7 +95,7 @@ export function ServicesSection({ t }: ServicesSectionProps) {
       description: t.landing.services.meetingPlanningDesc
     },
     {
-      icon: ChatBubbleLeftRightIcon,
+      icon: ChatBubbleLeftRightSvgIcon,
       colorClass: "text-pink-500",
       bgClass: "bg-pink-500/10",
       borderHover: "hover:border-pink-500/40",
@@ -110,7 +109,7 @@ export function ServicesSection({ t }: ServicesSectionProps) {
       <div className="container mx-auto px-4 py-20">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-14">
-            <SectionBadge title={t.landing.services.badge} icon={Layers} />
+            <SectionBadge title={t.landing.services.badge} icon={LayersSvgIcon} />
             <h2 className="text-3xl md:text-5xl font-bold mb-4">{t.landing.services.title}</h2>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
               {t.landing.services.subtitle}
