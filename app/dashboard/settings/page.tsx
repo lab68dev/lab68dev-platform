@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -149,9 +150,12 @@ export default function SettingsPage() {
             <Label>{t.settings.avatar || "Profile Picture"}</Label>
             <div className="flex items-center gap-4">
               {avatar ? (
-                <img
-                  src={avatar || "/placeholder.svg"}
+                <Image
+                  src={avatar}
                   alt="Avatar"
+                  width={80}
+                  height={80}
+                  unoptimized
                   className="w-20 h-20 object-cover border border-border"
                 />
               ) : (
