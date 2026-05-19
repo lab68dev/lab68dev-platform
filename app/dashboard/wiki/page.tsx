@@ -15,7 +15,7 @@ import {
   Tag,
 } from "lucide-react"
 import { getCurrentUser } from "@/lib/features/auth"
-import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
+import { useLanguage } from "@/lib/config"
 import { getWikiArticles, createWikiArticle, updateWikiArticle, deleteWikiArticle, type WikiArticle } from "@/lib/database"
 
 interface Article {
@@ -45,10 +45,9 @@ export default function WikiPage() {
   })
   const [searchQuery, setSearchQuery] = useState("")
   const [filterCategory, setFilterCategory] = useState<"all" | typeof CATEGORIES[number]>("all")
-  const [language, setLanguage] = useState<Language>(getUserLanguage())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const t = getTranslations(language)
+  const { t } = useLanguage()
 
   const loadArticles = useCallback(async () => {
     const user = getCurrentUser()
