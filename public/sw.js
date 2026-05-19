@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lab68dev-v1'
+const CACHE_NAME = 'lab68studio-v3'
 
 const STATIC_ASSETS = [
   '/offline',
@@ -29,38 +29,26 @@ self.addEventListener('activate', (event) => {
   self.clients.claim()
 })
 
-// Fetch: network-first with offline fallback
+// Fetch: never cache app HTML or Next.js chunks. Stale navigations can hydrate
+// against a newer client bundle after deploys or dev-server restarts.
 self.addEventListener('fetch', (event) => {
   const { request } = event
+  const url = new URL(request.url)
 
   // Skip non-GET and API/auth requests
   if (request.method !== 'GET') return
-  if (request.url.includes('/api/')) return
-  if (request.url.includes('/auth/')) return
-  if (request.url.includes('supabase')) return
+  if (url.pathname.startsWith('/_next/')) return
+  if (url.pathname.startsWith('/api/')) return
+  if (url.pathname.startsWith('/auth/')) return
+  if (url.hostname.includes('supabase')) return
+
+  if (request.mode !== 'navigate') return
 
   event.respondWith(
     fetch(request)
-      .then((response) => {
-        // Cache successful navigation responses
-        if (response.ok && request.mode === 'navigate') {
-          const responseClone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone)
-          })
-        }
-        return response
-      })
       .catch(async () => {
-        // Try cache first
-        const cachedResponse = await caches.match(request)
-        if (cachedResponse) return cachedResponse
-
-        // For navigation requests, show offline page
-        if (request.mode === 'navigate') {
-          const offlinePage = await caches.match('/offline')
-          if (offlinePage) return offlinePage
-        }
+        const offlinePage = await caches.match('/offline')
+        if (offlinePage) return offlinePage
 
         return new Response('Offline', { status: 503 })
       })
