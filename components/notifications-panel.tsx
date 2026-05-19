@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { Bell, X, Calendar, Clock } from "lucide-react"
 import { createClient } from "@/lib/database/supabase-client"
 import { getCurrentUser } from "@/lib/features/auth"
-import { getTranslations, getUserLanguage } from "@/lib/config"
+import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
 
 interface Meeting {
   id: string
@@ -18,14 +18,15 @@ interface Meeting {
 export function NotificationsPanel() {
   const [isOpen, setIsOpen] = useState(false)
   const [upcomingMeetings, setUpcomingMeetings] = useState<Meeting[]>([])
-  const [language, setLanguage] = useState(getUserLanguage())
-  const channelInstanceIdRef = useRef(
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `notifications-${Date.now()}-${Math.random().toString(36).slice(2)}`
-  )
+  const [language, setLanguage] = useState<Language>("en")
+  const instanceId = useId()
+  const channelInstanceIdRef = useRef(instanceId)
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null)
   const t = getTranslations(language)
+
+  useEffect(() => {
+    setLanguage(getUserLanguage())
+  }, [])
 
   const fetchUpcomingMeetings = async (userId: string) => {
     const supabase = createClient()
@@ -127,7 +128,7 @@ export function NotificationsPanel() {
           />
           
           {/* Notification Panel */}
-          <div className="fixed right-2 top-20 sm:absolute sm:right-0 sm:left-auto sm:top-full mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-md bg-card border-2 border-border shadow-2xl z-50 rounded-lg overflow-hidden">
+          <div className="fixed right-3 top-20 w-[calc(100vw-1.5rem)] max-w-md sm:right-5 sm:w-96 bg-card border-2 border-border shadow-2xl z-[100] rounded-lg overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b-2 border-border bg-muted">
               <div className="flex items-center gap-2">
@@ -216,7 +217,7 @@ export function NotificationsPanel() {
             {upcomingMeetings.length > 0 && (
               <div className="p-3 border-t-2 border-border bg-muted text-center">
                 <button className="text-sm text-primary hover:underline font-medium transition-colors">
-                  View All Meetings →
+                  View All Meetings &rarr;
                 </button>
               </div>
             )}
