@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Suspense, useCallback, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,6 +13,7 @@ import { LanguageSwitcher } from "@/components/language-switcher"
 import { getTranslations, getUserLanguage } from "@/lib/config"
 import { getCurrentUserAsync, signInWithOtp, signUp } from "@/lib/features/auth"
 import {
+  ArrowLeftIcon,
   ArrowPathIcon,
   ArrowRightIcon,
   BoltIcon,
@@ -20,14 +21,24 @@ import {
   EnvelopeIcon,
   LockClosedIcon,
   ShieldCheckIcon,
+  SparklesIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline"
 
 const logoSrc = "/images/design-mode/lab68studio logo.png"
 
+const signupHighlights = [
+  { icon: BoltIcon, title: "Projects", desc: "Plan and ship" },
+  { icon: ShieldCheckIcon, title: "Security", desc: "Auth-first access" },
+  { icon: CheckCircleIcon, title: "Team flow", desc: "Invite users" },
+]
+
+const previewItems = ["Plan", "Build", "Review"]
+
 function AuthBrand() {
   return (
     <Link href="/" className="inline-flex items-center gap-3">
-      <Image src={logoSrc} alt="lab68studio" width={40} height={40} className="rounded-md" priority />
+      <Image src={logoSrc} alt="lab68studio" width={42} height={42} className="rounded-lg" priority />
       <span>
         <span className="block text-lg font-bold tracking-tight">lab68studio</span>
         <span className="block text-xs text-muted-foreground">Developer workspace</span>
@@ -57,6 +68,7 @@ function SignUpPageContent() {
         getCurrentUserAsync(),
         new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 1500)),
       ])
+
       if (user) {
         router.push(redirectPath)
       }
@@ -93,6 +105,7 @@ function SignUpPageContent() {
         setError("Name is required")
         return
       }
+
       if (!password || password.length < 8) {
         setError("Password must be at least 8 characters")
         return
@@ -122,8 +135,8 @@ function SignUpPageContent() {
           setError(result.error || "Sign up failed")
         }
       }
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred")
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred")
     } finally {
       setIsLoading(false)
     }
@@ -139,14 +152,18 @@ function SignUpPageContent() {
         <LanguageSwitcher />
       </div>
 
-      <main className="grid min-h-screen lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.75fr)]">
-        <section className="hidden border-r border-border bg-[#050505] px-8 py-8 lg:flex xl:px-12">
+      <main className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)]">
+        <section className="hidden border-r border-white/10 bg-[#050505] px-8 py-8 lg:flex xl:px-12">
           <div className="flex w-full flex-col justify-between">
             <AuthBrand />
 
             <div className="max-w-xl space-y-8">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                <SparklesIcon className="h-4 w-4" />
+                Start focused
+              </div>
+
               <div className="space-y-4">
-                <p className="text-sm font-medium text-primary">Start focused</p>
                 <h1 className="text-4xl font-bold tracking-tight xl:text-5xl">
                   Create your lab68studio workspace access.
                 </h1>
@@ -156,12 +173,8 @@ function SignUpPageContent() {
               </div>
 
               <div className="grid gap-3 xl:grid-cols-3">
-                {[
-                  { icon: BoltIcon, title: "Projects", desc: "Plan and ship" },
-                  { icon: ShieldCheckIcon, title: "Security", desc: "Auth-first access" },
-                  { icon: CheckCircleIcon, title: "Team flow", desc: "Invite users" },
-                ].map((item) => (
-                  <div key={item.title} className="rounded-lg border border-border bg-card p-4">
+                {signupHighlights.map((item) => (
+                  <div key={item.title} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
                     <item.icon className="mb-4 h-5 w-5 text-primary" />
                     <h2 className="text-sm font-semibold">{item.title}</h2>
                     <p className="mt-1 text-xs text-muted-foreground">{item.desc}</p>
@@ -170,14 +183,14 @@ function SignUpPageContent() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-card p-5">
-              <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
+            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-5">
+              <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="text-sm font-semibold">Workspace preview</span>
                 <span className="rounded-md border border-primary/40 px-2 py-1 text-xs text-primary">Ready</span>
               </div>
               <div className="grid grid-cols-3 gap-3">
-                {["Plan", "Build", "Review"].map((item) => (
-                  <div key={item} className="rounded-md border border-border bg-background p-3 text-center">
+                {previewItems.map((item) => (
+                  <div key={item} className="rounded-md border border-white/10 bg-background/70 p-3 text-center">
                     <p className="text-sm font-semibold">{item}</p>
                     <p className="mt-1 text-xs text-muted-foreground">Team</p>
                   </div>
@@ -192,180 +205,193 @@ function SignUpPageContent() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="w-full max-w-md"
+            className="w-full max-w-[440px]"
           >
             <div className="mb-8 lg:hidden">
               <AuthBrand />
             </div>
 
-            <div className="mb-8 space-y-3">
-              <p className="text-sm font-medium text-primary">New account</p>
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Create account</h2>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Use a magic link for the fastest path, or create a password account.
-              </p>
-            </div>
-
-            <div className="mb-5 grid grid-cols-2 rounded-lg border border-border bg-card p-1">
-              <button
-                type="button"
-                onClick={() => setUsePassword(false)}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  !usePassword ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Magic link
-              </button>
-              <button
-                type="button"
-                onClick={() => setUsePassword(true)}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  usePassword ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Password
-              </button>
-            </div>
-
-            <form onSubmit={handleSignUp} className="space-y-5">
-              <AnimatePresence mode="wait">
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-                {success && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden rounded-md border border-green-500/40 bg-green-500/10 p-3 text-sm text-green-400"
-                  >
-                    {success}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <AnimatePresence initial={false}>
-                {usePassword && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-2 overflow-hidden"
-                  >
-                    <Label htmlFor="name" className="text-sm font-medium">
-                      Full name
-                    </Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Jane Doe"
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                      disabled={isLoading || !!success}
-                      className="h-12 rounded-md bg-card"
-                      required={usePassword}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  {t.auth?.email || "Email"}
-                </Label>
-                <div className="relative">
-                  <EnvelopeIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="email@example.com"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    disabled={isLoading || !!success}
-                    className="h-12 rounded-md bg-card pl-11"
-                    required
-                  />
+            <div className="rounded-xl border border-white/10 bg-card/80 p-5 shadow-2xl shadow-black/20 ring-1 ring-white/5 sm:p-6">
+              <div className="mb-7 space-y-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                  New workspace access
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Create account</h2>
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    Use a magic link for the fastest path, or create a password account.
+                  </p>
                 </div>
               </div>
 
-              <AnimatePresence initial={false}>
-                {usePassword && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-2 overflow-hidden"
-                  >
-                    <Label htmlFor="password" className="text-sm font-medium">
-                      Password
-                    </Label>
-                    <div className="relative">
-                      <LockClosedIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="Minimum 8 characters"
-                        value={password}
-                        onChange={(event) => setPassword(event.target.value)}
-                        disabled={isLoading || !!success}
-                        className="h-12 rounded-md bg-card pl-11"
-                        required={usePassword}
-                        minLength={8}
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <div className="mb-5 grid grid-cols-2 rounded-lg border border-white/10 bg-background/70 p-1">
+                <button
+                  type="button"
+                  onClick={() => setUsePassword(false)}
+                  className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                    !usePassword ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Magic link
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUsePassword(true)}
+                  className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                    usePassword ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Password
+                </button>
+              </div>
 
-              <p className="text-xs leading-5 text-muted-foreground">
-                By creating an account, you agree to the{" "}
-                <Link href="/terms" className="font-medium text-primary hover:text-primary/80">
-                  Terms
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className="font-medium text-primary hover:text-primary/80">
-                  Privacy Policy
+              <form onSubmit={handleSignUp} className="space-y-5">
+                <AnimatePresence mode="wait">
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+                    >
+                      {error}
+                    </motion.div>
+                  )}
+                  {success && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden rounded-lg border border-green-500/40 bg-green-500/10 p-3 text-sm text-green-400"
+                    >
+                      {success}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <AnimatePresence initial={false}>
+                  {usePassword && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2 overflow-hidden"
+                    >
+                      <Label htmlFor="name" className="text-sm font-medium">
+                        Full name
+                      </Label>
+                      <div className="relative">
+                        <UserIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="name"
+                          type="text"
+                          placeholder="Jane Doe"
+                          value={name}
+                          onChange={(event) => setName(event.target.value)}
+                          disabled={isLoading || !!success}
+                          className="h-12 rounded-lg border-white/10 bg-background/70 pl-11 focus-visible:ring-primary/30"
+                          required={usePassword}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    {t.auth?.email || "Email"}
+                  </Label>
+                  <div className="relative">
+                    <EnvelopeIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="email@example.com"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      disabled={isLoading || !!success}
+                      className="h-12 rounded-lg border-white/10 bg-background/70 pl-11 focus-visible:ring-primary/30"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <AnimatePresence initial={false}>
+                  {usePassword && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2 overflow-hidden"
+                    >
+                      <Label htmlFor="password" className="text-sm font-medium">
+                        Password
+                      </Label>
+                      <div className="relative">
+                        <LockClosedIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="Minimum 8 characters"
+                          value={password}
+                          onChange={(event) => setPassword(event.target.value)}
+                          disabled={isLoading || !!success}
+                          className="h-12 rounded-lg border-white/10 bg-background/70 pl-11 focus-visible:ring-primary/30"
+                          required={usePassword}
+                          minLength={8}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <p className="text-xs leading-5 text-muted-foreground">
+                  By creating an account, you agree to the{" "}
+                  <Link href="/terms" className="font-medium text-primary hover:text-primary/80">
+                    Terms
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className="font-medium text-primary hover:text-primary/80">
+                    Privacy Policy
+                  </Link>
+                  .
+                </p>
+
+                <Button
+                  type="submit"
+                  disabled={isLoading || !!success}
+                  className="h-12 w-full rounded-lg text-sm font-semibold"
+                >
+                  {isLoading ? (
+                    <>
+                      <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                      {usePassword ? "Creating..." : "Sending..."}
+                    </>
+                  ) : (
+                    <>
+                      {usePassword ? "Create Account" : "Send Magic Link"}
+                      <ArrowRightIcon className="h-5 w-5" />
+                    </>
+                  )}
+                </Button>
+              </form>
+
+              <footer className="mt-7 space-y-4 border-t border-white/10 pt-6 text-center text-sm">
+                <p className="text-muted-foreground">
+                  Already have an account?{" "}
+                  <Link href="/login" className="font-semibold text-primary hover:text-primary/80">
+                    Sign in
+                  </Link>
+                </p>
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground hover:text-primary"
+                >
+                  <ArrowLeftIcon className="h-4 w-4" />
+                  Back to Home
                 </Link>
-                .
-              </p>
-
-              <Button
-                type="submit"
-                disabled={isLoading || !!success}
-                className="h-12 w-full rounded-md text-sm font-semibold"
-              >
-                {isLoading ? (
-                  <>
-                    <ArrowPathIcon className="h-5 w-5 animate-spin" />
-                    {usePassword ? "Creating..." : "Sending..."}
-                  </>
-                ) : (
-                  <>
-                    {usePassword ? "Create Account" : "Send Magic Link"}
-                    <ArrowRightIcon className="h-5 w-5" />
-                  </>
-                )}
-              </Button>
-            </form>
-
-            <footer className="mt-8 space-y-4 border-t border-border pt-6 text-center text-sm">
-              <p className="text-muted-foreground">
-                Already have an account?{" "}
-                <Link href="/login" className="font-semibold text-primary hover:text-primary/80">
-                  Sign in
-                </Link>
-              </p>
-              <Link href="/" className="inline-flex text-xs font-semibold uppercase text-muted-foreground hover:text-primary">
-                {"<- Back to Home"}
-              </Link>
-            </footer>
+              </footer>
+            </div>
           </motion.div>
         </section>
       </main>
