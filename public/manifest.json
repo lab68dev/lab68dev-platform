@@ -1,11 +1,11 @@
 {
-  "name": "lab68dev Platform",
-  "short_name": "lab68dev",
-  "description": "An open developer platform. Build, Learn, Collaborate.",
+  "name": "lab68studio",
+  "short_name": "lab68studio",
+  "description": "An open developer workspace for planning, docs, files, diagrams, and collaboration.",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0a0a0a",
-  "theme_color": "#00FF99",
+  "theme_color": "#ff7a00",
   "orientation": "any",
   "icons": [
     {
