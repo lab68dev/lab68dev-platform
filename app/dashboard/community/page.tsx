@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MessageSquare, X, Search, Filter } from "lucide-react"
@@ -41,12 +41,10 @@ export default function CommunityPage() {
     }
   }
 
-  // Initialize on client side only
-  useState(() => {
+  useEffect(() => {
     setLanguage(getUserLanguage())
     loadDiscussions()
-    return null
-  })
+  }, [])
 
   const saveDiscussions = (updatedDiscussions: Discussion[]) => {
     localStorage.setItem("lab68_discussions", JSON.stringify(updatedDiscussions))
