@@ -16,7 +16,7 @@ import {
   Filter,
 } from "lucide-react"
 import { getCurrentUser } from "@/lib/features/auth"
-import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
+import { useLanguage } from "@/lib/config"
 import { getFiles, createFile, deleteFile, type FileRecord } from "@/lib/database"
 import { createClient } from "@/lib/database"
 
@@ -51,10 +51,9 @@ export default function FilesPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [filterType, setFilterType] = useState<"all" | "uploaded" | "link">("all")
   const [filterRelated, setFilterRelated] = useState<"all" | typeof FILE_CATEGORIES[number]>("all")
-  const [language, setLanguage] = useState<Language>(getUserLanguage())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const t = getTranslations(language)
+  const { t } = useLanguage()
 
   const loadFiles = useCallback(async () => {
     const user = getCurrentUser()
