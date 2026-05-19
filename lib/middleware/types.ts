@@ -38,5 +38,5 @@ export const defaultRouteConfig: RouteConfig = {
     protectedPaths: ['/dashboard'],
     authPaths: ['/login', '/signup'],
     staffPaths: ['/staff/dashboard'],
-    protectedApiPaths: ['/api/projects', '/api/resumes', '/api/chat'],
+    protectedApiPaths: ['/api/projects', '/api/chat'],
 }
