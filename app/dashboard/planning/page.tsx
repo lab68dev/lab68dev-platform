@@ -1,13 +1,13 @@
 ﻿"use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { getCurrentUser } from "@/lib/features/auth"
-import { getTranslations, getUserLanguage } from "@/lib/config"
+import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
 import { getMilestones, createMilestone, updateMilestone, deleteMilestone } from "@/lib/database"
 import {
   Plus,
@@ -57,8 +57,16 @@ export default function PlanningPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "in-progress" | "completed">("all")
   const [viewMode, setViewMode] = useState<ViewMode>("list")
-  const [language, setLanguage] = useState(getUserLanguage())
+  const [language, setLanguage] = useState<Language>("en")
+  const [now, setNow] = useState(() => new Date(0))
   const t = getTranslations(language).planning
+  const locale = language === "vi" ? "vi-VN" : "en-US"
+
+  const formatDate = useCallback(
+    (dateString: string, options?: Intl.DateTimeFormatOptions) =>
+      new Date(dateString).toLocaleDateString(locale, options),
+    [locale]
+  )
 
   const loadMilestones = useCallback(async () => {
     const user = getCurrentUser()
@@ -82,6 +90,8 @@ export default function PlanningPage() {
 
   useEffect(() => {
     loadMilestones()
+    setLanguage(getUserLanguage())
+    setNow(new Date())
 
     const handleStorageChange = () => {
       setLanguage(getUserLanguage())
@@ -211,9 +221,9 @@ export default function PlanningPage() {
     const rows = sortedMilestones.map((m) => [
       m.title,
       m.description || "",
-      new Date(m.target_date).toLocaleDateString(),
+      formatDate(m.target_date),
       m.status,
-      new Date(m.created_at).toLocaleDateString(),
+      formatDate(m.created_at),
     ])
 
     const csvContent = [
@@ -235,7 +245,7 @@ export default function PlanningPage() {
   }
 
   const exportToMarkdown = () => {
-    let markdown = `# Milestones - ${new Date().toLocaleDateString()}\n\n`
+    let markdown = `# Milestones - ${formatDate(new Date().toISOString())}\n\n`
     
     if (viewMode === "roadmap") {
       const groupedByQuarter: Record<string, Milestone[]> = {}
@@ -254,7 +264,7 @@ export default function PlanningPage() {
           const statusEmoji = m.status === "completed" ? "✅" : m.status === "in-progress" ? "🔄" : "⏳"
           markdown += `### ${statusEmoji} ${m.title}\n`
           markdown += `- **Status**: ${m.status}\n`
-          markdown += `- **Target Date**: ${new Date(m.target_date).toLocaleDateString()}\n`
+          markdown += `- **Target Date**: ${formatDate(m.target_date)}\n`
           if (m.description) markdown += `- **Description**: ${m.description}\n`
           markdown += `\n`
         })
@@ -264,7 +274,7 @@ export default function PlanningPage() {
         const statusEmoji = m.status === "completed" ? "✅" : m.status === "in-progress" ? "🔄" : "⏳"
         markdown += `## ${statusEmoji} ${m.title}\n`
         markdown += `- **Status**: ${m.status}\n`
-        markdown += `- **Target Date**: ${new Date(m.target_date).toLocaleDateString()}\n`
+        markdown += `- **Target Date**: ${formatDate(m.target_date)}\n`
         if (m.description) markdown += `- **Description**: ${m.description}\n`
         markdown += `\n`
       })
@@ -495,7 +505,7 @@ export default function PlanningPage() {
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {quarterMilestones.map((milestone) => {
-                const isPast = new Date(milestone.target_date) < new Date()
+                const isPast = new Date(milestone.target_date) < now
                 
                 return (
                   <Card
@@ -546,7 +556,7 @@ export default function PlanningPage() {
 
                     <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
                       <Calendar className="h-3 w-3" />
-                      <span>{new Date(milestone.target_date).toLocaleDateString()}</span>
+                      <span>{formatDate(milestone.target_date)}</span>
                       {isPast && milestone.status !== "completed" && (
                         <span className="text-red-500 font-medium">• Overdue</span>
                       )}
@@ -821,7 +831,7 @@ export default function PlanningPage() {
 
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
                     <Calendar className="h-3 w-3" />
-                    <span>{new Date(milestone.target_date).toLocaleDateString()}</span>
+                    <span>{formatDate(milestone.target_date)}</span>
                   </div>
 
                   <div className="flex gap-2">
