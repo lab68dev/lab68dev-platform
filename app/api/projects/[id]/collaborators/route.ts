@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server"
 import { createServerSupabaseClient } from "@/lib/database/supabase-server"
-import { createClient, getProjectCollaborators, removeProjectCollaborator } from "@/lib/database"
+
+const COLLABORATOR_ROLES = ["admin", "editor", "viewer"] as const
+type CollaboratorRole = (typeof COLLABORATOR_ROLES)[number]
+
+function isCollaboratorRole(role: unknown): role is CollaboratorRole {
+  return typeof role === "string" && COLLABORATOR_ROLES.includes(role as CollaboratorRole)
+}
 
 // GET /api/projects/[id]/collaborators - List collaborators for a project
 export async function GET(
@@ -9,7 +15,7 @@ export async function GET(
 ) {
   try {
     const { id: projectId } = await params
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
 
     // Check if user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -41,7 +47,7 @@ export async function GET(
       .select("role")
       .eq("project_id", projectId)
       .eq("user_id", user.id)
-      .single()
+      .maybeSingle()
 
     const hasAccess = isOwner || !!collaborator
 
@@ -52,8 +58,44 @@ export async function GET(
       )
     }
 
-    // Get collaborators
-    const collaborators = await getProjectCollaborators(projectId)
+    const { data: collaboratorRows, error: collaboratorError } = await supabase
+      .from("project_collaborators")
+      .select("id, project_id, user_id, role, invited_by, joined_at")
+      .eq("project_id", projectId)
+      .order("joined_at", { ascending: false })
+
+    if (collaboratorError) {
+      console.error("Collaborator list error:", collaboratorError)
+      return NextResponse.json(
+        { error: "Failed to fetch collaborators" },
+        { status: 500 }
+      )
+    }
+
+    const collaboratorIds = Array.from(
+      new Set((collaboratorRows || []).map((row) => row.user_id).filter(Boolean))
+    )
+
+    const { data: profiles, error: profilesError } = collaboratorIds.length
+      ? await supabase
+          .from("profiles")
+          .select("id, email, name, avatar")
+          .in("id", collaboratorIds)
+      : { data: [], error: null }
+
+    if (profilesError) {
+      console.error("Collaborator profile lookup error:", profilesError)
+      return NextResponse.json(
+        { error: "Failed to fetch collaborator profiles" },
+        { status: 500 }
+      )
+    }
+
+    const profileMap = new Map((profiles || []).map((profile) => [profile.id, profile]))
+    const collaborators = (collaboratorRows || []).map((row) => ({
+      ...row,
+      profiles: profileMap.get(row.user_id) || null,
+    }))
 
     return NextResponse.json({ collaborators })
   } catch (error) {
@@ -74,9 +116,18 @@ export async function POST(
     const { id: projectId } = await params
     const { email, role = "viewer" } = await request.json()
 
-    if (!email) {
+    if (typeof email !== "string" || !email.trim()) {
       return NextResponse.json(
         { error: "Email is required" },
+        { status: 400 }
+      )
+    }
+
+    const normalizedEmail = email.trim().toLowerCase()
+
+    if (!isCollaboratorRole(role)) {
+      return NextResponse.json(
+        { error: "Invalid collaborator role" },
         { status: 400 }
       )
     }
@@ -115,7 +166,7 @@ export async function POST(
         .select("role")
         .eq("project_id", projectId)
         .eq("user_id", user.id)
-        .single()
+        .maybeSingle()
 
       if (!userCollab || userCollab.role !== "admin") {
         return NextResponse.json(
@@ -128,11 +179,19 @@ export async function POST(
     // 3. User Lookup
     const { data: userProfile, error: profileError } = await supabase
       .from("profiles")
-      .select("*")
-      .ilike("email", email.trim())
-      .single()
+      .select("id, email, name, avatar")
+      .ilike("email", normalizedEmail)
+      .maybeSingle()
 
-    if (profileError || !userProfile) {
+    if (profileError) {
+      console.error("Collaborator profile lookup error:", profileError)
+      return NextResponse.json(
+        { error: "Failed to find user profile" },
+        { status: 500 }
+      )
+    }
+
+    if (!userProfile) {
       return NextResponse.json(
         { error: "User not found. Please make sure they have signed up on the platform." },
         { status: 404 }
@@ -147,6 +206,13 @@ export async function POST(
       )
     }
 
+    if (userProfile.id === project.user_id) {
+      return NextResponse.json(
+        { error: "The project owner already has access" },
+        { status: 400 }
+      )
+    }
+
     // 4. Add Collaborator
     // First check if already exists
     const { data: existingCollab } = await supabase
@@ -154,7 +220,7 @@ export async function POST(
       .select("user_id")
       .eq("project_id", projectId)
       .eq("user_id", userProfile.id)
-      .single()
+      .maybeSingle()
 
     if (existingCollab) {
       return NextResponse.json(
@@ -186,7 +252,8 @@ export async function POST(
       success: true,
       collaborator: {
         ...newCollaborator,
-        profile: userProfile
+        profile: userProfile,
+        profiles: userProfile
       }
     })
   } catch (error) {
@@ -242,6 +309,13 @@ export async function DELETE(
 
     const isOwner = project.user_id === user.id
 
+    if (userIdToRemove === project.user_id) {
+      return NextResponse.json(
+        { error: "Project owner cannot be removed" },
+        { status: 400 }
+      )
+    }
+
     if (!isOwner) {
       // Check if user is an admin collaborator
       const { data: userCollab } = await supabase
@@ -249,7 +323,7 @@ export async function DELETE(
         .select("role")
         .eq("project_id", projectId)
         .eq("user_id", user.id)
-        .single()
+        .maybeSingle()
 
       if (!userCollab || userCollab.role !== "admin") {
         return NextResponse.json(
@@ -259,8 +333,19 @@ export async function DELETE(
       }
     }
 
-    // Remove collaborator
-    await removeProjectCollaborator(projectId, userIdToRemove)
+    const { error: deleteError } = await supabase
+      .from("project_collaborators")
+      .delete()
+      .eq("project_id", projectId)
+      .eq("user_id", userIdToRemove)
+
+    if (deleteError) {
+      console.error("Collaborator delete error:", deleteError)
+      return NextResponse.json(
+        { error: "Failed to remove collaborator" },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

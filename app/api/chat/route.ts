@@ -1,5 +1,5 @@
 import { createGroq } from "@ai-sdk/groq"
-import { streamText } from "ai"
+import { convertToModelMessages, streamText, type UIMessage } from "ai"
 import { NextResponse } from "next/server"
 import { createServerSupabaseClient } from '@/lib/database/supabase-server'
 
@@ -10,11 +10,58 @@ const GROQ_MODELS: Record<string, string> = {
   "mixtral-8x7b-32768": "mixtral-8x7b-32768",
 }
 
+type ChatRole = "system" | "user" | "assistant"
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null
+}
+
+function isChatRole(role: unknown): role is ChatRole {
+  return role === "system" || role === "user" || role === "assistant"
+}
+
+function normalizeChatMessages(messages: unknown): UIMessage[] {
+  if (!Array.isArray(messages)) return []
+
+  return messages.flatMap((message, index) => {
+    if (!isRecord(message) || !isChatRole(message.role)) return []
+    if (message.id === "welcome") return []
+
+    const textParts = Array.isArray(message.parts)
+      ? message.parts.flatMap((part) => {
+          if (!isRecord(part) || part.type !== "text" || typeof part.text !== "string") {
+            return []
+          }
+
+          return [{ type: "text" as const, text: part.text }]
+        })
+      : []
+
+    const legacyContent =
+      typeof message.content === "string" && message.content.trim()
+        ? [{ type: "text" as const, text: message.content }]
+        : []
+
+    const parts = textParts.length > 0 ? textParts : legacyContent
+
+    if (parts.length === 0) return []
+
+    return [
+      {
+        id: typeof message.id === "string" ? message.id : `message-${index}`,
+        role: message.role,
+        parts,
+      } satisfies UIMessage,
+    ]
+  })
+}
+
 export async function POST(req: Request) {
   try {
     const { messages, model } = await req.json()
+    const normalizedMessages = normalizeChatMessages(messages)
 
-    if (!Array.isArray(messages) || messages.length === 0) {
+    if (normalizedMessages.length === 0) {
       return NextResponse.json({ error: "Messages are required" }, { status: 400 })
     }
 
@@ -69,7 +116,7 @@ export async function POST(req: Request) {
     const result = streamText({
       model: groq(modelId),
       system: systemMessageContent,
-      messages,
+      messages: await convertToModelMessages(normalizedMessages),
     })
 
     return result.toUIMessageStreamResponse()
