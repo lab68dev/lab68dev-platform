@@ -63,6 +63,7 @@ interface ConnectionHandle {
 export default function DiagramEditorPage() {
   const router = useRouter()
   const params = useParams()
+  const diagramId = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] : null
   const { t } = useLanguage()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [diagram, setDiagram] = useState<any>(null)
@@ -293,8 +294,13 @@ export default function DiagramEditorPage() {
         return
       }
 
+      if (!diagramId) {
+        router.push("/dashboard/diagrams")
+        return
+      }
+
       const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
-      const foundDiagram = allDiagrams.find((d: any) => d.id === params.id)
+      const foundDiagram = allDiagrams.find((d: any) => d.id === diagramId)
 
       if (!foundDiagram || foundDiagram.userId !== currentUser.id) {
         router.push("/dashboard/diagrams")
@@ -304,7 +310,7 @@ export default function DiagramEditorPage() {
       setDiagram(foundDiagram)
       setData(foundDiagram.data || { nodes: [], connections: [] })
     })
-  }, [params.id, router])
+  }, [diagramId, router])
 
   const getNodeAtPosition = (x: number, y: number): Node | null => {
     return (
