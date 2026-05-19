@@ -1,30 +1,44 @@
 "use client"
 
 import type React from "react"
-import { Suspense, useState, useEffect, useCallback } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { Suspense, useCallback, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
-import { signInWithOtp, checkRememberMe, getCurrentUserAsync } from "@/lib/features/auth"
-import { getTranslations, getUserLanguage } from "@/lib/config"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { getTranslations, getUserLanguage } from "@/lib/config"
+import { getCurrentUserAsync, signInWithOtp } from "@/lib/features/auth"
 import {
-  EnvelopeIcon,
+  ArrowPathIcon,
   ArrowRightIcon,
-  SparklesIcon,
   BoltIcon,
-  ShieldCheckIcon,
   CheckCircleIcon,
-  ArrowPathIcon
+  EnvelopeIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline"
+
+const logoSrc = "/images/design-mode/lab68studio logo.png"
+
+function AuthBrand() {
+  return (
+    <Link href="/" className="inline-flex items-center gap-3">
+      <Image src={logoSrc} alt="lab68studio" width={40} height={40} className="rounded-md" priority />
+      <span>
+        <span className="block text-lg font-bold tracking-tight">lab68studio</span>
+        <span className="block text-xs text-muted-foreground">Developer workspace</span>
+      </span>
+    </Link>
+  )
+}
 
 function LoginPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectPath = searchParams.get('redirect') || '/dashboard'
+  const redirectPath = searchParams?.get("redirect") || "/dashboard"
 
   const [email, setEmail] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
@@ -34,15 +48,17 @@ function LoginPageContent() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const [t, setT] = useState(getTranslations("en"))
 
-  // Check if user is already authenticated
   const checkAuth = useCallback(async () => {
     try {
-      const user = await getCurrentUserAsync()
+      const user = await Promise.race([
+        getCurrentUserAsync(),
+        new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 1500)),
+      ])
       if (user) {
         router.push(redirectPath)
       }
     } catch (err) {
-      console.error('Auth check error:', err)
+      console.error("Auth check error:", err)
     } finally {
       setIsCheckingAuth(false)
     }
@@ -50,20 +66,19 @@ function LoginPageContent() {
 
   useEffect(() => {
     setT(getTranslations(getUserLanguage()))
-    checkAuth()
+    void checkAuth()
   }, [checkAuth])
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault()
     setError("")
     setSuccess("")
 
     if (!email) {
-      setError(t.auth?.email + " is required" || "Email is required")
+      setError(`${t.auth?.email || "Email"} is required`)
       return
     }
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email address")
@@ -87,238 +102,182 @@ function LoginPageContent() {
     }
   }
 
-  // Show loading state while checking auth
   if (isCheckingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <div className="flex flex-col items-center gap-4">
-          <ArrowPathIcon className="h-8 w-8 text-primary animate-spin" />
-          <p className="text-slate-400">Loading...</p>
-        </div>
-      </div>
-    )
+    return <LoginPageFallback />
   }
 
   return (
-    <div className="min-h-screen flex selection:bg-primary/30 selection:text-primary">
-      {/* Left side - Cyber-Studio Mesh Gradient */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-slate-950">
-        {/* Dynamic Mesh Gradient Layer */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-[-10%] left-[-10%] w-[70%] h-[70%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[70%] h-[70%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse delay-700"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50%] h-[50%] bg-pink-600/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-        </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="fixed right-4 top-4 z-30 sm:right-6 sm:top-6">
+        <LanguageSwitcher />
+      </div>
 
-        {/* Static noise texture */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+      <main className="grid min-h-screen lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.75fr)]">
+        <section className="hidden border-r border-border bg-[#050505] px-8 py-8 lg:flex xl:px-12">
+          <div className="flex w-full flex-col justify-between">
+            <AuthBrand />
 
-        <div className="relative z-10 flex flex-col justify-center items-center text-white p-20 w-full">
-          <motion.div
-            initial={{ opacity: 1, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-md space-y-10"
-          >
-            <div className="flex items-center gap-4 group">
-              <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl group-hover:border-primary/50 transition-colors duration-500 shadow-2xl">
-                <SparklesIcon className="h-10 w-10 text-primary animate-pulse" />
-              </div>
-              <div>
-                <h1 className="text-6xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-primary to-white bg-300% animate-shimmer">
-                  LAB68
+            <div className="max-w-xl space-y-8">
+              <div className="space-y-4">
+                <p className="text-sm font-medium text-primary">Secure workspace access</p>
+                <h1 className="text-4xl font-bold tracking-tight xl:text-5xl">
+                  Continue building inside lab68studio.
                 </h1>
-                <p className="text-xs font-bold uppercase tracking-[0.4em] text-primary/80">Innovation Lab</p>
+                <p className="max-w-lg text-base leading-7 text-muted-foreground">
+                  One focused dashboard for projects, collaboration, planning, files, and team workflows.
+                </p>
+              </div>
+
+              <div className="grid gap-3 xl:grid-cols-3">
+                {[
+                  { icon: BoltIcon, title: "Fast setup", desc: "Magic link sign in" },
+                  { icon: ShieldCheckIcon, title: "Protected", desc: "Supabase auth" },
+                  { icon: CheckCircleIcon, title: "Focused", desc: "Work starts here" },
+                ].map((item) => (
+                  <div key={item.title} className="rounded-lg border border-border bg-card p-4">
+                    <item.icon className="mb-4 h-5 w-5 text-primary" />
+                    <h2 className="text-sm font-semibold">{item.title}</h2>
+                    <p className="mt-1 text-xs text-muted-foreground">{item.desc}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="space-y-6">
-              <h2 className="text-5xl font-bold leading-tight tracking-tight text-balance">
-                Build something <br />
-                <span className="text-primary italic">amazing</span> with us.
-              </h2>
-              <p className="text-xl text-slate-400 leading-relaxed font-light">
-                Sign in to your account to continue working on your projects.
+            <div className="rounded-lg border border-border bg-card p-5">
+              <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
+                <span className="text-sm font-semibold">Today</span>
+                <span className="rounded-md border border-primary/40 px-2 py-1 text-xs text-primary">Workspace</span>
+              </div>
+              <div className="space-y-3">
+                {["Project planning", "Collaborator review", "Security settings"].map((item, index) => (
+                  <div key={item} className="flex items-center gap-3">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-xs font-bold text-primary">
+                      {index + 1}
+                    </span>
+                    <span className="text-sm text-muted-foreground">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="flex min-h-screen items-center justify-center px-4 py-24 sm:px-6 lg:px-10">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="w-full max-w-md"
+          >
+            <div className="mb-8 lg:hidden">
+              <AuthBrand />
+            </div>
+
+            <div className="mb-8 space-y-3">
+              <p className="text-sm font-medium text-primary">Welcome back</p>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Sign in</h2>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Enter your email and we will send a secure magic link.
               </p>
             </div>
 
-            <div className="grid gap-6">
-              {[
-                { icon: BoltIcon, title: "AI-Powered", desc: "Boost your productivity" },
-                { icon: CheckCircleIcon, title: "Collaboration", desc: "Work with your team in real-time" },
-                { icon: ShieldCheckIcon, title: "Secure & Private", desc: "Your data is always protected" }
-              ].map((item, idx) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 + idx * 0.1 }}
-                  key={idx}
-                  className="flex items-start gap-5 p-4 rounded-2xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 group"
-                >
-                  <div className="rounded-xl bg-primary/10 border border-primary/20 p-3 mt-1 group-hover:bg-primary/20 transition-all">
-                    <item.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg">{item.title}</h3>
-                    <p className="text-slate-400 text-sm">{item.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </div>
+            <form onSubmit={handleLogin} className="space-y-5">
+              <AnimatePresence mode="wait">
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+                {success && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden rounded-md border border-green-500/40 bg-green-500/10 p-3 text-sm text-green-400"
+                  >
+                    {success}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-      {/* Right side - Login Form with Glassmorphism */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-950 relative overflow-hidden">
-        {/* Background glow for mobile */}
-        <div className="lg:hidden absolute top-[-20%] left-[-20%] w-full h-full bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
-
-        <div className="absolute top-8 right-8 z-20">
-          <LanguageSwitcher />
-        </div>
-
-        <motion.div
-          initial={{ opacity: 1, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="w-full max-w-md space-y-10 relative z-10"
-        >
-          {/* Mobile Logo Enhancement */}
-          <div className="lg:hidden flex justify-center mb-8">
-            <div className="inline-flex items-center gap-3 p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl">
-              <SparklesIcon className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-black tracking-tighter text-white">LAB68</h1>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight text-[#f8fafc]">Sign In</h2>
-            <p className="text-[#cbd5e1] text-lg font-light">
-              Welcome back! Enter your email to receive a magic link.
-            </p>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-6">
-            <AnimatePresence mode="wait">
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="rounded-2xl border border-red-500/50 bg-red-500/5 p-4 text-sm text-red-400 overflow-hidden"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-6 bg-red-500 rounded-full"></div>
-                    <p className="font-medium">{error}</p>
-                  </div>
-                </motion.div>
-              )}
-              {success && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="rounded-2xl border border-green-500/50 bg-green-500/5 p-4 text-sm text-green-400 overflow-hidden"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-1.5 h-6 bg-green-500 rounded-full shrink-0 mt-0.5"></div>
-                    <p className="font-medium">{success}</p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-[#cbd5e1] ml-1">
+                <Label htmlFor="email" className="text-sm font-medium">
                   {t.auth?.email || "Email"}
                 </Label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                    <EnvelopeIcon className="h-5 w-5 text-slate-500 group-focus-within:text-primary transition-colors" />
-                  </div>
+                <div className="relative">
+                  <EnvelopeIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="email@example.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(event) => setEmail(event.target.value)}
                     disabled={isLoading || !!success}
-                    className="pl-12 h-14 bg-white/[0.03] border-white/5 hover:border-white/10 focus:border-primary/50 transition-all rounded-2xl text-lg text-[#f8fafc] placeholder:text-[#94a3b8] focus:ring-0 focus:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-12 rounded-md bg-card pl-11"
                     required
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between px-1">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    disabled={isLoading || !!success}
-                    className="peer appearance-none w-5 h-5 rounded-md border border-white/10 checked:bg-primary checked:border-primary transition-all cursor-pointer disabled:opacity-50"
-                  />
-                  <CheckCircleIcon className="absolute top-0.5 left-0.5 w-4 h-4 text-slate-950 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
-                </div>
-                <span className="text-sm font-medium text-[#cbd5e1] group-hover:text-[#f8fafc] transition-colors">
-                  {t.auth?.rememberMe || "Remember me"}
-                </span>
+              <label className="flex items-center gap-3 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(event) => setRememberMe(event.target.checked)}
+                  disabled={isLoading || !!success}
+                  className="h-4 w-4 rounded border-border bg-card accent-primary"
+                />
+                <span>{t.auth?.rememberMe || "Remember me"}</span>
               </label>
-            </div>
 
-            <Button
-              type="submit"
-              disabled={isLoading || !!success}
-              className="w-full h-14 text-lg font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-slate-950 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all group rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <>
-                  <ArrowPathIcon className="mr-2 h-5 w-5 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  Send Magic Link
-                  <ArrowRightIcon className="ml-3 h-5 w-5 group-hover:translate-x-1.5 transition-transform" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          <footer className="pt-6 space-y-6 text-center border-t border-white/5">
-            <p className="text-[#cbd5e1] font-medium">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/signup"
-                className="text-[#f8fafc] hover:text-primary font-bold underline decoration-primary/30 underline-offset-4 decoration-2 transition-all"
+              <Button
+                type="submit"
+                disabled={isLoading || !!success}
+                className="h-12 w-full rounded-md text-sm font-semibold"
               >
-                Sign Up
-              </Link>
-            </p>
+                {isLoading ? (
+                  <>
+                    <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    Send Magic Link
+                    <ArrowRightIcon className="h-5 w-5" />
+                  </>
+                )}
+              </Button>
+            </form>
 
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[#cbd5e1] hover:text-primary transition-all"
-            >
-              <span>← Back to Home</span>
-            </Link>
-          </footer>
-        </motion.div>
-      </div>
+            <footer className="mt-8 space-y-4 border-t border-border pt-6 text-center text-sm">
+              <p className="text-muted-foreground">
+                Don&apos;t have an account?{" "}
+                <Link href="/signup" className="font-semibold text-primary hover:text-primary/80">
+                  Create one
+                </Link>
+              </p>
+              <Link href="/" className="inline-flex text-xs font-semibold uppercase text-muted-foreground hover:text-primary">
+                {"<- Back to Home"}
+              </Link>
+            </footer>
+          </motion.div>
+        </section>
+      </main>
     </div>
   )
 }
 
 function LoginPageFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950">
+    <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-4">
-        <ArrowPathIcon className="h-8 w-8 text-primary animate-spin" />
-        <p className="text-slate-400">Loading...</p>
+        <ArrowPathIcon className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
     </div>
   )
