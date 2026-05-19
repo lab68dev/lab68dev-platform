@@ -133,8 +133,6 @@ export interface Translations {
       fileManagementDesc: string
       diagrams: string
       diagramsDesc: string
-      resumeEditor: string
-      resumeEditorDesc: string
       gamesHub: string
       gamesHubDesc: string
       wiki: string
@@ -771,8 +769,6 @@ const translations: Record<Language, any> = {
         fileManagementDesc: "Upload, organize, and share files effortlessly. Support for multiple file types with easy categorization and search.",
         diagrams: "Diagram & Visualization",
         diagramsDesc: "Create flowcharts, mind maps, and technical diagrams. Visualize your ideas with powerful drawing tools.",
-        resumeEditor: "Live Resume Editor",
-        resumeEditorDesc: "Professional WYSIWYG resume builder with 5 templates, live A4 preview, drag-and-drop sections, and color customization. Export-ready for PDF.",
         gamesHub: "Games Hub",
         gamesHubDesc: "Take a break with puzzle games, arcade classics, and brain training. Sudoku, Tetris, Snake, typing tests, and more.",
         wiki: "Wiki & Documentation",
@@ -1320,8 +1316,6 @@ const translations: Record<Language, any> = {
         fileManagementDesc: "Tải lên, sắp xếp và chia sẻ tệp dễ dàng. Hỗ trợ nhiều loại tệp với phân loại và tìm kiếm dễ dàng.",
         diagrams: "Sơ đồ & Trực quan hóa",
         diagramsDesc: "Tạo sơ đồ luồng, bản đồ tư duy và sơ đồ kỹ thuật. Hình dung ý tưởng của bạn với công cụ vẽ mạnh mẽ.",
-        resumeEditor: "Trình soạn CV Trực tiếp",
-        resumeEditorDesc: "Trình tạo CV WYSIWYG chuyên nghiệp với 5 mẫu, xem trước A4 trực tiếp, kéo thả các phần và tùy chỉnh màu sắc. Sẵn sàng xuất PDF.",
         gamesHub: "Trung tâm Game",
         gamesHubDesc: "Nghỉ ngơi với các trò chơi giải đố, arcade cổ điển và rèn luyện não bộ. Sudoku, Tetris, Snake, kiểm tra đánh máy và nhiều hơn nữa.",
         wiki: "Wiki & Tài liệu",
