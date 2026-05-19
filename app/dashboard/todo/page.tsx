@@ -2,13 +2,13 @@
 
 import type React from "react"
 
-import { useState, useEffect, useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { getCurrentUser } from "@/lib/features/auth"
-import { getTranslations, getUserLanguage } from "@/lib/config"
+import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
 import { Plus, Trash2, Check, X, CheckCircle2, Circle, Search, Filter, Play, Pause, RotateCcw, Coffee, Timer, HelpCircle, Settings, Music } from "lucide-react"
 import { getTodos, createTodo, updateTodo, deleteTodo, type Todo as DBTodo } from "@/lib/database"
 
@@ -34,7 +34,7 @@ export default function TodoPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [filterPriority, setFilterPriority] = useState<"all" | "low" | "medium" | "high">("all")
   const [filterStatus, setFilterStatus] = useState<"all" | "completed" | "pending">("all")
-  const [language, setLanguage] = useState(getUserLanguage())
+  const [language, setLanguage] = useState<Language>("en")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const t = getTranslations(language).todo
@@ -100,6 +100,7 @@ export default function TodoPage() {
 
   useEffect(() => {
     loadTasks()
+    setLanguage(getUserLanguage())
 
     // Listen for language changes
     const handleStorageChange = () => {
