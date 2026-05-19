@@ -67,7 +67,6 @@ export function GlobalSearch() {
       { id: "10", title: "Flow & Diagrams", category: "pages", href: "/dashboard/diagrams", icon: <FileText className="h-4 w-4" /> },
       { id: "11", title: "Files", category: "pages", href: "/dashboard/files", icon: <FileText className="h-4 w-4" /> },
       { id: "12", title: "Community", category: "pages", href: "/dashboard/community", icon: <Users className="h-4 w-4" /> },
-      { id: "13", title: "Resume Editor", category: "pages", href: "/dashboard/resume", icon: <FileText className="h-4 w-4" /> },
       { id: "14", title: "AI Tools", category: "pages", href: "/dashboard/ai-tools", icon: <Bot className="h-4 w-4" /> },
       { id: "15", title: "Settings", category: "pages", href: "/dashboard/settings", icon: <FileText className="h-4 w-4" /> },
     ]
@@ -143,7 +142,7 @@ export function GlobalSearch() {
         <div className="max-h-[60vh] overflow-y-auto p-2">
           {query && results.length === 0 && (
             <div className="py-8 text-center text-sm text-muted-foreground">
-              No results found for "{query}"
+              No results found for &quot;{query}&quot;
             </div>
           )}
 
