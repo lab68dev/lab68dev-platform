@@ -55,34 +55,3 @@ export async function getDashboardData() {
     }
 }
 
-export async function getResumeById(id: string) {
-    const supabase = await createServerSupabaseClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) return null
-
-    const { data: resume, error } = await supabase
-        .from('resumes')
-        .select('*')
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .single()
-
-    if (error || !resume) return null
-
-    return {
-        id: resume.id,
-        title: resume.title,
-        data: {
-            personalInfo: resume.personal_info,
-            summary: resume.summary,
-            experience: resume.experience,
-            education: resume.education,
-            skills: resume.skills,
-            certifications: resume.certifications,
-            projects: resume.projects || [],
-            sectionOrder: resume.section_order,
-            styleSettings: resume.style_settings
-        }
-    }
-}
