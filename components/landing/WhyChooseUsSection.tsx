@@ -106,7 +106,7 @@ export function WhyChooseUsSection({ t }: WhyChooseUsSectionProps) {
                   </Link>
                 </Button>
                 <Button asChild variant="ghost" size="lg" className="h-12 px-8 rounded-full font-medium hover:bg-primary/10 transition-all">
-                  <Link href="/#services" className="flex items-center gap-2">
+                  <Link href="/#features" className="flex items-center gap-2">
                     {t.landing.whyChoose.exploreFeatures}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
