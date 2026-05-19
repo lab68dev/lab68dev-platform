@@ -2,13 +2,13 @@
 
 import type React from "react"
 
-import { useState, useEffect, useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { getCurrentUser } from "@/lib/features/auth"
-import { getTranslations, getUserLanguage } from "@/lib/config"
+import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
 import { Plus, Trash2, CalendarIcon, Clock, X, Search, Filter } from "lucide-react"
 import { getMeetings, createMeeting, deleteMeeting as deleteMeetingDB, type Meeting as DBMeeting } from "@/lib/database"
 
@@ -36,10 +36,17 @@ export default function MeetingPage() {
   })
   const [searchQuery, setSearchQuery] = useState("")
   const [filterTime, setFilterTime] = useState<"all" | "upcoming" | "past">("all")
-  const [language, setLanguage] = useState(getUserLanguage())
+  const [language, setLanguage] = useState<Language>("en")
+  const [now, setNow] = useState(() => new Date(0))
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const t = getTranslations(language).meeting
+  const locale = language === "vi" ? "vi-VN" : "en-US"
+
+  const formatDate = useCallback(
+    (dateString: string) => new Date(dateString).toLocaleDateString(locale),
+    [locale]
+  )
 
   const loadMeetings = useCallback(async () => {
     const user = getCurrentUser()
@@ -83,6 +90,8 @@ export default function MeetingPage() {
 
   useEffect(() => {
     loadMeetings()
+    setLanguage(getUserLanguage())
+    setNow(new Date())
 
     // Listen for language changes
     const handleStorageChange = () => {
@@ -139,7 +148,7 @@ export default function MeetingPage() {
 
   const isPastMeeting = (date: string, time: string) => {
     const meetingDateTime = new Date(`${date}T${time}`)
-    return meetingDateTime < new Date()
+    return meetingDateTime < now
   }
 
   // Filter meetings based on search and filters
@@ -355,7 +364,7 @@ export default function MeetingPage() {
                       <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1 border border-border px-2 py-1">
                           <CalendarIcon className="h-3 w-3" />
-                          {new Date(meeting.date).toLocaleDateString()}
+                          {formatDate(meeting.date)}
                         </div>
                         <div className="flex items-center gap-1 border border-border px-2 py-1">
                           <Clock className="h-3 w-3" />
@@ -408,7 +417,7 @@ export default function MeetingPage() {
                       <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1 border border-border px-2 py-1">
                           <CalendarIcon className="h-3 w-3" />
-                          {new Date(meeting.date).toLocaleDateString()}
+                          {formatDate(meeting.date)}
                         </div>
                         <div className="flex items-center gap-1 border border-border px-2 py-1">
                           <Clock className="h-3 w-3" />
