@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Brutalist theme with black background, white text, and neon green accent */
+/* lab68studio theme with black background, white text, and orange accent */
 :root {
   --background: oklch(0.02 0 0); /* #050505 - deeper black */
   --foreground: oklch(1 0 0); /* white */
@@ -11,46 +11,46 @@
   --card-foreground: oklch(1 0 0);
   --popover: oklch(0.05 0 0);
   --popover-foreground: oklch(1 0 0);
-  --primary: oklch(0.85 0.2 145); /* #00FF99 - neon green accent */
+  --primary: oklch(0.72 0.19 52); /* lab68studio orange */
   --primary-foreground: oklch(0.04 0 0);
   --secondary: oklch(0.12 0 0); /* Darker secondary */
   --secondary-foreground: oklch(1 0 0);
   --muted: oklch(0.1 0 0); /* Darker muted */
   --muted-foreground: oklch(0.75 0 0);
-  --accent: oklch(0.85 0.2 145); /* neon green */
+  --accent: oklch(0.72 0.19 52); /* lab68studio orange */
   --accent-foreground: oklch(0.04 0 0);
   --destructive: oklch(0.6 0.24 27); /* #FF1744 - neon red for errors */
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.12 0 0); 
   --input: oklch(0.12 0 0);
-  --ring: oklch(0.85 0.2 145);
+  --ring: oklch(0.72 0.19 52);
   
   /* Enhanced Cyberpunk Accent Colors */
-  --accent-cyan: oklch(0.85 0.17 200); /* #00E5FF - electric cyan */
-  --accent-purple: oklch(0.7 0.15 300); /* #BB86FC - neon purple */
-  --accent-pink: oklch(0.75 0.2 340); /* #FF6EC7 - neon pink */
-  --warning: oklch(0.85 0.2 90); /* #FFD600 - electric yellow */
+  --accent-cyan: oklch(0.82 0.14 210);
+  --accent-purple: oklch(0.68 0.12 305);
+  --accent-pink: oklch(0.72 0.16 22);
+  --warning: oklch(0.78 0.17 75);
   --warning-foreground: oklch(0.04 0 0);
-  --success: oklch(0.85 0.2 145); /* neon green - same as primary */
+  --success: oklch(0.78 0.18 155);
   --success-foreground: oklch(0.04 0 0);
   --info: oklch(0.85 0.17 200); /* cyan for info states */
   --info-foreground: oklch(0.04 0 0);
   
   /* Chart colors with new accents */
-  --chart-1: oklch(0.85 0.2 145); /* neon green */
+  --chart-1: oklch(0.72 0.19 52); /* orange */
   --chart-2: oklch(0.85 0.17 200); /* cyan */
   --chart-3: oklch(0.7 0.15 300); /* purple */
   --chart-4: oklch(0.75 0.2 340); /* pink */
-  --chart-5: oklch(0.85 0.2 90); /* yellow */
-  --radius: 0rem; /* no rounded corners for brutalist style */
+  --chart-5: oklch(0.78 0.17 75); /* yellow */
+  --radius: 0.5rem;
   --sidebar: oklch(0.02 0 0); /* #050505 */
   --sidebar-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(0.85 0.2 145);
+  --sidebar-primary: oklch(0.72 0.19 52);
   --sidebar-primary-foreground: oklch(0.04 0 0);
   --sidebar-accent: oklch(0.12 0 0);
   --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(0.12 0 0);
-  --sidebar-ring: oklch(0.85 0.2 145);
+  --sidebar-ring: oklch(0.72 0.19 52);
 }
 
 /* Added light mode theme with brutalist styling */
@@ -61,19 +61,19 @@
   --card-foreground: oklch(0.04 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.04 0 0);
-  --primary: oklch(0.45 0.2 145); /* darker green for light mode */
+  --primary: oklch(0.62 0.18 52); /* orange for light mode */
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.92 0 0); /* #EBEBEB - light gray */
   --secondary-foreground: oklch(0.04 0 0);
   --muted: oklch(0.92 0 0);
   --muted-foreground: oklch(0.35 0 0);
-  --accent: oklch(0.45 0.2 145);
+  --accent: oklch(0.62 0.18 52);
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.5 0.24 27); /* darker red for light mode */
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.85 0 0); /* #D9D9D9 */
   --input: oklch(0.92 0 0);
-  --ring: oklch(0.45 0.2 145);
+  --ring: oklch(0.62 0.18 52);
   
   /* Enhanced Cyberpunk Accent Colors (Light Mode) */
   --accent-cyan: oklch(0.5 0.17 200); /* darker cyan for light mode */
@@ -81,25 +81,25 @@
   --accent-pink: oklch(0.55 0.2 340); /* darker pink */
   --warning: oklch(0.6 0.2 90); /* darker yellow */
   --warning-foreground: oklch(1 0 0);
-  --success: oklch(0.45 0.2 145); /* darker green */
+  --success: oklch(0.48 0.16 155);
   --success-foreground: oklch(1 0 0);
   --info: oklch(0.5 0.17 200); /* darker cyan */
   --info-foreground: oklch(1 0 0);
   
   /* Chart colors with new accents (Light Mode) */
-  --chart-1: oklch(0.45 0.2 145); /* green */
+  --chart-1: oklch(0.62 0.18 52); /* orange */
   --chart-2: oklch(0.5 0.17 200); /* cyan */
   --chart-3: oklch(0.5 0.15 300); /* purple */
   --chart-4: oklch(0.55 0.2 340); /* pink */
   --chart-5: oklch(0.6 0.2 90); /* yellow */
   --sidebar: oklch(0.98 0 0);
   --sidebar-foreground: oklch(0.04 0 0);
-  --sidebar-primary: oklch(0.45 0.2 145);
+  --sidebar-primary: oklch(0.62 0.18 52);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.92 0 0);
   --sidebar-accent-foreground: oklch(0.04 0 0);
   --sidebar-border: oklch(0.85 0 0);
-  --sidebar-ring: oklch(0.45 0.2 145);
+  --sidebar-ring: oklch(0.62 0.18 52);
 }
 
 @theme inline {
@@ -129,10 +129,10 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -150,10 +150,21 @@
   
   html {
     @apply transition-colors duration-200;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
   
   body {
     @apply bg-background text-foreground transition-colors duration-200;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
   }
   
   /* Ensure proper theme inheritance */
@@ -205,13 +216,32 @@
 }
 
 /* Hide scrollbar while keeping scroll functionality */
+.no-scrollbar,
 .scrollbar-hide {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox 64+ */
 }
 
+.no-scrollbar::-webkit-scrollbar,
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Edge, Opera, Samsung Internet */
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .dashboard-main {
+    margin-left: 16rem;
+  }
 }
 
 /* Floating animation for auth pages */
