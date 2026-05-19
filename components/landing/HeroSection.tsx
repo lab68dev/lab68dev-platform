@@ -13,7 +13,6 @@ import {
   ChatBubbleLeftRightSvgIcon,
   ClipboardDocumentListSvgIcon,
   CodeBracketSvgIcon,
-  DocumentTextSvgIcon,
   RocketLaunchSvgIcon,
   SparklesSvgIcon,
   UserGroupSvgIcon,
@@ -28,7 +27,6 @@ const featurePills = [
   { icon: SparklesSvgIcon,              label: "AI Assistant",        color: "text-pink-400 bg-pink-400/10 border-pink-400/20" },
   { icon: UserGroupSvgIcon,             label: "Collaboration",       color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" },
   { icon: CodeBracketSvgIcon,           label: "Code Tools",          color: "text-primary bg-primary/10 border-primary/20" },
-  { icon: DocumentTextSvgIcon,          label: "Resume Builder",      color: "text-purple-400 bg-purple-400/10 border-purple-400/20" },
   { icon: ChatBubbleLeftRightSvgIcon,   label: "Team Chat",           color: "text-green-400 bg-green-400/10 border-green-400/20" },
 ]
 
@@ -55,8 +53,8 @@ export function HeroSection({ t }: HeroSectionProps) {
             className="flex flex-col items-center gap-4"
           >
             <Image
-              src="/images/design-mode/lab68dev_logo.png"
-              alt="Lab68dev"
+              src="/images/design-mode/lab68studio logo.png"
+              alt="lab68studio"
               width={240}
               height={120}
               className="hover:scale-105 transition-transform duration-500 rounded-2xl drop-shadow-2xl"
@@ -139,7 +137,7 @@ export function HeroSection({ t }: HeroSectionProps) {
               size="lg"
               className="w-full sm:w-auto h-14 px-10 text-base font-semibold border-foreground/20 hover:bg-foreground/5 bg-transparent group rounded-xl"
             >
-              <Link href="#services" className="flex items-center gap-2">
+              <Link href="#features" className="flex items-center gap-2">
                 Explore Features
                 <ArrowRightSvgIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
