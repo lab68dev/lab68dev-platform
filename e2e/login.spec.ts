@@ -22,7 +22,7 @@ test.describe('Login Page', () => {
 
   test('should have back to home link', async ({ page }) => {
     await page.goto('/login')
-    const homeLink = page.locator('a[href="/"]')
+    const homeLink = page.getByRole('link', { name: /back to home/i })
     await expect(homeLink).toBeVisible()
   })
 })
