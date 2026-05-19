@@ -1,5 +1,5 @@
 /**
- * Enhanced Cyberpunk Color Palette
+ * lab68studio Color Palette
  * Utility classes and helpers for using accent colors
  */
 
@@ -7,7 +7,7 @@ export const accentColors = {
   cyan: 'var(--accent-cyan)',
   purple: 'var(--accent-purple)',
   pink: 'var(--accent-pink)',
-  green: 'var(--primary)',
+  orange: 'var(--primary)',
   yellow: 'var(--warning)',
   red: 'var(--destructive)',
 } as const;
@@ -42,7 +42,7 @@ export const accentClasses = {
     border: 'border-[var(--accent-pink)]',
     glow: 'shadow-[0_0_20px_var(--accent-pink)]',
   },
-  green: {
+  orange: {
     bg: 'bg-primary',
     text: 'text-primary',
     border: 'border-primary',
@@ -85,7 +85,7 @@ export function getRandomAccentColor(): keyof typeof accentColors {
  */
 export const gradientClasses = {
   cyanPurple: 'bg-gradient-to-br from-[var(--accent-cyan)] to-[var(--accent-purple)]',
-  greenCyan: 'bg-gradient-to-br from-[var(--primary)] to-[var(--accent-cyan)]',
+  orangeCyan: 'bg-gradient-to-br from-[var(--primary)] to-[var(--accent-cyan)]',
   pinkPurple: 'bg-gradient-to-br from-[var(--accent-pink)] to-[var(--accent-purple)]',
   rainbow: 'bg-gradient-to-r from-[var(--primary)] via-[var(--accent-cyan)] via-[var(--accent-purple)] to-[var(--accent-pink)]',
 } as const;
