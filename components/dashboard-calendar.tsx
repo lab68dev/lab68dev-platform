@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Calendar as CalendarIcon } from "lucide-react"
 
 type Meeting = {
@@ -13,16 +13,18 @@ type Meeting = {
 
 interface DashboardCalendarProps {
   upcomingMeetings: Meeting[]
+  initialDateIso: string
 }
 
-export function DashboardCalendar({ upcomingMeetings }: DashboardCalendarProps) {
-  const [selectedDate, setSelectedDate] = useState(new Date())
+export function DashboardCalendar({ upcomingMeetings, initialDateIso }: DashboardCalendarProps) {
+  const initialDate = useMemo(() => new Date(initialDateIso), [initialDateIso])
+  const [selectedDate, setSelectedDate] = useState(initialDate)
 
   const year = selectedDate.getFullYear()
   const month = selectedDate.getMonth()
   const firstDay = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const today = new Date()
+  const today = initialDate
 
   const todayMeetings = upcomingMeetings.filter(meeting => {
     const meetingDate = new Date(meeting.date)
@@ -111,7 +113,7 @@ export function DashboardCalendar({ upcomingMeetings }: DashboardCalendarProps) 
              </span>
           </div>
           
-          <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[160px] scrollbar-thin scrollbar-thumb-primary/10 hover:scrollbar-thumb-primary/20">
+          <div className="scrollbar-hide flex-1 overflow-y-auto pr-1 space-y-2 max-h-[160px]">
             {todayMeetings.length > 0 ? (
                 <>
                 {todayMeetings.map((meeting) => (
