@@ -16,9 +16,9 @@ const ibmPlexSans = IBM_Plex_Sans({
 })
 
 export const metadata: Metadata = {
-  title: "lab68dev Platform - Build, Learn, Collaborate",
+  title: "lab68studio - Open Developer Workspace",
   description:
-    "An open developer platform by lab68dev. Empowering developers to build, learn, and collaborate using cutting-edge technologies.",
+    "An open developer workspace for planning projects, writing docs, managing files, diagramming systems, and collaborating.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -58,6 +58,35 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
+                  var isLocalDev = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+                  if (isLocalDev && 'serviceWorker' in navigator) {
+                    var cleanupKey = 'lab68_sw_cleaned_v4';
+                    var cleanup = function() {
+                      var cleanupServiceWorkers = navigator.serviceWorker.getRegistrations()
+                        .then(function(registrations) {
+                          return Promise.all(registrations.map(function(registration) {
+                            return registration.unregister();
+                          }));
+                        })
+                        .catch(function() {});
+                      var cleanupCaches = window.caches
+                        ? caches.keys()
+                          .then(function(names) {
+                            return Promise.all(names.map(function(name) {
+                              return caches.delete(name);
+                            }));
+                          })
+                          .catch(function() {})
+                        : Promise.resolve();
+                      return Promise.all([cleanupServiceWorkers, cleanupCaches]);
+                    };
+                    cleanup().finally(function() {
+                      if (navigator.serviceWorker.controller && sessionStorage.getItem(cleanupKey) !== '1') {
+                        sessionStorage.setItem(cleanupKey, '1');
+                        window.location.reload();
+                      }
+                    });
+                  }
                   const theme = localStorage.getItem('lab68_theme') || 'dark';
                   if (theme === 'light') {
                     document.documentElement.classList.add('light');
@@ -93,6 +122,11 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
+                  var isLocalDev = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+                  if (isLocalDev) {
+                    return;
+                  }
+                  sessionStorage.removeItem('lab68_sw_cleaned_v4');
                   navigator.serviceWorker.register('/sw.js').catch(function() {});
                 });
               }
