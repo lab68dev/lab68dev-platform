@@ -7,7 +7,6 @@ import {
   CalendarSvgIcon,
   ChatBubbleLeftRightSvgIcon,
   ClipboardDocumentListSvgIcon,
-  DocumentTextSvgIcon,
   FaceSmileSvgIcon,
   FolderSvgIcon,
   LayersSvgIcon,
@@ -61,14 +60,6 @@ export function ServicesSection({ t }: ServicesSectionProps) {
       borderHover: "hover:border-sky-400/40",
       title: t.landing.services.diagrams,
       description: t.landing.services.diagramsDesc
-    },
-    {
-      icon: DocumentTextSvgIcon,
-      colorClass: "text-pink-500",
-      bgClass: "bg-pink-500/10",
-      borderHover: "hover:border-pink-500/40",
-      title: t.landing.services.resumeEditor,
-      description: t.landing.services.resumeEditorDesc
     },
     {
       icon: FaceSmileSvgIcon,
