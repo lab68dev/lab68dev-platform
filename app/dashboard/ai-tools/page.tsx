@@ -11,7 +11,24 @@ import {
 } from "@/components/ui/select"
 import { Send, Sparkles, Bot, User, Trash2, Copy, Check } from "lucide-react"
 import { getTranslations, getUserLanguage } from "@/lib/config"
-import { useChat } from "@ai-sdk/react"
+import { useChat, type UIMessage } from "@ai-sdk/react"
+import { RichTextMessage } from "@/components/ai/rich-text-message"
+
+const WELCOME_TEXT =
+  "Hello! I'm your AI development assistant. I can help you with code generation, debugging, architecture decisions, and more."
+
+const WELCOME_MESSAGE: UIMessage = {
+  id: "welcome",
+  role: "assistant",
+  parts: [{ type: "text", text: WELCOME_TEXT }],
+}
+
+function getMessageText(message: UIMessage) {
+  return message.parts
+    .filter((part): part is Extract<UIMessage["parts"][number], { type: "text" }> => part.type === "text")
+    .map((part) => part.text)
+    .join("")
+}
 
 export default function AIToolsPage() {
   const [t, setT] = useState(getTranslations("en"))
@@ -23,14 +40,7 @@ export default function AIToolsPage() {
   const [selectedModel, setSelectedModel] = useState("llama-3.3-70b-versatile")
 
   const { messages, sendMessage, status, setMessages } = useChat({
-    // Cast to any to bypass strict UIMessage type vs helper type conflicts if necessary
-    messages: [
-      {
-        id: "welcome",
-        role: "assistant",
-        content: "Hello! I'm your AI development assistant. I can help you with code generation, debugging, architecture decisions, and more.",
-      } as any,
-    ],
+    messages: [WELCOME_MESSAGE],
     onError: (error) => {
       console.error("Chat error:", error)
     }
@@ -40,11 +50,10 @@ export default function AIToolsPage() {
   const isLoading = status === "submitted" || status === "streaming"
 
   // Initialize translations on client side only
-  useState(() => {
+  useEffect(() => {
     const lang = getUserLanguage()
     setT(getTranslations(lang))
-    return null
-  })
+  }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -61,7 +70,7 @@ export default function AIToolsPage() {
     // Send user message
     try {
         await sendMessage(
-            { role: 'user', content: input } as any,
+            { text: input },
             { body: { model: selectedModel } }
         )
     } catch (err) {
@@ -77,14 +86,10 @@ export default function AIToolsPage() {
   }
 
   const clearChat = () => {
-    setMessages([
-      {
-        id: "welcome",
-        role: "assistant",
-        content: "Hello! I'm your AI development assistant. I can help you with code generation, debugging, architecture decisions, and more.",
-      } as any,
-    ])
+    setMessages([WELCOME_MESSAGE])
   }
+
+  const conversationMessageCount = messages.filter((message) => message.id !== "welcome").length
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -141,9 +146,12 @@ export default function AIToolsPage() {
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-6 py-6 max-w-5xl">
           <div className="space-y-6">
-            {messages.map((message: any, index: number) => (
-              <div 
-                key={message.id || index} 
+            {messages.map((message, index) => {
+              const messageText = getMessageText(message)
+
+              return (
+              <div
+                key={message.id || index}
                 className={`flex gap-4 ${message.role === "user" ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-4 duration-500`}
               >
                 <div className={`flex gap-3 max-w-3xl ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
@@ -172,12 +180,14 @@ export default function AIToolsPage() {
                         ? "bg-primary text-primary-foreground" 
                         : "bg-card border border-border"
                     }`}>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                        {message.content ? message.content : (Array.isArray(message.parts) ? message.parts.map((p: any) => p.text).join('') : JSON.stringify(message))}
-                      </p>
-                      {message.role === "assistant" && message.content && (
+                      {message.role === "assistant" ? (
+                        <RichTextMessage content={messageText} />
+                      ) : (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{messageText}</p>
+                      )}
+                      {message.role === "assistant" && messageText && (
                         <button
-                          onClick={() => copyToClipboard(message.content, index)}
+                          onClick={() => copyToClipboard(messageText, index)}
                           className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg bg-background/80 hover:bg-background border border-border"
                           title="Copy to clipboard"
                         >
@@ -192,7 +202,8 @@ export default function AIToolsPage() {
                   </div>
                 </div>
               </div>
-            ))}
+              )
+            })}
             
             {/* Loading Indicator */}
             {isLoading && (
@@ -260,7 +271,7 @@ export default function AIToolsPage() {
                 <span>Production Ready</span>
               </p>
               <p className="text-muted-foreground/60">
-                {messages.length - 1} {messages.length === 2 ? 'message' : 'messages'}
+                {conversationMessageCount} {conversationMessageCount === 1 ? 'message' : 'messages'}
               </p>
             </div>
           </div>
