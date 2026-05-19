@@ -14,6 +14,7 @@ export default async function DashboardPage() {
       initialUser={data.user} 
       initialCounts={data.counts} 
       initialMeetings={data.upcomingMeetings} 
+      initialNowIso={new Date().toISOString()}
     />
   )
 }
