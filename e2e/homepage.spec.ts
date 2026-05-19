@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 test.describe('Homepage', () => {
   test('should load and display the homepage', async ({ page }) => {
     await page.goto('/')
-    await expect(page).toHaveTitle(/lab68dev/i)
+    await expect(page).toHaveTitle("lab68studio | Open Developer Workspace")
   })
 
   test('should have a login link', async ({ page }) => {
