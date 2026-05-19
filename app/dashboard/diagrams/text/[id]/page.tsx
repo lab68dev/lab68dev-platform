@@ -24,6 +24,7 @@ interface Diagram {
 export default function TextDiagramEditorPage() {
   const router = useRouter()
   const params = useParams()
+  const diagramId = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] : null
   const { t } = useLanguage()
   const [diagram, setDiagram] = useState<Diagram | null>(null)
   const [textContent, setTextContent] = useState("")
@@ -67,8 +68,13 @@ export default function TextDiagramEditorPage() {
         return
       }
 
+      if (!diagramId) {
+        router.push("/dashboard/diagrams")
+        return
+      }
+
       const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
-      const foundDiagram = allDiagrams.find((d: any) => d.id === params.id)
+      const foundDiagram = allDiagrams.find((d: any) => d.id === diagramId)
 
       if (!foundDiagram || foundDiagram.userId !== currentUser.id) {
         router.push("/dashboard/diagrams")
@@ -78,7 +84,7 @@ export default function TextDiagramEditorPage() {
       setDiagram(foundDiagram)
       setTextContent(foundDiagram.textContent || "")
     })
-  }, [params.id, router])
+  }, [diagramId, router])
 
   useEffect(() => {
     if (isPreviewMode && textContent && previewRef.current) {
