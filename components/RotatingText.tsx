@@ -106,6 +106,17 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
       }));
     }, [texts, currentTextIndex, splitBy]);
 
+    const randomSeed = useMemo(() => {
+      if (staggerFrom !== 'random') return 0;
+      const seedText = texts[currentTextIndex] || '';
+      let hash = 0;
+      for (let i = 0; i < seedText.length; i++) {
+        hash = (hash * 31 + seedText.charCodeAt(i)) % 2147483647;
+      }
+      hash = (hash + currentTextIndex * 131) % 2147483647;
+      return hash;
+    }, [staggerFrom, texts, currentTextIndex]);
+
     const getStaggerDelay = useCallback(
       (index: number, totalChars: number): number => {
         const total = totalChars;
@@ -116,12 +127,12 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
           return Math.abs(center - index) * staggerDuration;
         }
         if (staggerFrom === 'random') {
-          const randomIndex = Math.floor(Math.random() * total);
+          const randomIndex = total > 0 ? randomSeed % total : 0;
           return Math.abs(randomIndex - index) * staggerDuration;
         }
         return Math.abs((staggerFrom as number) - index) * staggerDuration;
       },
-      [staggerFrom, staggerDuration]
+      [staggerFrom, staggerDuration, randomSeed]
     );
 
     const handleIndexChange = useCallback(
