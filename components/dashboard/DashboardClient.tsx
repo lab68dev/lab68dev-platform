@@ -24,9 +24,10 @@ interface DashboardClientProps {
     meetings: number
   }
   initialMeetings: any[]
+  initialNowIso: string
 }
 
-export function DashboardClient({ initialUser, initialCounts, initialMeetings }: DashboardClientProps) {
+export function DashboardClient({ initialUser, initialCounts, initialMeetings, initialNowIso }: DashboardClientProps) {
   const { t } = useLanguage()
   const [showOnboarding, setShowOnboarding] = useState(false)
 
@@ -43,7 +44,7 @@ export function DashboardClient({ initialUser, initialCounts, initialMeetings }:
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 pt-20 lg:pt-8 min-h-screen text-foreground">
+    <div className="min-h-screen p-4 pt-4 text-foreground sm:p-5 lg:p-6">
       {showOnboarding && (
         <OnboardingFlow onComplete={handleOnboardingComplete} onSkip={handleOnboardingComplete} />
       )}
@@ -85,13 +86,13 @@ export function DashboardClient({ initialUser, initialCounts, initialMeetings }:
         </BentoCard>
 
         <BentoCard colSpan={2} rowSpan={2} title="Recent Activity" icon={<Activity className="h-4 w-4" />}>
-          <div className="h-[350px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-primary/20">
+          <div className="scrollbar-hide h-[350px] overflow-y-auto pr-2">
             <RecentActivity userId={initialUser.id} limit={10} />
           </div>
         </BentoCard>
 
         <BentoCard colSpan={2} rowSpan={2} title="Upcoming Meetings" icon={<Calendar className="h-4 w-4" />}>
-          <DashboardCalendar upcomingMeetings={initialMeetings} />
+          <DashboardCalendar upcomingMeetings={initialMeetings} initialDateIso={initialNowIso} />
         </BentoCard>
 
         <BentoCard colSpan={2} title="Recent Projects" icon={<FolderKanban className="h-4 w-4" />}>
