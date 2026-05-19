@@ -44,7 +44,7 @@ const CURSOR_COLORS = [
 export default function WhiteboardEditorPage() {
   const params = useParams()
   const router = useRouter()
-  const whiteboardId = params.id as string
+  const whiteboardId = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] || "" : ""
   const supabase = createClient()
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
