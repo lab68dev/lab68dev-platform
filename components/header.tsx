@@ -4,8 +4,6 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { LanguageSwitcher } from "./language-switcher"
-import { getTranslations, getUserLanguage } from "@/lib/config"
-import { useEffect, useState } from "react"
 import { 
   DocumentTextIcon, 
   UserGroupIcon, 
@@ -18,11 +16,6 @@ import {
 export function Header() {
   const pathname = usePathname()
   const isAuthenticated = pathname?.startsWith("/dashboard")
-  const [t, setT] = useState(getTranslations("en"))
-
-  useEffect(() => {
-    setT(getTranslations(getUserLanguage()))
-  }, [])
 
   if (isAuthenticated) {
     return null // Don't show header in dashboard
@@ -39,8 +32,8 @@ export function Header() {
           >
             <div className="relative w-10 h-10 overflow-hidden rounded-lg border-2 border-primary/30 group-hover:border-primary transition-all group-hover:scale-105">
               <Image
-                src="/images/design-mode/lab68dev_logo.png"
-                alt="Lab68dev"
+                src="/images/design-mode/lab68studio logo.png"
+                alt="Lab68studio"
                 width={40}
                 height={40}
                 className="object-cover w-full h-full"
@@ -48,10 +41,10 @@ export function Header() {
             </div>
             <div className="flex flex-col">
               <span className="text-lg font-bold tracking-tight group-hover:text-primary transition-colors leading-none">
-                Lab68
+                lab68studio
               </span>
               <span className="text-xs text-muted-foreground group-hover:text-primary/70 transition-colors leading-none">
-                Dev Platform
+                Developer workspace
               </span>
             </div>
           </Link>
@@ -60,26 +53,26 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-2">
             {/* Projects Card */}
             <Link 
-              href="/#services"
+              href="/#product"
               className="group relative"
             >
               <div className="flex items-center gap-2 px-3 py-2 border border-border/50 bg-card/50 hover:border-primary/50 hover:bg-card transition-all duration-200 rounded-lg">
                 <RocketLaunchIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                 <span className="text-sm font-medium group-hover:text-primary transition-colors">
-                  Features
+                  Product
                 </span>
               </div>
             </Link>
 
             {/* Community Card */}
             <Link 
-              href="/#community"
+              href="/#workflow"
               className="group relative"
             >
               <div className="flex items-center gap-2 px-3 py-2 border border-border/50 bg-card/50 hover:border-primary/50 hover:bg-card transition-all duration-200 rounded-lg">
                 <UserGroupIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                 <span className="text-sm font-medium group-hover:text-primary transition-colors">
-                  {t.nav.community}
+                  Workflow
                 </span>
               </div>
             </Link>
@@ -100,13 +93,13 @@ export function Header() {
 
             {/* Team Card */}
             <Link 
-              href="/#founder"
+              href="/#stack"
               className="group relative"
             >
               <div className="flex items-center gap-2 px-3 py-2 border border-border/50 bg-card/50 hover:border-primary/50 hover:bg-card transition-all duration-200 rounded-lg">
                 <DocumentTextIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                 <span className="text-sm font-medium group-hover:text-primary transition-colors">
-                  Team
+                  Stack
                 </span>
               </div>
             </Link>
