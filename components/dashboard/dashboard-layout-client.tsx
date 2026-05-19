@@ -1,16 +1,21 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
+
+import { GlobalSearch } from "@/components/global-search"
+import { MeetingNotifier } from "@/components/meeting-notifier"
 import { OnboardingFlow } from "@/components/onboarding-flow"
 import { createClient } from "@/lib/database/supabase-client"
 
 interface DashboardLayoutClientProps {
-  children: React.ReactNode
   showOnboarding: boolean
   userId: string
 }
 
-export function DashboardLayoutClient({ children, showOnboarding: initialShow, userId }: DashboardLayoutClientProps) {
+export function DashboardLayoutClient({
+  showOnboarding: initialShow,
+  userId,
+}: DashboardLayoutClientProps) {
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   useEffect(() => {
@@ -35,7 +40,8 @@ export function DashboardLayoutClient({ children, showOnboarding: initialShow, u
 
   return (
     <>
-      {children}
+      <GlobalSearch />
+      <MeetingNotifier />
       {showOnboarding && (
         <OnboardingFlow 
           onComplete={handleComplete} 
