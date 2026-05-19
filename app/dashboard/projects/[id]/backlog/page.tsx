@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ArrowLeft, Plus, X, Trash2, Pencil, Tag, Calendar, User, Flag, MoveRight } from "lucide-react"
-import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
+import { useLanguage } from "@/lib/config"
 import { getProjects, type Project as DBProject } from "@/lib/database"
 import { getCurrentUser } from "@/lib/features/auth"
 import {
@@ -34,7 +34,7 @@ import Link from "next/link"
 export default function BacklogPage() {
   const params = useParams()
   const router = useRouter()
-  const projectId = params.id as string
+  const projectId = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] || "" : ""
 
   const [project, setProject] = useState<DBProject | null>(null)
   const [backlogTasks, setBacklogTasks] = useState<Task[]>([])
@@ -57,16 +57,19 @@ export default function BacklogPage() {
     labels: [] as string[],
   })
 
-  const [language, setLanguage] = useState<Language>(getUserLanguage())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const t = getTranslations(language)
+  const { t } = useLanguage()
 
   // Check if we should use API backend
-  const useAPI = typeof window !== 'undefined' && 
-    process.env.NEXT_PUBLIC_USE_SUPABASE_BACKEND === 'true'
+  const useAPI = process.env.NEXT_PUBLIC_USE_SUPABASE_BACKEND === 'true'
 
   const loadProject = useCallback(async () => {
+    if (!projectId) {
+      router.push("/dashboard/projects")
+      return
+    }
+
     const user = getCurrentUser()
     if (!user) {
       router.push("/dashboard/projects")
@@ -88,6 +91,11 @@ export default function BacklogPage() {
   }, [projectId, router])
 
   const loadBacklog = useCallback(async () => {
+    if (!projectId) {
+      router.push("/dashboard/projects")
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
@@ -128,7 +136,7 @@ export default function BacklogPage() {
     } finally {
       setLoading(false)
     }
-  }, [projectId, useAPI])
+  }, [projectId, router, useAPI])
 
   useEffect(() => {
     loadProject()
