@@ -5,13 +5,11 @@ import Link from "next/link"
 import Image from "next/image"
 import { Trophy, Medal, Tv, Gamepad2, User, ChevronRight } from "lucide-react"
 import { getTopScores } from "@/lib/features/games"
-import { getTranslations, getUserLanguage } from "@/lib/config"
 
 export default function LeaderboardPage() {
   const [topScores, setTopScores] = useState<any[]>([])
   const [selectedGame, setSelectedGame] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const t = getTranslations(getUserLanguage())
 
   useEffect(() => {
     const fetchScores = async () => {
