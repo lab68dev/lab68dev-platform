@@ -9,7 +9,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ userName, t }: DashboardHeaderProps) {
   return (
-    <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div>
         <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-2">
           <SplitText 
