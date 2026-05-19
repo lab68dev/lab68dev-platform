@@ -2,8 +2,9 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Lab68Dev | Modern Collaboration Platform",
-  description: "Think. Code. Test. Ship. The ultimate platform for developers who build, learn, and collaborate.",
+  title: "lab68studio | Open Developer Workspace",
+  description:
+    "A practical workspace for developers to plan projects, write docs, manage files, diagram systems, and collaborate.",
 }
 
 export default function HomePage() {
