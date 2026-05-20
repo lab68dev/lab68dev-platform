@@ -1764,7 +1764,12 @@ export function getTranslations(lang: Language): Translations {
   const clone = JSON.parse(JSON.stringify(base)) as Translations
 
   const merge = (target: Record<string, any>, source: Record<string, any>) => {
+    const blockedKeys = new Set(["__proto__", "constructor", "prototype"])
     Object.keys(source).forEach((key) => {
+      if (blockedKeys.has(key)) {
+        return
+      }
+
       const value = source[key]
       if (value === undefined || value === null) {
         return

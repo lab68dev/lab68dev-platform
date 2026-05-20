@@ -59,8 +59,24 @@ export default async function DashboardLayout({
       }
     : null
 
+  const dashboardUserSnapshot = sidebarUser
+    ? Buffer.from(
+        JSON.stringify({
+          id: sidebarUser.id,
+          email: sidebarUser.email,
+          name: sidebarUser.name,
+          avatar: sidebarUser.avatar,
+          createdAt: user?.created_at || "",
+          language: "en",
+        }),
+      ).toString("base64")
+    : ""
+
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+    <div
+      className="min-h-screen bg-background text-foreground transition-colors duration-300"
+      data-lab68-user={dashboardUserSnapshot}
+    >
       <SkipNav />
       <DashboardSidebar user={sidebarUser} />
 

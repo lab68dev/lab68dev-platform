@@ -18,11 +18,60 @@ export interface AuthState {
   isAuthenticated: boolean
 }
 
-// Get current user from localStorage cache (for immediate UI rendering)
+type MinimalCachedUser = Pick<User, "id" | "email" | "name" | "language" | "avatar">
+
+let inMemoryUser: User | null = null
+
+function readDashboardUserSnapshot(): User | null {
+  if (typeof document === "undefined") return null
+  const root = document.querySelector("[data-lab68-user]")
+  const encoded = root?.getAttribute("data-lab68-user")
+  if (!encoded) return null
+
+  try {
+    const decoded = window.atob(encoded)
+    const parsed = JSON.parse(decoded) as Partial<User>
+    if (!parsed?.id) return null
+
+    return {
+      id: parsed.id,
+      email: parsed.email || "",
+      name: parsed.name || "User",
+      createdAt: parsed.createdAt || "",
+      language: parsed.language,
+      avatar: parsed.avatar,
+    }
+  } catch {
+    return null
+  }
+}
+
+function toCachedUser(user: User): MinimalCachedUser {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    language: user.language,
+    avatar: user.avatar,
+  }
+}
+
+export function setCachedUser(user: User | null) {
+  inMemoryUser = user
+}
+
+// Get current user from memory or dashboard server snapshot
 export function getCurrentUser(): User | null {
+  if (inMemoryUser) return inMemoryUser
   if (typeof window === "undefined") return null
-  const session = localStorage.getItem("lab68_session")
-  return session ? JSON.parse(session) : null
+
+  const snapshot = readDashboardUserSnapshot()
+  if (snapshot) {
+    inMemoryUser = snapshot
+    return snapshot
+  }
+
+  return null
 }
 
 // Get current user session from Supabase (authoritative source)
@@ -51,7 +100,7 @@ export async function getCurrentUserAsync(): Promise<User | null> {
         createdAt: authUser.created_at,
         language: 'en'
       }
-      localStorage.setItem("lab68_session", JSON.stringify(user))
+      setCachedUser(user)
       return user
     }
 
@@ -67,8 +116,7 @@ export async function getCurrentUserAsync(): Promise<User | null> {
       avatar: profile.avatar
     }
 
-    // Cache user in localStorage for immediate UI rendering
-    localStorage.setItem("lab68_session", JSON.stringify(user))
+    setCachedUser(user)
     return user
   } catch (error) {
     console.error('Error getting current user:', error)
@@ -116,8 +164,7 @@ export async function signUp(
       language: language || 'en',
     }
 
-    // Cache user in localStorage
-    localStorage.setItem("lab68_session", JSON.stringify(newUser))
+    setCachedUser(newUser)
 
     return { success: true, user: newUser }
   } catch (error: any) {
@@ -172,8 +219,7 @@ export async function signIn(
       language: 'en'
     }
 
-    // Cache user in localStorage
-    localStorage.setItem("lab68_session", JSON.stringify(user))
+    setCachedUser(user)
 
     if (rememberMe) {
       localStorage.setItem("lab68_remember", "true")
@@ -266,8 +312,7 @@ export async function verifyOtp(
       language: 'en'
     }
 
-    // Cache user in localStorage
-    localStorage.setItem("lab68_session", JSON.stringify(user))
+    setCachedUser(user)
 
     if (rememberMe) {
       localStorage.setItem("lab68_remember", "true")
@@ -305,12 +350,11 @@ export async function signOut(): Promise<void> {
   try {
     const supabase = createClient()
     await supabase.auth.signOut()
-    localStorage.removeItem("lab68_session")
+    setCachedUser(null)
     localStorage.removeItem("lab68_remember")
   } catch (error) {
     console.error('Error signing out:', error)
-    // Still clear localStorage even if Supabase signout fails
-    localStorage.removeItem("lab68_session")
+    setCachedUser(null)
     localStorage.removeItem("lab68_remember")
   }
 }
@@ -357,7 +401,7 @@ export async function updateUserProfile(
     const currentUser = await getCurrentUserAsync()
 
     if (currentUser && currentUser.id === userId) {
-      localStorage.setItem("lab68_session", JSON.stringify(currentUser))
+      setCachedUser(currentUser)
     }
 
     return { success: true, user: currentUser || undefined }
@@ -385,6 +429,6 @@ export async function checkRememberMe(): Promise<User | null> {
 // Clear all auth data (useful for debugging)
 export function clearAuthData(): void {
   if (typeof window === "undefined") return
-  localStorage.removeItem("lab68_session")
+  setCachedUser(null)
   localStorage.removeItem("lab68_remember")
 }

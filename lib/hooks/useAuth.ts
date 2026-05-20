@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/database/supabase-client'
-import type { User } from '@/lib/features/auth/auth-service'
+import { setCachedUser, type User } from '@/lib/features/auth/auth-service'
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -36,7 +36,7 @@ export function useAuth() {
               avatar: profile.avatar
             }
             setUser(userData)
-            localStorage.setItem("lab68_session", JSON.stringify(userData))
+            setCachedUser(userData)
           }
         }
       } catch (error) {
@@ -70,11 +70,11 @@ export function useAuth() {
             avatar: profile.avatar
           }
           setUser(userData)
-          localStorage.setItem("lab68_session", JSON.stringify(userData))
+          setCachedUser(userData)
         }
       } else {
         setUser(null)
-        localStorage.removeItem("lab68_session")
+        setCachedUser(null)
       }
     })
 
