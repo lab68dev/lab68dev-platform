@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useCallback, useEffect, useState, useRef } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { getCurrentUser } from "@/lib/features/auth"
+import { getCurrentUserAsync } from "@/lib/features/auth"
 import { useLanguage } from "@/lib/config"
 import { Save, Download, ArrowLeft, Copy, Maximize2, Minimize2, BookOpen } from "lucide-react"
+import { getDiagrams, updateDiagram, type Diagram as DBDiagram } from "@/lib/database"
 // Removed static import for mermaid to enable lazy-loading
 // import mermaid from "mermaid"
 
@@ -19,6 +20,49 @@ interface Diagram {
   diagramType?: "visual" | "text"
   textContent?: string
   category?: string
+}
+
+function sanitizeMermaidSvg(svg: string) {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(svg, "image/svg+xml")
+  const disallowedTags = new Set(["script", "foreignObject"])
+  const walker = doc.createTreeWalker(doc, NodeFilter.SHOW_ELEMENT)
+  const toRemove: Element[] = []
+
+  while (walker.nextNode()) {
+    const element = walker.currentNode as Element
+    if (disallowedTags.has(element.tagName)) {
+      toRemove.push(element)
+      continue
+    }
+
+    for (const attr of Array.from(element.attributes)) {
+      const name = attr.name.toLowerCase()
+      const value = attr.value.trim().toLowerCase()
+      if (name.startsWith("on") || value.startsWith("javascript:")) {
+        element.removeAttribute(attr.name)
+      }
+    }
+  }
+
+  toRemove.forEach((element) => element.remove())
+  return doc.documentElement
+}
+
+function toViewDiagram(row: DBDiagram): Diagram {
+  const payload = row.data && typeof row.data === "object" ? row.data : {}
+  return {
+    id: row.id,
+    name: row.title,
+    description: row.description || "",
+    userId: row.user_id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    data: payload,
+    diagramType: row.type === "visual" ? "visual" : "text",
+    textContent: typeof payload.textContent === "string" ? payload.textContent : "",
+    category: typeof payload.category === "string" ? payload.category : undefined,
+  }
 }
 
 export default function TextDiagramEditorPage() {
@@ -61,8 +105,8 @@ export default function TextDiagramEditorPage() {
   }, [])
 
   useEffect(() => {
-    queueMicrotask(() => {
-      const currentUser = getCurrentUser()
+    void (async () => {
+      const currentUser = await getCurrentUserAsync()
       if (!currentUser) {
         router.push("/login")
         return
@@ -73,58 +117,54 @@ export default function TextDiagramEditorPage() {
         return
       }
 
-      const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
-      const foundDiagram = allDiagrams.find((d: any) => d.id === diagramId)
+      const allDiagrams = await getDiagrams(currentUser.id)
+      const foundDiagram = allDiagrams.find((d) => d.id === diagramId)
 
-      if (!foundDiagram || foundDiagram.userId !== currentUser.id) {
+      if (!foundDiagram || foundDiagram.user_id !== currentUser.id) {
         router.push("/dashboard/diagrams")
         return
       }
 
-      setDiagram(foundDiagram)
-      setTextContent(foundDiagram.textContent || "")
-    })
+      const viewDiagram = toViewDiagram(foundDiagram)
+      setDiagram(viewDiagram)
+      setTextContent(viewDiagram.textContent || "")
+    })()
   }, [diagramId, router])
 
   useEffect(() => {
     if (isPreviewMode && textContent && previewRef.current) {
-      renderDiagram()
+      void renderDiagram()
     }
-  }, [isPreviewMode, textContent])
+  }, [isPreviewMode, textContent, renderDiagram])
 
-  const renderDiagram = async () => {
+  const renderDiagram = useCallback(async () => {
     if (!previewRef.current || !textContent) return
 
     try {
       setError(null)
-      previewRef.current.innerHTML = ""
+      previewRef.current.replaceChildren()
       
       const { default: mermaid } = await import("mermaid")
       const id = `mermaid-${Date.now()}`
       const { svg } = await mermaid.render(id, textContent)
-      previewRef.current.innerHTML = svg
+      previewRef.current.appendChild(sanitizeMermaidSvg(svg))
     } catch (err: any) {
       setError(err.message || "Failed to render diagram")
       console.error("Mermaid render error:", err)
     }
-  }
+  }, [textContent])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!diagram) return
-
-    const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
-    const updatedDiagrams = allDiagrams.map((d: Diagram) => {
-      if (d.id === diagram.id) {
-        return {
-          ...d,
-          textContent,
-          updatedAt: new Date().toISOString(),
-        }
-      }
-      return d
+    await updateDiagram(diagram.id, {
+      data: {
+        ...(diagram.data || {}),
+        diagramType: "text",
+        category: diagram.category || "c4",
+        textContent,
+      },
+      updated_at: new Date().toISOString(),
     })
-
-    localStorage.setItem("lab68_diagrams", JSON.stringify(updatedDiagrams))
     setSavedMessage(true)
     setTimeout(() => setSavedMessage(false), 2000)
   }

@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect, useState, useRef } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { getCurrentUser } from "@/lib/features/auth"
+import { getCurrentUserAsync } from "@/lib/features/auth"
 import { useLanguage } from "@/lib/config"
 import {
   Save,
@@ -25,6 +25,7 @@ import {
   Type,
   Minus,
 } from "lucide-react"
+import { getDiagrams, updateDiagram, type Diagram as DBDiagram } from "@/lib/database"
 
 interface Node {
   id: string
@@ -88,6 +89,17 @@ export default function DiagramEditorPage() {
   const [connectionColor, setConnectionColor] = useState("#00FF99")
   const [connectionWidth, setConnectionWidth] = useState(2)
   const [connectionStyle, setConnectionStyle] = useState<"solid" | "dashed" | "dotted">("solid")
+
+  function toViewDiagram(row: DBDiagram) {
+    return {
+      id: row.id,
+      name: row.title,
+      description: row.description || "",
+      userId: row.user_id,
+      updatedAt: row.updated_at,
+      data: row.data || { nodes: [], connections: [] },
+    }
+  }
 
   const getConnectionHandles = (node: Node): ConnectionHandle[] => {
     return [
@@ -287,8 +299,8 @@ export default function DiagramEditorPage() {
 
   // Load diagram data on mount
   useEffect(() => {
-    queueMicrotask(() => {
-      const currentUser = getCurrentUser()
+    void (async () => {
+      const currentUser = await getCurrentUserAsync()
       if (!currentUser) {
         router.push("/login")
         return
@@ -299,17 +311,18 @@ export default function DiagramEditorPage() {
         return
       }
 
-      const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
-      const foundDiagram = allDiagrams.find((d: any) => d.id === diagramId)
+      const allDiagrams = await getDiagrams(currentUser.id)
+      const foundDiagram = allDiagrams.find((d) => d.id === diagramId)
 
-      if (!foundDiagram || foundDiagram.userId !== currentUser.id) {
+      if (!foundDiagram || foundDiagram.user_id !== currentUser.id) {
         router.push("/dashboard/diagrams")
         return
       }
 
-      setDiagram(foundDiagram)
-      setData(foundDiagram.data || { nodes: [], connections: [] })
-    })
+      const viewDiagram = toViewDiagram(foundDiagram)
+      setDiagram(viewDiagram)
+      setData((viewDiagram.data as DiagramData) || { nodes: [], connections: [] })
+    })()
   }, [diagramId, router])
 
   const getNodeAtPosition = (x: number, y: number): Node | null => {
@@ -482,20 +495,10 @@ export default function DiagramEditorPage() {
     }
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!diagram) return
-
-    const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
-    const index = allDiagrams.findIndex((d: any) => d.id === diagram.id)
-    if (index !== -1) {
-      allDiagrams[index] = {
-        ...diagram,
-        data,
-        updatedAt: new Date().toISOString(),
-      }
-      localStorage.setItem("lab68_diagrams", JSON.stringify(allDiagrams))
-      alert((t.diagrams as any).saved || "Diagram saved successfully!")
-    }
+    await updateDiagram(diagram.id, { data, updated_at: new Date().toISOString() })
+    alert((t.diagrams as any).saved || "Diagram saved successfully!")
   }
 
   const handleExportImage = () => {
