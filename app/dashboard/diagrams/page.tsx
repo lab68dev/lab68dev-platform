@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { getCurrentUser } from "@/lib/features/auth"
+import { getCurrentUserAsync } from "@/lib/features/auth"
 import { Input } from "@/components/ui/input"
 import { Plus, Edit, Trash2, Search, Filter } from "lucide-react"
 import { useLanguage } from "@/lib/config"
 import Link from "next/link"
+import { createDiagram, deleteDiagram, getDiagrams, updateDiagram, type Diagram as DBDiagram } from "@/lib/database"
 
 interface Diagram {
   id: string
@@ -19,6 +20,22 @@ interface Diagram {
   diagramType?: "visual" | "text" // visual = drag-drop, text = mermaid/C4
   textContent?: string // for text-based diagrams
   category?: string // e.g., "c4", "flowchart", "sequence", "class", "er"
+}
+
+function toViewDiagram(row: DBDiagram): Diagram {
+  const payload = row.data && typeof row.data === "object" ? row.data : {}
+  return {
+    id: row.id,
+    name: row.title,
+    description: row.description || "",
+    userId: row.user_id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    data: payload,
+    diagramType: row.type === "visual" ? "visual" : "text",
+    textContent: typeof payload.textContent === "string" ? payload.textContent : "",
+    category: typeof payload.category === "string" ? payload.category : undefined,
+  }
 }
 
 export default function DiagramsPage() {
@@ -35,45 +52,42 @@ export default function DiagramsPage() {
   const [user, setUser] = useState<any>(null)
   const [searchQuery, setSearchQuery] = useState("")
 
-  const loadDiagrams = (userId: string) => {
-    const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
-    const userDiagrams = allDiagrams.filter((d: Diagram) => d.userId === userId)
-    setDiagrams(userDiagrams)
+  const loadDiagrams = async (userId: string) => {
+    const rows = await getDiagrams(userId)
+    setDiagrams(rows.map(toViewDiagram))
   }
 
   useEffect(() => {
-    queueMicrotask(() => {
-      const currentUser = getCurrentUser()
+    void (async () => {
+      const currentUser = await getCurrentUserAsync()
       if (!currentUser) {
         router.push("/login")
         return
       }
       setUser(currentUser)
-      loadDiagrams(currentUser.id)
-    })
+      await loadDiagrams(currentUser.id)
+    })()
   }, [router])
 
-  const handleCreateDiagram = () => {
+  const handleCreateDiagram = async () => {
     if (!newDiagram.name.trim() || !user) return
 
-    const diagram: Diagram = {
-      id: crypto.randomUUID(),
-      name: newDiagram.name,
-      description: newDiagram.description,
-      userId: user.id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      data: newDiagram.diagramType === "visual" ? { nodes: [], connections: [] } : {},
-      diagramType: newDiagram.diagramType,
-      category: newDiagram.diagramType === "text" ? newDiagram.category : undefined,
-      textContent: newDiagram.diagramType === "text" ? getDefaultTemplate(newDiagram.category) : "",
-    }
+    await createDiagram({
+      user_id: user.id,
+      title: newDiagram.name.trim(),
+      description: newDiagram.description.trim(),
+      type: newDiagram.diagramType,
+      data:
+        newDiagram.diagramType === "visual"
+          ? { nodes: [], connections: [], diagramType: "visual" }
+          : {
+              diagramType: "text",
+              category: newDiagram.category,
+              textContent: getDefaultTemplate(newDiagram.category),
+            },
+    })
 
-    const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
-    allDiagrams.push(diagram)
-    localStorage.setItem("lab68_diagrams", JSON.stringify(allDiagrams))
-
-    setDiagrams([...diagrams, diagram])
+    await loadDiagrams(user.id)
     setNewDiagram({ name: "", description: "", diagramType: "text", category: "c4" })
     setShowCreateModal(false)
   }
@@ -177,12 +191,10 @@ Rel(banking_system, mainframe, "Uses")`,
     return templates[category] || templates.c4
   }
 
-  const handleDeleteDiagram = (id: string) => {
+  const handleDeleteDiagram = async (id: string) => {
     if (!confirm(t.diagrams.confirmDelete)) return
 
-    const allDiagrams = JSON.parse(localStorage.getItem("lab68_diagrams") || "[]")
-    const filtered = allDiagrams.filter((d: Diagram) => d.id !== id)
-    localStorage.setItem("lab68_diagrams", JSON.stringify(filtered))
+    await deleteDiagram(id)
     setDiagrams(diagrams.filter((d) => d.id !== id))
   }
 

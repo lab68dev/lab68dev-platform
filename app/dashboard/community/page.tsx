@@ -4,8 +4,9 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MessageSquare, X, Search, Filter } from "lucide-react"
-import { getCurrentUser } from "@/lib/features/auth"
+import { getCurrentUserAsync } from "@/lib/features/auth"
 import { getTranslations, getUserLanguage, type Language } from "@/lib/config"
+import { createClient, createDiscussion, getDiscussions } from "@/lib/database"
 
 interface Discussion {
   id: string
@@ -34,43 +35,54 @@ export default function CommunityPage() {
   const [language, setLanguage] = useState<Language>("en")
   const t = getTranslations(language)
 
-  const loadDiscussions = () => {
-    const saved = localStorage.getItem("lab68_discussions")
-    if (saved) {
-      setDiscussions(JSON.parse(saved))
-    }
+  const loadDiscussions = async () => {
+    const supabase = createClient()
+    const rows = await getDiscussions()
+    const userIds = Array.from(new Set(rows.map((row) => row.user_id).filter(Boolean)))
+    const { data: profiles } = userIds.length
+      ? await supabase.from("profiles").select("id, name, email").in("id", userIds)
+      : { data: [] }
+    const profileMap = new Map((profiles || []).map((profile) => [profile.id, profile]))
+
+    setDiscussions(
+      rows.map((row) => {
+        const profile = profileMap.get(row.user_id)
+        return {
+          id: row.id,
+          title: row.title,
+          content: row.content,
+          category: row.category || "general",
+          author: profile?.name || profile?.email || "Member",
+          authorEmail: profile?.email || "",
+          replies: row.replies || 0,
+          createdAt: row.created_at,
+        }
+      }),
+    )
   }
 
   useEffect(() => {
     setLanguage(getUserLanguage())
-    loadDiscussions()
+    void loadDiscussions()
   }, [])
 
-  const saveDiscussions = (updatedDiscussions: Discussion[]) => {
-    localStorage.setItem("lab68_discussions", JSON.stringify(updatedDiscussions))
-    setDiscussions(updatedDiscussions)
-  }
-
-  const handleCreateDiscussion = () => {
-    const user = getCurrentUser()
+  const handleCreateDiscussion = async () => {
+    const user = await getCurrentUserAsync()
     if (!user) return
 
     const finalCategory = newDiscussion.category === "custom" ? newDiscussion.customCategory : newDiscussion.category
 
     if (!newDiscussion.title || !newDiscussion.content || !finalCategory) return
 
-    const discussion: Discussion = {
-      id: Date.now().toString(),
-      title: newDiscussion.title,
-      content: newDiscussion.content,
-      category: finalCategory,
-      author: user.name,
-      authorEmail: user.email,
-      replies: 0,
-      createdAt: new Date().toISOString(),
-    }
+    await createDiscussion({
+      user_id: user.id,
+      title: newDiscussion.title.trim(),
+      content: newDiscussion.content.trim(),
+      category: finalCategory.trim(),
+      tags: [],
+    })
 
-    saveDiscussions([discussion, ...discussions])
+    await loadDiscussions()
     setNewDiscussion({ title: "", content: "", category: "", customCategory: "" })
     setShowNewDiscussionModal(false)
   }
