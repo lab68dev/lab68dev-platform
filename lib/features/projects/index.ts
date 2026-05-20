@@ -4,6 +4,23 @@ import type { Project, ProjectCollaborator } from '@/lib/database/connection'
 
 export type { Project, ProjectCollaborator }
 
+type ProjectsApiResponse = {
+    projects?: Project[]
+    error?: string
+}
+
+type CollaboratorsApiResponse = {
+    collaborators?: Array<ProjectCollaborator & {
+        profiles?: {
+            id?: string
+            email?: string | null
+            name?: string | null
+            avatar?: string | null
+        } | null
+    }>
+    error?: string
+}
+
 function guard() {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
         throw new Error('[Lab68Dev] Supabase is not configured.')
@@ -21,40 +38,24 @@ export async function createProject(project: Omit<Project, 'id' | 'created_at' |
 
 export async function getProjects(userId: string) {
     guard()
-    const supabase = createClient()
-    const { data: ownedProjects, error: ownedError } = await supabase
-        .from('projects').select('*').eq('user_id', userId).order('created_at', { ascending: false })
+    const res = await fetch('/api/projects', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+    })
 
-    if (ownedError) throw ownedError
+    const payload = await res.json().catch(() => ({} as ProjectsApiResponse)) as ProjectsApiResponse
 
-    const { data: collaboratorRows, error: collaboratorError } = await supabase
-        .from('project_collaborators')
-        .select('project_id')
-        .eq('user_id', userId)
-
-    if (collaboratorError) throw collaboratorError
-
-    const ownedIds = new Set((ownedProjects || []).map((project) => project.id))
-    const collaboratorProjectIds = Array.from(
-        new Set((collaboratorRows || []).map((row) => row.project_id).filter(Boolean))
-    ).filter((projectId) => !ownedIds.has(projectId))
-
-    if (collaboratorProjectIds.length === 0) {
-        return ownedProjects || []
+    if (!res.ok) {
+        const error = new Error(payload.error || 'Failed to fetch projects') as Error & { status?: number }
+        error.status = res.status
+        throw error
     }
 
-    const { data: collaboratorProjects, error: collaboratorProjectsError } = await supabase
-        .from('projects')
-        .select('*')
-        .in('id', collaboratorProjectIds)
-
-    if (collaboratorProjectsError) throw collaboratorProjectsError
-
-    return [...(ownedProjects || []), ...(collaboratorProjects || [])].sort((a, b) => {
-        const aTime = new Date(a.updated_at || a.created_at || 0).getTime()
-        const bTime = new Date(b.updated_at || b.created_at || 0).getTime()
-        return bTime - aTime
-    })
+    const projects = Array.isArray(payload.projects) ? payload.projects : []
+    return projects.filter((project) => project.user_id === userId || Boolean(project.id))
 }
 
 export async function updateProject(id: string, updates: Partial<Project>) {
@@ -92,13 +93,23 @@ export async function addProjectCollaborator(
 
 export async function getProjectCollaborators(projectId: string) {
     guard()
-    const supabase = createClient()
-    const { data, error } = await supabase
-        .from('project_collaborators')
-        .select(`*, profiles:user_id (id, email, name, avatar)`)
-        .eq('project_id', projectId)
-    if (error) throw error
-    return data || []
+    const res = await fetch(`/api/projects/${projectId}/collaborators`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+    })
+
+    const payload = await res.json().catch(() => ({} as CollaboratorsApiResponse)) as CollaboratorsApiResponse
+
+    if (!res.ok) {
+        const error = new Error(payload.error || 'Failed to fetch collaborators') as Error & { status?: number }
+        error.status = res.status
+        throw error
+    }
+
+    return Array.isArray(payload.collaborators) ? payload.collaborators : []
 }
 
 export async function removeProjectCollaborator(projectId: string, userId: string) {

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
+import { createAdminClient } from "@/lib/database/supabase-admin"
 import { createServerSupabaseClient } from "@/lib/database/supabase-server"
+import { getProjectAccessContext } from "@/lib/server/project-access"
 
 const COLLABORATOR_ROLES = ["admin", "editor", "viewer"] as const
 type CollaboratorRole = (typeof COLLABORATOR_ROLES)[number]
@@ -15,10 +17,12 @@ export async function GET(
 ) {
   try {
     const { id: projectId } = await params
-    const supabase = await createServerSupabaseClient()
+    const sessionClient = await createServerSupabaseClient()
+    const adminClient = createAdminClient()
+    const dataClient = adminClient || sessionClient
 
     // Check if user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { user }, error: authError } = await sessionClient.auth.getUser()
     if (authError || !user) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -26,39 +30,22 @@ export async function GET(
       )
     }
 
-    // Check if user has access to the project (owner or collaborator)
-    const { data: project } = await supabase
-      .from("projects")
-      .select("user_id")
-      .eq("id", projectId)
-      .single()
-
-    if (!project) {
+    const access = await getProjectAccessContext(dataClient, projectId, user.id)
+    if (!access) {
       return NextResponse.json(
         { error: "Project not found" },
         { status: 404 }
       )
     }
 
-    const isOwner = project.user_id === user.id
-
-    const { data: collaborator } = await supabase
-      .from("project_collaborators")
-      .select("role")
-      .eq("project_id", projectId)
-      .eq("user_id", user.id)
-      .maybeSingle()
-
-    const hasAccess = isOwner || !!collaborator
-
-    if (!hasAccess) {
+    if (!access.hasAccess) {
       return NextResponse.json(
         { error: "Access denied" },
         { status: 403 }
       )
     }
 
-    const { data: collaboratorRows, error: collaboratorError } = await supabase
+    const { data: collaboratorRows, error: collaboratorError } = await dataClient
       .from("project_collaborators")
       .select("id, project_id, user_id, role, invited_by, joined_at")
       .eq("project_id", projectId)
@@ -77,7 +64,7 @@ export async function GET(
     )
 
     const { data: profiles, error: profilesError } = collaboratorIds.length
-      ? await supabase
+      ? await dataClient
           .from("profiles")
           .select("id, email, name, avatar")
           .in("id", collaboratorIds)
@@ -133,8 +120,10 @@ export async function POST(
     }
 
     // 1. Authenticate Request
-    const supabase = await createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const sessionClient = await createServerSupabaseClient()
+    const adminClient = createAdminClient()
+    const dataClient = adminClient || sessionClient
+    const { data: { user }, error: authError } = await sessionClient.auth.getUser()
 
     if (authError || !user) {
       return NextResponse.json(
@@ -144,40 +133,23 @@ export async function POST(
     }
 
     // 2. Check Permissions (Project Owner/Admin)
-    const { data: project } = await supabase
-      .from("projects")
-      .select("user_id")
-      .eq("id", projectId)
-      .single()
-
-    if (!project) {
+    const access = await getProjectAccessContext(dataClient, projectId, user.id)
+    if (!access) {
       return NextResponse.json(
         { error: "Project not found" },
         { status: 404 }
       )
     }
 
-    const isOwner = project.user_id === user.id
-
-    if (!isOwner) {
-      // Check if user is an admin collaborator
-      const { data: userCollab } = await supabase
-        .from("project_collaborators")
-        .select("role")
-        .eq("project_id", projectId)
-        .eq("user_id", user.id)
-        .maybeSingle()
-
-      if (!userCollab || userCollab.role !== "admin") {
-        return NextResponse.json(
-          { error: "Only project owners and admins can add collaborators" },
-          { status: 403 }
-        )
-      }
+    if (!access.canManage) {
+      return NextResponse.json(
+        { error: "Only project owners and admins can add collaborators" },
+        { status: 403 }
+      )
     }
 
     // 3. User Lookup
-    const { data: userProfile, error: profileError } = await supabase
+    const { data: userProfile, error: profileError } = await dataClient
       .from("profiles")
       .select("id, email, name, avatar")
       .ilike("email", normalizedEmail)
@@ -206,7 +178,7 @@ export async function POST(
       )
     }
 
-    if (userProfile.id === project.user_id) {
+    if (userProfile.id === access.project.user_id) {
       return NextResponse.json(
         { error: "The project owner already has access" },
         { status: 400 }
@@ -215,7 +187,7 @@ export async function POST(
 
     // 4. Add Collaborator
     // First check if already exists
-    const { data: existingCollab } = await supabase
+    const { data: existingCollab } = await dataClient
       .from("project_collaborators")
       .select("user_id")
       .eq("project_id", projectId)
@@ -229,7 +201,7 @@ export async function POST(
       )
     }
 
-    const { data: newCollaborator, error: insertError } = await supabase
+    const { data: newCollaborator, error: insertError } = await dataClient
       .from("project_collaborators")
       .insert({
         project_id: projectId,
@@ -282,10 +254,12 @@ export async function DELETE(
       )
     }
 
-    const supabase = await createServerSupabaseClient()
+    const sessionClient = await createServerSupabaseClient()
+    const adminClient = createAdminClient()
+    const dataClient = adminClient || sessionClient
 
     // Check if user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { user }, error: authError } = await sessionClient.auth.getUser()
     if (authError || !user) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -293,47 +267,29 @@ export async function DELETE(
       )
     }
 
-    // Check if user is the project owner or admin
-    const { data: project } = await supabase
-      .from("projects")
-      .select("user_id")
-      .eq("id", projectId)
-      .single()
-
-    if (!project) {
+    const access = await getProjectAccessContext(dataClient, projectId, user.id)
+    if (!access) {
       return NextResponse.json(
         { error: "Project not found" },
         { status: 404 }
       )
     }
 
-    const isOwner = project.user_id === user.id
-
-    if (userIdToRemove === project.user_id) {
+    if (userIdToRemove === access.project.user_id) {
       return NextResponse.json(
         { error: "Project owner cannot be removed" },
         { status: 400 }
       )
     }
 
-    if (!isOwner) {
-      // Check if user is an admin collaborator
-      const { data: userCollab } = await supabase
-        .from("project_collaborators")
-        .select("role")
-        .eq("project_id", projectId)
-        .eq("user_id", user.id)
-        .maybeSingle()
-
-      if (!userCollab || userCollab.role !== "admin") {
-        return NextResponse.json(
-          { error: "Only project owners and admins can remove collaborators" },
-          { status: 403 }
-        )
-      }
+    if (!access.canManage) {
+      return NextResponse.json(
+        { error: "Only project owners and admins can remove collaborators" },
+        { status: 403 }
+      )
     }
 
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await dataClient
       .from("project_collaborators")
       .delete()
       .eq("project_id", projectId)
