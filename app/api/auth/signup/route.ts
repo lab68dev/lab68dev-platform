@@ -38,8 +38,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
+    const atIndex = email.lastIndexOf('@')
+    const hasValidEmailShape =
+      atIndex > 0 &&
+      atIndex < email.length - 3 &&
+      !email.includes(' ') &&
+      email.slice(atIndex + 1).includes('.')
+
+    if (!hasValidEmailShape) {
       return NextResponse.json(
         { error: 'Invalid email format' },
         { status: 400 }
