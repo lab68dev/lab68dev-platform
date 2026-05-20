@@ -131,12 +131,6 @@ export default function TextDiagramEditorPage() {
     })()
   }, [diagramId, router])
 
-  useEffect(() => {
-    if (isPreviewMode && textContent && previewRef.current) {
-      void renderDiagram()
-    }
-  }, [isPreviewMode, textContent, renderDiagram])
-
   const renderDiagram = useCallback(async () => {
     if (!previewRef.current || !textContent) return
 
@@ -153,6 +147,12 @@ export default function TextDiagramEditorPage() {
       console.error("Mermaid render error:", err)
     }
   }, [textContent])
+
+  useEffect(() => {
+    if (isPreviewMode && textContent && previewRef.current) {
+      void renderDiagram()
+    }
+  }, [isPreviewMode, textContent, renderDiagram])
 
   const handleSave = async () => {
     if (!diagram) return
