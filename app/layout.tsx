@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { JetBrains_Mono, IBM_Plex_Sans } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "sonner"
+import { CookieConsentBanner } from "@/components/cookie-consent-banner"
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -104,6 +105,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <CookieConsentBanner />
         <Toaster
           position="top-right"
           toastOptions={{
