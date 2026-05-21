@@ -113,6 +113,41 @@ const stack = [
   { name: "Tailwind CSS", logo: "/icons/brands/tailwind-css.svg" },
 ]
 
+const supportLinks = [
+  {
+    name: "GitHub Sponsors",
+    href: "https://github.com/sponsors/lab68dev",
+    description: "Support long-term open-source development and platform maintenance.",
+    accent: "from-fuchsia-500/18 via-fuchsia-500/6 to-transparent",
+    border: "border-fuchsia-400/25",
+    icon: Github,
+  },
+  {
+    name: "Ko-fi",
+    href: "https://ko-fi.com/dongphuduong",
+    description: "Back product experiments, shipping cadence, and fast iteration.",
+    accent: "from-cyan-400/18 via-cyan-400/6 to-transparent",
+    border: "border-cyan-400/25",
+    icon: Sparkles,
+  },
+  {
+    name: "Buy Me a Coffee",
+    href: "https://buymeacoffee.com/lab68dev",
+    description: "Help fund design polish, QA passes, and product refinement work.",
+    accent: "from-amber-400/18 via-amber-400/6 to-transparent",
+    border: "border-amber-300/25",
+    icon: Rocket,
+  },
+  {
+    name: "Patreon",
+    href: "https://www.patreon.com/c/DongDuong2001",
+    description: "Support sustained roadmap work and deeper investment in the workspace.",
+    accent: "from-[#ff7a00]/22 via-[#ff7a00]/10 to-transparent",
+    border: "border-[#ff7a00]/30",
+    icon: Users,
+  },
+]
+
 function ProductPreview() {
   return (
     <div className="relative mx-auto w-full max-w-6xl">
@@ -497,6 +532,63 @@ export function LandingClient() {
                   <span className="text-sm font-bold text-zinc-200">{tech.name}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-white/10 bg-[#050505]">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+            <div className="overflow-hidden rounded-[8px] border border-[#ff7a00]/20 bg-[radial-gradient(circle_at_top_left,rgba(255,122,0,0.16),transparent_34%),linear-gradient(180deg,#120b04_0%,#070707_58%,#050505_100%)]">
+              <div className="grid gap-8 p-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:p-8">
+                <div className="max-w-xl">
+                  <div className="inline-flex items-center gap-2 rounded-[999px] border border-[#ff7a00]/25 bg-black/35 px-3 py-1.5 text-xs font-semibold text-[#ffb36b]">
+                    <Code2 className="h-3.5 w-3.5" />
+                    Support lab68studio
+                  </div>
+                  <h2 className="mt-4 text-3xl font-black leading-tight tracking-normal text-white md:text-4xl">
+                    Help keep the workspace independent, improving, and shipping.
+                  </h2>
+                  <p className="mt-4 text-sm leading-7 text-zinc-300 md:text-base">
+                    If the product is useful, support keeps the work moving: design passes, infrastructure costs, documentation,
+                    testing, and new features all get easier to sustain.
+                  </p>
+
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-[8px] border border-white/10 bg-black/40 p-4">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">Open source</div>
+                      <div className="mt-2 text-lg font-black text-white">Public roadmap, public code</div>
+                    </div>
+                    <div className="rounded-[8px] border border-white/10 bg-black/40 p-4">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">Direct support</div>
+                      <div className="mt-2 text-lg font-black text-white">Back the builder directly</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {supportLinks.map((support) => (
+                    <a
+                      key={support.name}
+                      href={support.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`group relative overflow-hidden rounded-[8px] border bg-black/55 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ff7a00]/45 hover:bg-black/70 ${support.border}`}
+                    >
+                      <div className={`absolute inset-0 bg-gradient-to-br ${support.accent} opacity-100`} aria-hidden="true" />
+                      <div className="relative">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-[8px] border border-white/10 bg-white/5 text-white">
+                            <support.icon className="h-5 w-5" />
+                          </div>
+                          <ArrowRight className="h-4 w-4 shrink-0 text-zinc-500 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-white" />
+                        </div>
+                        <h3 className="mt-5 text-lg font-bold text-white">{support.name}</h3>
+                        <p className="mt-2 text-sm leading-6 text-zinc-300">{support.description}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
