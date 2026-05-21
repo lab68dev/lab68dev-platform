@@ -337,6 +337,77 @@ export function LandingClient() {
                   </Link>
                 </Button>
               </div>
+
+              <div className="mt-10 flex flex-col items-center gap-5">
+                <div className="flex w-full max-w-[860px] flex-col items-center justify-center gap-3 md:flex-row md:flex-wrap md:items-stretch md:justify-center">
+                  <a
+                    href="https://forg.to/products/lab68studio"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-16 w-64 shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-white/10 bg-white/5 px-2 transition-colors hover:border-[#ff7a00]/40"
+                    aria-label="Upvote lab68studio on Forg"
+                  >
+                    <img
+                      src="https://forg.to/api/badges/upvote/lab68studio?theme=dark&shape=rounded"
+                      alt="lab68studio - Upvote on Forg"
+                      width="256"
+                      height="64"
+                      className="h-16 w-64 object-contain"
+                    />
+                  </a>
+
+                  <a
+                    href="https://unikorn.vn/p/lab68studio?ref=embed-lab68studio"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-16 w-64 shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-white/10 bg-white px-2 transition-colors hover:border-[#ff7a00]/40"
+                    aria-label="View lab68studio on Unikorn.vn"
+                  >
+                    <img
+                      src="https://unikorn.vn/api/widgets/badge/lab68studio?theme=light"
+                      alt="lab68studio trên Unikorn.vn"
+                      width="256"
+                      height="64"
+                      className="h-16 w-64 object-contain"
+                    />
+                  </a>
+
+                  <a
+                    href="https://www.producthunt.com/products/lab68studio?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-lab68studio"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-16 w-64 shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-white/10 bg-white/5 px-2 transition-colors hover:border-[#ff7a00]/40"
+                    aria-label="View lab68studio on Product Hunt"
+                  >
+                    <img
+                      src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1152387&theme=dark&t=1779355389680"
+                      alt="lab68studio - Build, document, and ship from one focused workspace. | Product Hunt"
+                      width="256"
+                      height="64"
+                      className="h-16 w-64 object-contain"
+                    />
+                  </a>
+                </div>
+
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Achievement</p>
+                  <a
+                    href="https://unikorn.vn/p/lab68studio?ref=embed-lab68studio"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-16 w-64 items-center justify-center overflow-hidden rounded-[8px] border border-[#ff7a00]/20 bg-[#120b04] px-2 shadow-[0_12px_30px_rgba(255,122,0,0.08)] transition-colors hover:border-[#ff7a00]/40"
+                    aria-label="View lab68studio daily rank on Unikorn.vn"
+                  >
+                    <img
+                      src="https://unikorn.vn/api/widgets/badge/lab68studio/rank?theme=light&type=daily"
+                      alt="lab68studio - Hàng ngày"
+                      width="256"
+                      height="64"
+                      className="h-16 w-64 object-contain"
+                    />
+                  </a>
+                </div>
+              </div>
             </div>
 
             <div className="mt-12">
