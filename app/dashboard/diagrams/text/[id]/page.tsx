@@ -22,33 +22,6 @@ interface Diagram {
   category?: string
 }
 
-function sanitizeMermaidSvg(svg: string) {
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(svg, "image/svg+xml")
-  const disallowedTags = new Set(["script", "foreignObject"])
-  const walker = doc.createTreeWalker(doc, NodeFilter.SHOW_ELEMENT)
-  const toRemove: Element[] = []
-
-  while (walker.nextNode()) {
-    const element = walker.currentNode as Element
-    if (disallowedTags.has(element.tagName)) {
-      toRemove.push(element)
-      continue
-    }
-
-    for (const attr of Array.from(element.attributes)) {
-      const name = attr.name.toLowerCase()
-      const value = attr.value.trim().toLowerCase()
-      if (name.startsWith("on") || value.startsWith("javascript:")) {
-        element.removeAttribute(attr.name)
-      }
-    }
-  }
-
-  toRemove.forEach((element) => element.remove())
-  return doc.documentElement
-}
-
 function toViewDiagram(row: DBDiagram): Diagram {
   const payload = row.data && typeof row.data === "object" ? row.data : {}
   return {
@@ -75,8 +48,26 @@ export default function TextDiagramEditorPage() {
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [savedMessage, setSavedMessage] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const previewRef = useRef<HTMLDivElement>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const previewUrlRef = useRef<string | null>(null)
   const [showDocumentation, setShowDocumentation] = useState(false)
+
+  const replacePreviewUrl = useCallback((url: string | null) => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current)
+    }
+
+    previewUrlRef.current = url
+    setPreviewUrl(url)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const initMermaid = async () => {
@@ -132,24 +123,25 @@ export default function TextDiagramEditorPage() {
   }, [diagramId, router])
 
   const renderDiagram = useCallback(async () => {
-    if (!previewRef.current || !textContent) return
+    if (!textContent) return
 
     try {
       setError(null)
-      previewRef.current.replaceChildren()
       
       const { default: mermaid } = await import("mermaid")
       const id = `mermaid-${Date.now()}`
       const { svg } = await mermaid.render(id, textContent)
-      previewRef.current.appendChild(sanitizeMermaidSvg(svg))
+      const blob = new Blob([svg], { type: "image/svg+xml" })
+      replacePreviewUrl(URL.createObjectURL(blob))
     } catch (err: any) {
+      replacePreviewUrl(null)
       setError(err.message || "Failed to render diagram")
       console.error("Mermaid render error:", err)
     }
-  }, [textContent])
+  }, [replacePreviewUrl, textContent])
 
   useEffect(() => {
-    if (isPreviewMode && textContent && previewRef.current) {
+    if (isPreviewMode && textContent) {
       void renderDiagram()
     }
   }, [isPreviewMode, textContent, renderDiagram])
@@ -409,7 +401,19 @@ export default function TextDiagramEditorPage() {
                 <pre className="text-sm whitespace-pre-wrap">{error}</pre>
               </div>
             ) : (
-              <div ref={previewRef} className="flex items-center justify-center min-h-full" />
+              <div className="flex min-h-full items-center justify-center">
+                {previewUrl ? (
+                  // Mermaid preview uses a generated object URL, so Next Image optimization does not apply.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previewUrl}
+                    alt={diagram?.name ? `${diagram.name} preview` : "Diagram preview"}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground">Render the diagram to preview it.</p>
+                )}
+              </div>
             )}
           </div>
         </div>
