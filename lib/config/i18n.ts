@@ -1763,10 +1763,19 @@ export function getTranslations(lang: Language): Translations {
 
   const clone = JSON.parse(JSON.stringify(base)) as Translations
 
-  const merge = (target: Record<string, any>, source: Record<string, any>) => {
-    const blockedKeys = new Set(["__proto__", "constructor", "prototype"])
+  const isUnsafeMergeKey = (key: string) =>
+    key === "__proto__" || key === "constructor" || key === "prototype"
+
+  const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null && !Array.isArray(value)
+
+  const merge = (target: Record<string, unknown>, source: Record<string, unknown>) => {
     Object.keys(source).forEach((key) => {
-      if (blockedKeys.has(key)) {
+      if (
+        isUnsafeMergeKey(key) ||
+        !Object.prototype.hasOwnProperty.call(source, key) ||
+        !Object.prototype.hasOwnProperty.call(target, key)
+      ) {
         return
       }
 
@@ -1776,22 +1785,20 @@ export function getTranslations(lang: Language): Translations {
       }
 
       const targetValue = target[key]
-      if (
-        typeof targetValue === "object" &&
-        targetValue !== null &&
-        !Array.isArray(targetValue) &&
-        typeof value === "object" &&
-        value !== null &&
-        !Array.isArray(value)
-      ) {
-        merge(targetValue, value as Record<string, any>)
+      if (isRecord(targetValue) && isRecord(value)) {
+        merge(targetValue, value)
       } else {
-        target[key] = value
+        Object.defineProperty(target, key, {
+          value,
+          configurable: true,
+          enumerable: true,
+          writable: true,
+        })
       }
     })
   }
 
-  merge(clone as unknown as Record<string, any>, overrides as Record<string, any>)
+  merge(clone as unknown as Record<string, unknown>, overrides as Record<string, unknown>)
   return clone
 }
 
