@@ -239,32 +239,55 @@ export async function signInWithOtp(
   email: string,
   rememberMe = true,
 ): Promise<{ success: boolean; error?: string; message?: string }> {
-  try {
-    const supabase = createClient()
+  const controller = new AbortController()
+  const timeoutId = window.setTimeout(() => controller.abort(), 15000)
 
-    // Send OTP to user's email
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+  try {
+    const response = await fetch('/api/auth/magic-link', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ email }),
+      cache: 'no-store',
+      signal: controller.signal,
     })
 
-    if (error) {
-      return { success: false, error: error.message }
+    const result = await response.json().catch(() => null) as {
+      success?: boolean
+      error?: string
+      message?: string
+    } | null
+
+    if (!response.ok || !result?.success) {
+      return {
+        success: false,
+        error: result?.error || 'Failed to send login link',
+      }
     }
 
     // Store remember me preference for after OTP verification
     if (rememberMe) {
       localStorage.setItem("lab68_remember", "true")
+    } else {
+      localStorage.removeItem("lab68_remember")
     }
 
     return {
       success: true,
-      message: 'Check your email for the magic link to sign in.'
+      message: result.message || 'Check your email for the magic link to sign in.'
     }
   } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      return {
+        success: false,
+        error: 'The request took too long. The email may still arrive, but please try again if it does not.',
+      }
+    }
+
     return { success: false, error: error.message || 'Failed to send login link' }
+  } finally {
+    window.clearTimeout(timeoutId)
   }
 }
 
